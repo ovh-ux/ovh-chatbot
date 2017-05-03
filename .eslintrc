@@ -1,0 +1,16 @@
+{
+	"extends": "eslint:recommended",
+	"rules": {
+		"indent": ["error", 2],
+		"quotes": ["error", "double"],
+		"semi": ["error", "always"],
+		"strict": "error",
+		"eqeqeq": ["error", "always"],
+		"no-console": "off",
+		"no-case-declarations": "off"
+	},
+	"env": {
+		"node": true,
+		"es6": true
+	}
+}

@@ -1,0 +1,51 @@
+{
+  "name": "OvhChatbot",
+  "version": "1.0.0",
+  "description": "Chatbot OVH to help support",
+  "main": "app.js",
+  "scripts": {
+    "start": "node index.js",
+    "lint": "eslint . --ext .js",
+    "precommit": "npm run lint",
+    "test": "npm run lint"
+  },
+  "repository": {
+    "type": "git",
+    "url": ""
+  },
+  "author": "OVH",
+  "license": "MIT",
+  "dependencies": {
+    "bluebird": "^3.4.7",
+    "body-parser": "^1.16.0",
+    "compression": "^1.6.2",
+    "config": "^1.20.4",
+    "cors": "^2.8.1",
+    "ejs": "^2.4.2",
+    "eslint-plugin-import": "^2.2.0",
+    "express": "^4.14.1",
+    "i": "^0.3.5",
+    "lusca": "^1.4.1",
+    "mathjs": "^3.9.3",
+    "mongodb": "^2.2.11",
+    "mongoose": "^4.8.1",
+    "morgan": "^1.8.0",
+    "node-wit": "^4.2.0",
+    "npm": "^4.2.0",
+    "ovh": "^2.0.1",
+    "ovh-winston-ldp": "^0.3.0",
+    "request": "^2.79.0",
+    "request-promise": "^4.1.1",
+    "require-dir": "^0.3.1",
+    "slack-node": "^0.1.8",
+    "winston": "^2.3.1"
+  },
+  "engines": {
+    "node": "~6.4.0"
+  },
+  "devDependencies": {
+    "eslint": "^3.15.0",
+    "eslint-plugin-import": "^2.2.0",
+    "husky": "^0.13.1"
+  }
+}
