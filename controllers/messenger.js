@@ -3,7 +3,7 @@
 const messenger = require("../platforms/messenger/messenger");
 const bot = require("../bots/hosting")();
 const config = require("../config/config-loader").load();
-const wit = require("../utils/wit");
+const apiai = require("../utils/apiai");
 const Bluebird = require("bluebird");
 const responsesCst = require("../constants/responses").FR;
 
@@ -114,25 +114,40 @@ module.exports = () => {
   }
 
   function sendCustomMessage(res, senderId, message) {
-    wit.message(message, {}) //Get intention
-      .then((resp) => {
-        if (resp.entities && Array.isArray(resp.entities.intent) && resp.entities.intent.length > 0) {
-          if (resp.entities.intent[0].value === "connection") {
-            messenger.sendTextMessage(senderId, responsesCst.welcome);
-            return messenger.sendAccountLinking(senderId, `${config.server.url}${config.server.basePath}/authorize?state=${senderId}-facebook_messenger`);
-          }
-
-          return bot.ask("message", senderId, message, resp.entities.intent[0].value, resp.entities, res)
-            .then((responses) => sendResponses(res, senderId, responses))
-            .catch((err) => {
-              res.logger.error(err);
-              messenger.sendTextMessage(senderId, `Oups ! ${err.message}`);
-            });
+    apiai.textRequestAsync(message, {
+      sessionId: senderId
+    })
+    .then((resp) => {
+      if (resp.status && resp.status.code === 200 && resp.result) {
+        if (resp.result.action === "connection" || resp.result.action === "welcome") {
+          messenger.sendTextMessage(senderId, responsesCst.welcome);
+          return messenger.sendAccountLinking(senderId, `${config.server.url}${config.server.basePath}/authorize?state=${senderId}-facebook_messenger`);
         }
-        
-        messenger.sendTextMessage(senderId, responsesCst.noIntent);
-      })
-      .catch(res.logger.error);
+
+        if (resp.result.fulfillment && resp.result.fulfillment.speech && Array.isArray(resp.result.fulfillment.messages) && resp.result.fulfillment.messages.length) {
+          return sendQuickResponses(res, senderId, resp.result.fulfillment.messages);
+        }
+
+        return bot.ask("message", senderId, message, resp.result.action, resp.result.parameters, res)
+          .then((responses) => sendResponses(res, senderId, responses))
+          .catch((err) => {
+            res.logger.error(err);
+            messenger.sendTextMessage(senderId, `Oups ! ${err.message}`);
+          });
+      }
+    })
+    .catch(res.logger.error);
+  }
+
+  function sendQuickResponses(res, senderId, responses) {
+    return Bluebird.mapSeries(responses, (response) => {
+      switch (response.type) {
+      case 0:
+        return sendResponse(res, senderId, response.speech);
+      default:
+        return sendResponse(res, senderId, response.speech);
+      }
+    });
   }
 
   function sendResponses(res, senderId, responses) {

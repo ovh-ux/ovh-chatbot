@@ -11,8 +11,8 @@ class DnsServerConfig {
     return utils.getOvhClient(senderId)
       .then((ovhClient) => ovhClient.requestPromised("GET", "/domain"))
       .then((domains) => {
-        if (Array.isArray(entities.url) && entities.url.length) {
-          let url = encodeURIComponent(entities.url[0].value.replace(/https?:\/\//gi, ""));
+        if (entities.url) {
+          let url = encodeURIComponent(entities.url.replace(/https?:\/\//gi, ""));
 
           if (domains.indexOf(url) !== -1) {
             let buttons = [new Button("web_url", `https://www.ovh.com/manager/web/#/configuration/domain/${url}?tab=DNS`, "Gérer les serveurs DNS")];

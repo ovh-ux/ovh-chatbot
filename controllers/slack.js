@@ -4,10 +4,10 @@ const Bluebird = require("bluebird");
 const slack = require("../platforms/slack/slack");
 const SlackModel = require("../models/slack.models");
 const config = require("../config/config-loader").load();
-const wit = require("../utils/wit");
 const bot = require("../bots/hosting")();
 const request = require("request-promise");
 const responsesCst = require("../constants/responses").FR;
+const apiai = require("../utils/apiai");
 
 module.exports = () => {
 
@@ -28,11 +28,11 @@ module.exports = () => {
       channel = req.body.event.channel;
 
       Bluebird.props({
-        wit: wit.message(message, {}),
+        apiai: apiai.textRequestAsync(message, { sessionId: channel }),
         slack: slack(req.body.team_id)
       }).then((resp) => {
-        if (resp.wit.entities && Array.isArray(resp.wit.entities.intent) && resp.wit.entities.intent.length > 0) {
-          if (resp.wit.entities.intent[0].value === "connection") {
+        if (resp.apiai.status && resp.apiai.status.code === 200 && resp.apiai.result) {
+          if (resp.apiai.result.action === "connection" || resp.apiai.result.action === "welcome" ) {
             return resp.slack.sendTextMessage(channel, `Pour te connecter il te suffit de <${config.server.url}${config.server.basePath}/authorize?state=${channel}-slack|cliquer ici.>
 Pour l'instant je ne peux te répondre que sur des informations concernant un dysfonctionnement sur ton site web.
   Voici des exemples de questions que tu peux me poser :
@@ -45,7 +45,11 @@ Pour l'instant je ne peux te répondre que sur des informations concernant un dy
               .catch(res.logger.error);
           }
 
-          return bot.ask("message", channel, message, resp.wit.entities.intent[0].value, resp.wit.entities, res)
+          if (resp.apiai.result.fulfillment && resp.apiai.result.fulfillment.speech && Array.isArray(resp.apiai.result.fulfillment.messages) && resp.apiai.result.fulfillment.messages.length) {
+            return sendQuickResponses(res, channel, resp.apiai.result.fulfillment.messages, resp.slack);
+          }
+
+          return bot.ask("message", channel, message, resp.apiai.result.action, resp.apiai.result.parameters, res)
             .then((responses) => sendResponses(res, channel, responses, resp.slack))
             .catch((err) => {
               res.logger.error(err);
@@ -115,6 +119,17 @@ Pour l'instant je ne peux te répondre que sur des informations concernant un dy
     }
   };
 };
+
+function sendQuickResponses(res, senderId, responses, slack) {
+  return Bluebird.mapSeries(responses, (response) => {
+    switch (response.type) {
+    case 0:
+      return sendResponse(res, senderId, response.speech, slack);
+    default:
+      return sendResponse(res, senderId, response.speech, slack);
+    }
+  });
+}
 
 function sendResponses(res, channel, responses, slack) {
   return Bluebird.mapSeries(responses, (response) => sendResponse(res, channel, response, slack));

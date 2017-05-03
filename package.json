@@ -16,6 +16,7 @@
   "author": "OVH",
   "license": "MIT",
   "dependencies": {
+    "apiai": "^4.0.2",
     "bluebird": "^3.4.7",
     "body-parser": "^1.16.0",
     "compression": "^1.6.2",

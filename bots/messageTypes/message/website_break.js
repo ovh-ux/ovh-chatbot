@@ -18,8 +18,8 @@ class WebsiteBreak {
           return [new TextMessage("Tu n'as pas d'hébergement web :("), new TextMessage(responsesCst.upsellingWeb)];
         }
 
-        if (Array.isArray(entities.url) && entities.url.length) {
-          let website = entities.url[0].value.indexOf("http") !== -1 ? entities.url[0].value : "http://" + entities.url[0].value;
+        if (entities.url) {
+          let website = entities.url.indexOf("http") !== -1 ? entities.url : "http://" + entities.url;
 
           if (hostings.length === 1) {
             let buttons = [new Button("postback", `ATTACHED_DOMAIN_SELECTED_${hostings[0]}_${URL.parse(website).hostname}`, hostings[0])];

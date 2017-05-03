@@ -19,6 +19,9 @@ module.exports = {
   wit: {
     token: process.env.WIT_TOKEN
   },
+  apiai: {
+    token: process.env.APIAI_TOKEN
+  },
   graylog: {
     host: "discover.logs.ovh.com",
     port: 12202,
