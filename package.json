@@ -14,7 +14,7 @@
     "url": ""
   },
   "author": "OVH",
-  "license": "MIT",
+  "license": "BSD-3-Clause",
   "dependencies": {
     "bluebird": "^3.4.7",
     "body-parser": "^1.16.0",
