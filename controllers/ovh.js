@@ -1,6 +1,6 @@
 "use strict";
-const ovh = require("ovh");
 
+const ovh = require("ovh");
 const config = require("../config/config-loader").load();
 const messenger = require("../platforms/messenger/messenger");
 const User = require("../models/users.model");
@@ -48,7 +48,7 @@ module.exports = () => {
 function welcome(senderId, meInfos, platform) {
   switch(platform) {
   case "facebook_messenger":
-    messenger.sendTextMessage(senderId, `Tu es bien connecté sous le nic ${meInfos.nichandle} :) 
+    messenger.sendTextMessage(senderId, `Tu es bien connecté sous le nic ${meInfos.nichandle} :)
 Pour l'instant je ne peux te répondre que sur des informations concernant un dysfonctionnement sur ton site web.
 Voici des exemples de questions que tu peux me poser :
   • Mon site ne fonctionne plus

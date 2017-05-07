@@ -64,7 +64,7 @@ module.exports = {
         res.logger.info(err);
         if (Array.isArray(err) && err.length && typeof err[0] === "string") {
           return err;
-        }    
+        }
 
         switch (err.status || err.statusCode) {
         case 500:
@@ -82,7 +82,7 @@ module.exports = {
         default:
           if (err.code) {
             return responses.concat(this.explainError(err, hosting));
-          } 
+          }
 
           if (!sslState.length) {
             return [...responses, new TextMessage("Problème non diagnostiquable, ce guide pourrait néanmoins t'aider : " + guides.errorApache)];
@@ -194,7 +194,7 @@ module.exports = {
     }
 
     if (goodIp) {
-      return [new TextMessage(`Ton site ne pointe pas sur la bonne ip (actuellement ${ip}), ton domaine "${domain.domain}" devrait pointer sur l'ip ${goodIp}`), new TextMessage("Ce guide pourrait t'aider si tu ne sais pas comment faire ces modifications : " + guides.dnsConfig)];  
+      return [new TextMessage(`Ton site ne pointe pas sur la bonne ip (actuellement ${ip}), ton domaine "${domain.domain}" devrait pointer sur l'ip ${goodIp}`), new TextMessage("Ce guide pourrait t'aider si tu ne sais pas comment faire ces modifications : " + guides.dnsConfig)];
     }
   },
 

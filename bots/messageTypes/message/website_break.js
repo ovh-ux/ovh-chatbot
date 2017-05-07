@@ -27,7 +27,7 @@ class WebsiteBreak {
             return [new ButtonsMessage("Sélectionne l'hébergement web sur lequel est installé ton site", buttons)];
           }
           eltInfos = hostings.map((hosting) => new Button("postback", `ATTACHED_DOMAIN_SELECTED_${hosting}_${URL.parse(website).hostname}`, hosting));
-            
+
           return [new TextMessage("Sélectionne l'hébergement web sur lequel est installé ton site"), createPostBackList("Sélectionne l'hébergement web sur lequel est installé ton site", eltInfos, "MORE_HOSTING", 0, 4)];
         }
 
@@ -36,7 +36,7 @@ class WebsiteBreak {
 
           return [new ButtonsMessage("Sélectionne l'hébergement web sur lequel est installé ton site", buttons)];
         }
-        
+
         eltInfos = hostings.map((hosting) => new Button("postback", `HOSTING_SELECTED_${hosting}`, hosting));
 
         return [new TextMessage("Sélectionne l'hébergement web sur lequel est installé ton site"), createPostBackList("Sélectionne l'hébergement web sur lequel est installé ton site", eltInfos, "MORE_HOSTING", 0, 4)];
@@ -47,4 +47,5 @@ class WebsiteBreak {
       });
   }
 }
+
 module.exports = { website_break: WebsiteBreak };

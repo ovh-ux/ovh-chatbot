@@ -8,4 +8,5 @@ class Thanks {
     return Bluebird.resolve([new TextMessage("De rien avec plaisir :)")]);
   }
 }
+
 module.exports = { thanks: Thanks };

@@ -7,7 +7,7 @@ const { ButtonsListMessage, ButtonsMessage, TextMessage } = require("../generics
 const { textMessageAdapter, buttonsListMessageAdapter, buttonsMessageAdapter } = require("./messenger_adapters");
 
 /*
- * Be sure to setup your config values before running this code. You can 
+ * Be sure to setup your config values before running this code. You can
  * set them using environment variables or modifying the config file in /config.
  *
  */
@@ -15,16 +15,16 @@ const { textMessageAdapter, buttonsListMessageAdapter, buttonsMessageAdapter } =
 // Generate a page access token for your page from the App Dashboard
 const PAGE_ACCESS_TOKEN = config.facebook.pageAccessToken;
 
-// URL where the app is running (include protocol). Used to point to scripts and 
-// assets located at this address. 
+// URL where the app is running (include protocol). Used to point to scripts and
+// assets located at this address.
 const SERVER_URL = config.server.url;
 
 
 /*
  * Authorization Event
  *
- * The value for "optin.ref" is defined in the entry point. For the "Send to 
- * Messenger" plugin, it is the "data-ref" field. Read more at 
+ * The value for "optin.ref" is defined in the entry point. For the "Send to
+ * Messenger" plugin, it is the "data-ref" field. Read more at
  * https://developers.facebook.com/docs/messenger-platform/webhook-reference/authentication
  *
  */
@@ -34,14 +34,14 @@ function receivedAuthentication(event) {
   var timeOfAuth = event.timestamp;
 
   // The "ref" field is set in the "Send to Messenger" plugin, in the "data-ref"
-  // The developer can set this to an arbitrary value to associate the 
+  // The developer can set this to an arbitrary value to associate the
   // authentication callback with the "Send to Messenger" click event. This is
-  // a way to do account linking when the user clicks the "Send to Messenger" 
+  // a way to do account linking when the user clicks the "Send to Messenger"
   // plugin.
   var passThroughParam = event.optin.ref;
 
   console.log("Received authentication for user %d and page %d with pass " +
-    "through param '%s' at %d", senderID, recipientID, passThroughParam, 
+    "through param '%s' at %d", senderID, recipientID, passThroughParam,
     timeOfAuth);
 
   // When an authentication is received, we"ll send a message back to the sender
@@ -53,7 +53,7 @@ function receivedAuthentication(event) {
 /*
  * Delivery Confirmation Event
  *
- * This event is sent to confirm the delivery of a message. Read more about 
+ * This event is sent to confirm the delivery of a message. Read more about
  * these fields at https://developers.facebook.com/docs/messenger-platform/webhook-reference/message-delivered
  *
  */
@@ -67,7 +67,7 @@ function receivedDeliveryConfirmation(event) {
 
   if (messageIDs) {
     messageIDs.forEach(function(messageID) {
-      console.log("Received delivery confirmation for message ID: %s", 
+      console.log("Received delivery confirmation for message ID: %s",
         messageID);
     });
   }
@@ -79,23 +79,23 @@ function receivedDeliveryConfirmation(event) {
 /*
  * Postback Event
  *
- * This event is called when a postback is tapped on a Structured Message. 
+ * This event is called when a postback is tapped on a Structured Message.
  * https://developers.facebook.com/docs/messenger-platform/webhook-reference/postback-received
- * 
+ *
  */
 function receivedPostback(event) {
   var senderID = event.sender.id;
   var recipientID = event.recipient.id;
   var timeOfPostback = event.timestamp;
 
-  // The "payload" param is a developer-defined field which is set in a postback 
-  // button for Structured Messages. 
+  // The "payload" param is a developer-defined field which is set in a postback
+  // button for Structured Messages.
   var payload = event.postback.payload;
 
-  console.log("Received postback for user %d and page %d with payload '%s' " + 
+  console.log("Received postback for user %d and page %d with payload '%s' " +
     "at %d", senderID, recipientID, payload, timeOfPostback);
 
-  // When a postback is called, we"ll send a message back to the sender to 
+  // When a postback is called, we"ll send a message back to the sender to
   // let them know it was successful
   sendTextMessage(senderID, "Postback called");
 }
@@ -105,7 +105,7 @@ function receivedPostback(event) {
  *
  * This event is called when a previously-sent message has been read.
  * https://developers.facebook.com/docs/messenger-platform/webhook-reference/message-read
- * 
+ *
  */
 function receivedMessageRead(event) {
   // var senderID = event.sender.id;
@@ -125,7 +125,7 @@ function receivedMessageRead(event) {
  * This event is called when the Link Account or UnLink Account action has been
  * tapped.
  * https://developers.facebook.com/docs/messenger-platform/webhook-reference/account-linking
- * 
+ *
  */
 function receivedAccountLink(event) {
   var senderID = event.sender.id;
@@ -289,7 +289,7 @@ function sendButtonMessage(recipientId, text, title, url) {
         }
       }
     }
-  };  
+  };
 
   callSendAPI(messageData);
 }
@@ -331,7 +331,7 @@ function sendGenericMessage(recipientId, elements) {
         }
       }
     }
-  };  
+  };
 
   callSendAPI(messageData);
 }
@@ -356,8 +356,8 @@ function sendReceiptMessage(recipientId) {
           recipient_name: "Peter Chang",
           order_number: receiptId,
           currency: "USD",
-          payment_method: "Visa 1234",        
-          timestamp: "1428444852", 
+          payment_method: "Visa 1234",
+          timestamp: "1428444852",
           elements: [{
             title: "Oculus Rift",
             subtitle: "Includes: headset, sensor, remote",
@@ -508,14 +508,14 @@ function sendAccountLinking(recipientId, url) {
         }
       }
     }
-  };  
+  };
 
   callSendAPI(messageData);
 }
 
 /*
- * Call the Send API. The message data goes in the body. If successful, we"ll 
- * get the message id in a response 
+ * Call the Send API. The message data goes in the body. If successful, we"ll
+ * get the message id in a response
  *
  */
 function callSendAPI(messageData) {
@@ -539,9 +539,9 @@ function callSendAPI(messageData) {
       } else {
         console.error("Failed calling Send API", response.statusCode, response.statusMessage, body.error);
       }
-      
+
       return resolve({ body , message: messageData.message });
-    }); 
+    });
   });
 }
 
@@ -557,7 +557,7 @@ function send(recipientId, message) {
   if (message instanceof ButtonsListMessage) {
     return sendListMessage(recipientId, buttonsListMessageAdapter(message));
   }
-  
+
   if (message instanceof ButtonsMessage) {
     return sendListMessage(recipientId, buttonsMessageAdapter(message));
   }

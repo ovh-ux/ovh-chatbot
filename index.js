@@ -26,4 +26,3 @@ process.on("SIGTERM", function() {
     process.exit(1);
   }, 30 * 1000);
 });
-

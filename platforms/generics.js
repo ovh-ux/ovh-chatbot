@@ -51,7 +51,7 @@ class ButtonsListMessage {
 function createPostBackList(text, listInfos, morePayload, offset, limit) {
   let buttons = listInfos.slice(offset, limit + offset);
   let moreButton = offset + limit >= listInfos.length ? null : new Button(BUTTON_TYPE.MORE, morePayload + "_" + (offset + limit), "Voir plus");
-  
+
   if (moreButton) {
     buttons.push(moreButton);
   }
