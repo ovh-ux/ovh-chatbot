@@ -22,7 +22,6 @@
     "config": "^1.20.4",
     "cors": "^2.8.1",
     "ejs": "^2.4.2",
-    "eslint-plugin-import": "^2.2.0",
     "express": "^4.14.1",
     "lusca": "^1.4.1",
     "mathjs": "^3.9.3",
@@ -44,7 +43,6 @@
   },
   "devDependencies": {
     "eslint": "^3.15.0",
-    "eslint-plugin-import": "^2.2.0",
     "husky": "^0.13.1"
   }
 }
