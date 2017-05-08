@@ -19,7 +19,7 @@ Contains all the handlers to communicate with different platforms
 
 ### Message types
 
-+ TextMessage -->  simple message with text 
++ TextMessage -->  simple message with text
 
 + ButtonsMessage --> message with multiple buttons (1 - 3 buttons)
 

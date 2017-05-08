@@ -7,7 +7,6 @@ const Bluebird = require("bluebird");
 const dns = require("dns");
 const URL = require("url");
 
-
 module.exports = {
   getOvhClient(senderId) {
     return User

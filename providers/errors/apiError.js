@@ -6,6 +6,6 @@ module.exports = (statusCode, message, data) => {
   } else if (message instanceof Error) {
     return { statusCode, message: message.message };
   }
-  
+
   return { statusCode, message, data };
 };

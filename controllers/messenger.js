@@ -14,7 +14,7 @@ function getWebhook(req, res) {
     res.status(200).send(req.query["hub.challenge"]);
   } else {
     console.error("Failed validation. Make sure the validation tokens match.");
-    res.sendStatus(403);          
+    res.sendStatus(403);
   }
 }
 
@@ -51,7 +51,7 @@ module.exports = () => {
 
       // Assume all went well.
       //
-      // You must send back a 200, within 20 seconds, to let us know you"ve 
+      // You must send back a 200, within 20 seconds, to let us know you"ve
       // successfully received the callback. Otherwise, the request will time out.
       return res.sendStatus(200);
     }
@@ -62,16 +62,16 @@ module.exports = () => {
   /*
    * Message Event
    *
-   * This event is called when a message is sent to your page. The "message" 
+   * This event is called when a message is sent to your page. The "message"
    * object format can vary depending on the kind of message that was received.
    * Read more at https://developers.facebook.com/docs/messenger-platform/webhook-reference/message-received
    *
-   * For this example, we"re going to echo any text that we get. If we get some 
+   * For this example, we"re going to echo any text that we get. If we get some
    * special keywords ("button", "generic", "receipt"), then we"ll send back
-   * examples of those bubbles to illustrate the special message bubbles we"ve 
-   * created. If we receive a message with an attachment (image, video, audio), 
+   * examples of those bubbles to illustrate the special message bubbles we"ve
+   * created. If we receive a message with an attachment (image, video, audio),
    * then we"ll simply confirm that we"ve received the attachment.
-   * 
+   *
    */
   function receivedMessage(res, event) {
     let senderID = event.sender.id;
@@ -83,7 +83,7 @@ module.exports = () => {
     let appId = message.app_id;
     let metadata = message.metadata;
 
-    console.log("Received message for user %d and page %d at %d with message:", 
+    console.log("Received message for user %d and page %d at %d with message:",
       senderID, recipientID, timeOfMessage);
 
     // You may get a text or attachment but not both
@@ -91,7 +91,7 @@ module.exports = () => {
 
     if (isEcho) {
       // Just logging message echoes to console
-      console.log("Received echo for message %s and app %d with metadata %s", 
+      console.log("Received echo for message %s and app %d with metadata %s",
         messageId, appId, metadata);
       return;
     }
@@ -129,7 +129,7 @@ module.exports = () => {
               messenger.sendTextMessage(senderId, `Oups ! ${err.message}`);
             });
         }
-        
+
         messenger.sendTextMessage(senderId, responsesCst.noIntent);
       })
       .catch(res.logger.error);

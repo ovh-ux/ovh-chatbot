@@ -8,16 +8,16 @@ const Users = require("../models/users.model");
 module.exports = () => {
   return {
     ask(type, senderId, message, intent, entities, res) {
-      
+
       Users.where({ senderId })
         .update({ $inc: { messageNumber: 1 }})
         .exec();
 
       switch (type) {
-      
+
       case "postback":
         let promise;
-        
+
         postbackActions.some((postback) => {
           if(message.match(new RegExp(postback.regx))) {
             promise = postback.action(senderId, message, postback.regx, entities, res);
