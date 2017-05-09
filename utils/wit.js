@@ -1,4 +1,5 @@
 "use strict";
+
 const { Wit, log } = require("node-wit");
 const config = require("../config/config-loader").load();
 

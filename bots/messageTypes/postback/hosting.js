@@ -103,7 +103,6 @@ function getSSLState(ovhClient, hosting) {
   });
 }
 
-
 function createWebsiteList(hosting, domains, offset, limit) {
   let elements = [];
 
@@ -112,7 +111,7 @@ function createWebsiteList(hosting, domains, offset, limit) {
   }
 
   let moreButton = offset + limit >= domains.length ? null : new Button("postback_more", "MORE_ATTACHED_DOMAIN_" + hosting + "_" + (offset + limit), "Voir plus");
-    
+
   if (moreButton) {
     elements.push(moreButton);
   }

@@ -1,5 +1,6 @@
 "use strict";
 
 const hosting = require("./hosting");
+const feedback = require("./feedback");
 
-module.exports = [...hosting];
+module.exports = [...hosting, ...feedback];

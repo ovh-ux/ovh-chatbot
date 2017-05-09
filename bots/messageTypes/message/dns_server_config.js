@@ -25,4 +25,5 @@ class DnsServerConfig {
       });
   }
 }
+
 module.exports = { dns_server_config: DnsServerConfig };

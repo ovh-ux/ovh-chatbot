@@ -15,7 +15,7 @@
 
 + Create an account on [wit.ai website](https://wit.ai)
 + Go in **Stories** section on this [this project](https://wit.ai/bnjjj/ovh-status) and click on **Export App**.
-+ It will download a `zip` file. Now you can create a new **wit.ai** app and import this `zip` file to create. 
++ It will download a `zip` file. Now you can create a new **wit.ai** app and import this `zip` file to create.
 + Copy your **Server Access Token** found in the **Settings** section
 + And save it into the env variable named `WIT_TOKEN`
 
@@ -30,13 +30,13 @@ Requirements --> environment variable: **WIT_TOKEN**, **MONGO** and **APP_URL**
 
 **Without docker**
 ```shell
-$ npm i 
+$ npm i
 $ APP_PORT=80 npm start
 ```
 
 **With docker and docker-compose**
 ```shell
-$ sudo docker-compose up 
+$ sudo docker-compose up
 ```
 
 ### Create Facebook Developer app for chatbot
@@ -47,12 +47,12 @@ $ sudo docker-compose up
 
 ### Create Slack Developer app for chatbot
 
-+ Go on [this page](https://api.slack.com/apps?new_app=1) and create a new app 
++ Go on [this page](https://api.slack.com/apps?new_app=1) and create a new app
 + Enable **Interactive Messages** and add request URL `https://yourCustomDomain/api/v1.0/slack/actions`
 + Enable **Event Subscriptions** and add request URL `https://yourCustomDomain/api/v1.0/slack`
 + In the same section subscribe to event **message.im** and save changes
 + Add a bot user in section **Bot Users**
-+ In section **OAuth & Permissions** add permissions named `bot` and `chat:write:bot` 
++ In section **OAuth & Permissions** add permissions named `bot` and `chat:write:bot`
 + In the same section click on **Install App to Team** in order to get the **Bot User Oauth Access Token** which are saved in our env variable as `SLACK_BOT_ACCESS_TOKEN`
 + Then add a redirect URLs like this one `https://yourCustomDomain/api/v1.0/slack/authorize`
 + In section **Basic Information** you can fetch the **Client ID** saved in our env variable as `SLACK_ID`, the **Client Secret** saved in `SLACK_SECRET` and the **Verification Token** in `SLACK_TOKEN`

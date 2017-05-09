@@ -16,5 +16,4 @@ module.exports = {
     let configs = configFiles.map((file) => require(file));
     return Object.assign({}, configs[0], configs[1]);
   }
-
 };

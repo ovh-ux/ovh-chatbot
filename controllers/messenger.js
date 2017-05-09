@@ -6,6 +6,8 @@ const config = require("../config/config-loader").load();
 const apiai = require("../utils/apiai");
 const Bluebird = require("bluebird");
 const responsesCst = require("../constants/responses").FR;
+const { ButtonsListMessage, Button } = require("../../../platforms/generics");
+const { camelCase } = require("lodash");
 
 function getWebhook(req, res) {
   if (req.query["hub.mode"] === "subscribe" &&
@@ -14,7 +16,7 @@ function getWebhook(req, res) {
     res.status(200).send(req.query["hub.challenge"]);
   } else {
     console.error("Failed validation. Make sure the validation tokens match.");
-    res.sendStatus(403);          
+    res.sendStatus(403);
   }
 }
 
@@ -51,7 +53,7 @@ module.exports = () => {
 
       // Assume all went well.
       //
-      // You must send back a 200, within 20 seconds, to let us know you"ve 
+      // You must send back a 200, within 20 seconds, to let us know you"ve
       // successfully received the callback. Otherwise, the request will time out.
       return res.sendStatus(200);
     }
@@ -62,16 +64,16 @@ module.exports = () => {
   /*
    * Message Event
    *
-   * This event is called when a message is sent to your page. The "message" 
+   * This event is called when a message is sent to your page. The "message"
    * object format can vary depending on the kind of message that was received.
    * Read more at https://developers.facebook.com/docs/messenger-platform/webhook-reference/message-received
    *
-   * For this example, we"re going to echo any text that we get. If we get some 
+   * For this example, we"re going to echo any text that we get. If we get some
    * special keywords ("button", "generic", "receipt"), then we"ll send back
-   * examples of those bubbles to illustrate the special message bubbles we"ve 
-   * created. If we receive a message with an attachment (image, video, audio), 
+   * examples of those bubbles to illustrate the special message bubbles we"ve
+   * created. If we receive a message with an attachment (image, video, audio),
    * then we"ll simply confirm that we"ve received the attachment.
-   * 
+   *
    */
   function receivedMessage(res, event) {
     let senderID = event.sender.id;
@@ -83,7 +85,7 @@ module.exports = () => {
     let appId = message.app_id;
     let metadata = message.metadata;
 
-    console.log("Received message for user %d and page %d at %d with message:", 
+    console.log("Received message for user %d and page %d at %d with message:",
       senderID, recipientID, timeOfMessage);
 
     // You may get a text or attachment but not both
@@ -91,7 +93,7 @@ module.exports = () => {
 
     if (isEcho) {
       // Just logging message echoes to console
-      console.log("Received echo for message %s and app %d with metadata %s", 
+      console.log("Received echo for message %s and app %d with metadata %s",
         messageId, appId, metadata);
       return;
     }
@@ -125,18 +127,36 @@ module.exports = () => {
         }
 
         if (resp.result.fulfillment && resp.result.fulfillment.speech && Array.isArray(resp.result.fulfillment.messages) && resp.result.fulfillment.messages.length) {
-          return sendQuickResponses(res, senderId, resp.result.fulfillment.messages);
+          return sendQuickResponses(res, senderId, resp.result.fulfillment.messages)
+            .then(() => sendFeedback(res, senderId, resp.result.action, message)); // Ask if it was useful
         }
 
         return bot.ask("message", senderId, message, resp.result.action, resp.result.parameters, res)
           .then((responses) => sendResponses(res, senderId, responses))
+          .then(() => sendFeedback(res, senderId, resp.result.action, message)) // Ask if it was useful
           .catch((err) => {
             res.logger.error(err);
-            messenger.sendTextMessage(senderId, `Oups ! ${err.message}`);
+            return messenger.sendTextMessage(senderId, `Oups ! ${err.message}`);
           });
       }
     })
     .catch(res.logger.error);
+  }
+
+  function sendFeedback(res, senderId, intent, message) {
+    if (intent === "unknown") {
+      return;
+    }
+
+    message = message.length >= 1000 ? "TOOLONG" : message;
+
+    let buttons = [
+      new Button("postback", `FEEDBACK_MISUNDERSTOOD_${camelCase(intent)}_${message}`, "Mauvaise compréhension"),
+      new Button("postback", `FEEDBACK_BAD_${camelCase(intent)}_${message}`, "Non"),
+      new Button("postback", `FEEDBACK_GOOD_${camelCase(intent)}_${message}`, "Oui")
+    ];
+
+    return sendResponse(res, senderId, new ButtonsListMessage("Est-ce que cette réponse vous a aidé ?", buttons));
   }
 
   function sendQuickResponses(res, senderId, responses) {
