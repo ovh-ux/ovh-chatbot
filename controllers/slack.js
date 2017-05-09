@@ -51,7 +51,7 @@ Pour l'instant je ne peux te répondre que sur des informations concernant un dy
 
           if (resp.apiai.result.fulfillment && resp.apiai.result.fulfillment.speech && Array.isArray(resp.apiai.result.fulfillment.messages) && resp.apiai.result.fulfillment.messages.length) {
             return sendQuickResponses(res, channel, resp.apiai.result.fulfillment.messages, resp.slack)
-              .then(() => sendFeedback(res, channel, resp.apiai.result.action, message));
+              .then(() => sendFeedback(res, channel, resp.apiai.result.action, message, resp.slack));
           }
 
           return bot.ask("message", channel, message, resp.apiai.result.action, resp.apiai.result.parameters, res)
@@ -62,7 +62,7 @@ Pour l'instant je ne peux te répondre que sur des informations concernant un dy
             })
             .then(() => {
               if (needFeedback) {
-                return sendFeedback(res, channel, resp.apiai.result.action, message);
+                return sendFeedback(res, channel, resp.apiai.result.action, message, resp.slack);
               }
             })
             .catch((err) => {
@@ -82,6 +82,7 @@ Pour l'instant je ne peux te répondre que sur des informations concernant un dy
       const payload = JSON.parse(req.body.payload);
       const channel = payload.channel.id;
       const value = payload.actions[0].value;
+      let slackClient;
       let needFeedback = false;
 
       Bluebird.props({
@@ -89,13 +90,14 @@ Pour l'instant je ne peux te répondre que sur des informations concernant un dy
         slack: slack(payload.team.id)
       })
       .then((responses) => {
-        needFeedback = responses.slack.feedback || needFeedback;
+        slackClient = responses.slack;
+        needFeedback = responses.bot.feedback || needFeedback;
 
-        return sendResponses(res, channel, responses.bot, responses.slack.responses);
+        return sendResponses(res, channel, responses.bot, responses.bot.responses);
       })
       .then(() => {
         if (needFeedback) {
-          return sendFeedback(res, channel, value, "message");
+          return sendFeedback(res, channel, value, "message", slackClient);
         }
       })
       .catch((err) => {
@@ -144,7 +146,7 @@ Pour l'instant je ne peux te répondre que sur des informations concernant un dy
   };
 };
 
-function sendFeedback(res, senderId, intent, message) {
+function sendFeedback(res, senderId, intent, message, slack) {
   if (intent === "unknown") {
     return;
   }
@@ -157,7 +159,7 @@ function sendFeedback(res, senderId, intent, message) {
     new Button("postback", `FEEDBACK_GOOD_${camelCase(intent)}_${message}`, "Oui")
   ];
 
-  return sendResponse(res, senderId, new ButtonsListMessage("Est-ce que cette réponse vous a aidé ?", buttons));
+  return sendResponse(res, senderId, new ButtonsListMessage("Est-ce que cette réponse vous a aidé ?", buttons), slack);
 }
 
 function sendQuickResponses(res, senderId, responses, slack) {
