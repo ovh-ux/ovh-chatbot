@@ -8,6 +8,8 @@ const bot = require("../bots/hosting")();
 const request = require("request-promise");
 const responsesCst = require("../constants/responses").FR;
 const apiai = require("../utils/apiai");
+const { camelCase } = require("lodash");
+const { ButtonsListMessage, Button } = require("../platforms/generics");
 
 module.exports = () => {
 
@@ -31,6 +33,8 @@ module.exports = () => {
         apiai: apiai.textRequestAsync(message, { sessionId: channel }),
         slack: slack(req.body.team_id)
       }).then((resp) => {
+        let needFeedback = false;
+
         if (resp.apiai.status && resp.apiai.status.code === 200 && resp.apiai.result) {
           if (resp.apiai.result.action === "connection" || resp.apiai.result.action === "welcome" ) {
             return resp.slack.sendTextMessage(channel, `Pour te connecter il te suffit de <${config.server.url}${config.server.basePath}/authorize?state=${channel}-slack|cliquer ici.>
@@ -46,11 +50,21 @@ Pour l'instant je ne peux te répondre que sur des informations concernant un dy
           }
 
           if (resp.apiai.result.fulfillment && resp.apiai.result.fulfillment.speech && Array.isArray(resp.apiai.result.fulfillment.messages) && resp.apiai.result.fulfillment.messages.length) {
-            return sendQuickResponses(res, channel, resp.apiai.result.fulfillment.messages, resp.slack);
+            return sendQuickResponses(res, channel, resp.apiai.result.fulfillment.messages, resp.slack)
+              .then(() => sendFeedback(res, channel, resp.apiai.result.action, message));
           }
 
           return bot.ask("message", channel, message, resp.apiai.result.action, resp.apiai.result.parameters, res)
-            .then((responses) => sendResponses(res, channel, responses, resp.slack))
+            .then((answer) => {
+              needFeedback = answer.feedback || needFeedback;
+
+              return sendResponses(res, channel, answer.responses, resp.slack);
+            })
+            .then(() => {
+              if (needFeedback) {
+                return sendFeedback(res, channel, resp.apiai.result.action, message);
+              }
+            })
             .catch((err) => {
               res.logger.error(err);
               resp.slack.sendTextMessage(channel, `Oups ! ${err.message}`);
@@ -68,12 +82,22 @@ Pour l'instant je ne peux te répondre que sur des informations concernant un dy
       const payload = JSON.parse(req.body.payload);
       const channel = payload.channel.id;
       const value = payload.actions[0].value;
+      let needFeedback = false;
 
       Bluebird.props({
         bot: bot.ask("postback", channel, value, "", {}, res),
         slack: slack(payload.team.id)
       })
-      .then((responses) => sendResponses(res, channel, responses.bot, responses.slack))
+      .then((responses) => {
+        needFeedback = responses.slack.feedback || needFeedback;
+
+        return sendResponses(res, channel, responses.bot, responses.slack.responses);
+      })
+      .then(() => {
+        if (needFeedback) {
+          return sendFeedback(res, channel, value, "message");
+        }
+      })
       .catch((err) => {
         res.logger.error(err);
         slack(payload.team.id)
@@ -119,6 +143,22 @@ Pour l'instant je ne peux te répondre que sur des informations concernant un dy
     }
   };
 };
+
+function sendFeedback(res, senderId, intent, message) {
+  if (intent === "unknown") {
+    return;
+  }
+
+  message = message.length >= 1000 ? "TOOLONG" : message;
+
+  let buttons = [
+    new Button("postback", `FEEDBACK_MISUNDERSTOOD_${camelCase(intent)}_${message}`, "Mauvaise compréhension"),
+    new Button("postback", `FEEDBACK_BAD_${camelCase(intent)}_${message}`, "Non"),
+    new Button("postback", `FEEDBACK_GOOD_${camelCase(intent)}_${message}`, "Oui")
+  ];
+
+  return sendResponse(res, senderId, new ButtonsListMessage("Est-ce que cette réponse vous a aidé ?", buttons));
+}
 
 function sendQuickResponses(res, senderId, responses, slack) {
   return Bluebird.mapSeries(responses, (response) => {
