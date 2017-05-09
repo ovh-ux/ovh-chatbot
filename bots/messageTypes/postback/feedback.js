@@ -4,7 +4,7 @@ const { snakeCase } = require("lodash");
 const Bluebird = require("bluebird").config({
   warnings: false
 });
-const Message = require("../models/messages.model");
+const Message = require("../../../models/messages.model");
 
 module.exports = [{
   regx : "FEEDBACK_GOOD_([^_]*)_(.*)",
