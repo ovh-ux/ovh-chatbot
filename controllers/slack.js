@@ -158,8 +158,10 @@ function sendFeedback(res, senderId, intent, message, slack) {
     new Button("postback", `FEEDBACK_BAD_${camelCase(intent)}_${message}`, "Non"),
     new Button("postback", `FEEDBACK_GOOD_${camelCase(intent)}_${message}`, "Oui")
   ];
+  let buttonsList = new ButtonsListMessage("Est-ce que cette réponse vous a aidé ?", buttons);
+  buttonsList.delete_original = true;
 
-  return sendResponse(res, senderId, new ButtonsListMessage("Est-ce que cette réponse vous a aidé ?", buttons), slack);
+  return sendResponse(res, senderId, buttonsList, slack);
 }
 
 function sendQuickResponses(res, senderId, responses, slack) {
