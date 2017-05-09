@@ -6,7 +6,7 @@ const config = require("../config/config-loader").load();
 const apiai = require("../utils/apiai");
 const Bluebird = require("bluebird");
 const responsesCst = require("../constants/responses").FR;
-const { ButtonsListMessage, Button } = require("../../../platforms/generics");
+const { ButtonsListMessage, Button } = require("../platforms/generics");
 const { camelCase } = require("lodash");
 
 function getWebhook(req, res) {
