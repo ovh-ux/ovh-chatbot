@@ -559,12 +559,12 @@ function send(recipientId, message) {
   }
 
   if (message instanceof ButtonsListMessage) {
-    return sendListMessage(recipientId, buttonsListMessageAdapter(message));
+    return sendTextMessage(recipientId, message.text)
+      .then(() => sendListMessage(recipientId, buttonsListMessageAdapter(message)));
   }
 
   if (message instanceof ButtonsMessage) {
-    return sendTextMessage(recipientId, message.text)
-      .then(() => sendListMessage(recipientId, buttonsMessageAdapter(message)));
+    return sendListMessage(recipientId, buttonsMessageAdapter(message));
   }
 
   return callSendAPI(message);
