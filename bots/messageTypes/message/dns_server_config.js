@@ -21,7 +21,7 @@ class DnsServerConfig {
           }
         }
 
-        return responses;
+        return { responses, feedback: true };
       });
   }
 }

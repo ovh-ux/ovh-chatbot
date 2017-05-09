@@ -15,7 +15,7 @@ class DomainToHosting {
       responses.push(new ButtonsMessage("Tu peux modifier ta zone DNS via l'espace client OVH", buttons));
     }
 
-    return Bluebird.resolve(responses);
+    return Bluebird.resolve({ responses, feedback: true });
   }
 }
 

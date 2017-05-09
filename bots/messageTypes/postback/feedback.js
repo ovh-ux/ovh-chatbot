@@ -28,5 +28,5 @@ function saveFeedback(postback, regx, feedback) {
   let message = postback.match(new RegExp(regx))[2];
 
   new Message({ intent, text: message, feedback }).save();
-  return Bluebird.resolve([]);
+  return Bluebird.resolve({ responses: [], feedback: false });
 }

@@ -104,11 +104,21 @@ module.exports = () => {
   }
 
   function receivedPostback(res, event) {
+    let needFeedback = false;
     let senderId = event.sender.id;
     let payload = event.postback.payload;
 
     bot.ask("postback", senderId, payload, null, null, res)
-      .then((responses) => sendResponses(res, senderId, responses))
+      .then((answer) => {
+        needFeedback = answer.feedback || needFeedback;
+
+        return sendResponses(res, senderId, answer.responses);
+      })
+      .then(() => {
+        if (needFeedback) {
+          return sendFeedback(res, senderId, payload, "message");
+        }
+      }) // Ask if it was useful
       .catch((err) => {
         res.logger.error(err);
         messenger.sendTextMessage(senderId, `Oups ! ${err.message}`);
@@ -116,6 +126,8 @@ module.exports = () => {
   }
 
   function sendCustomMessage(res, senderId, message) {
+    let needFeedback = false;
+
     apiai.textRequestAsync(message, {
       sessionId: senderId
     })
@@ -132,8 +144,16 @@ module.exports = () => {
         }
 
         return bot.ask("message", senderId, message, resp.result.action, resp.result.parameters, res)
-          .then((responses) => sendResponses(res, senderId, responses))
-          .then(() => sendFeedback(res, senderId, resp.result.action, message)) // Ask if it was useful
+          .then((answer) => {
+            needFeedback = answer.feedback || needFeedback;
+
+            return sendResponses(res, senderId, answer.responses);
+          })
+          .then(() => {
+            if (needFeedback) {
+              sendFeedback(res, senderId, resp.result.action, message);
+            }
+          }) // Ask if it was useful
           .catch((err) => {
             res.logger.error(err);
             return messenger.sendTextMessage(senderId, `Oups ! ${err.message}`);
@@ -163,9 +183,9 @@ module.exports = () => {
     return Bluebird.mapSeries(responses, (response) => {
       switch (response.type) {
       case 0:
-        return sendResponse(res, senderId, response.speech);
       default:
-        return sendResponse(res, senderId, response.speech);
+        let textResponse = response.speech.replace(/<(.*)\|+(.*)>/, "$1");
+        return sendResponse(res, senderId, textResponse);
       }
     });
   }
