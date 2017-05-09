@@ -93,7 +93,7 @@ Pour l'instant je ne peux te répondre que sur des informations concernant un dy
         slackClient = responses.slack;
         needFeedback = responses.bot.feedback || needFeedback;
 
-        return sendResponses(res, channel, responses.bot, responses.bot.responses);
+        return sendResponses(res, channel, responses.bot.responses, slackClient);
       })
       .then(() => {
         if (needFeedback) {
