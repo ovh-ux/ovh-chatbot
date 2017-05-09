@@ -46,7 +46,7 @@ function getSlackApi(team_id) {
             promise = Bluebird.each(messageData.actionsStr, (msg) => slack.sendTextMessage(channel, msg));
           }
 
-          return Bluebird.all([promise, slack.sendButtonMessage(channel, messageData.attachments, messageData.delete_original)]);
+          return Bluebird.all([promise, slack.sendButtonMessage(channel, messageData.attachments, message.delete_original)]);
         }
 
         return slack.apiAsync(POST_MESSAGE, message);
