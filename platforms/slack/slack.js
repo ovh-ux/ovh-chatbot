@@ -21,10 +21,15 @@ function getSlackApi(team_id) {
       slack.sendButtonMessage = (channel, messageData, deleteOriginal = false) => {
         let params = {
           channel,
-          replace_original: deleteOriginal,
-          delete_original: deleteOriginal,
+          replace_original: false,
+          delete_original: false,
           attachments: JSON.stringify(messageData)
         };
+
+        if (deleteOriginal) {
+          delete params.replace_original;
+          delete params.delete_original;
+        }
 
         return slack.apiAsync(POST_MESSAGE, params);
       };
