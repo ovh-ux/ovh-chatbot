@@ -5,6 +5,7 @@ const Bluebird = require("bluebird").config({
   warnings: false
 });
 const Message = require("../../../models/messages.model");
+const { TextMessage } = require("../../../platforms/generics");
 
 module.exports = [{
   regx : "FEEDBACK_GOOD_([^_]*)_(.*)",
@@ -28,5 +29,5 @@ function saveFeedback(postback, regx, feedback) {
   let message = postback.match(new RegExp(regx))[2];
 
   new Message({ intent, text: message, feedback }).save();
-  return Bluebird.resolve({ responses: [], feedback: false });
+  return Bluebird.resolve({ responses: [new TextMessage("Merci pour votre avis")], feedback: false });
 }
