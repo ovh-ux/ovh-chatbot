@@ -43,7 +43,7 @@ class WebsiteBreak {
       })
       .catch((err) => {
         res.logger.error(err);
-        return Bluebird.reject({ responses: error(err.error || err.statusCode || 400, err), feedback: false });
+        return Bluebird.reject(error(err.error || err.statusCode || 400, err));
       });
   }
 }
