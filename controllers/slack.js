@@ -50,7 +50,9 @@ Pour l'instant je ne peux te répondre que sur des informations concernant un dy
           }
 
           if (resp.apiai.result.fulfillment && resp.apiai.result.fulfillment.speech && Array.isArray(resp.apiai.result.fulfillment.messages) && resp.apiai.result.fulfillment.messages.length) {
-            return sendQuickResponses(res, channel, resp.apiai.result.fulfillment.messages, resp.slack)
+            let smalltalk = resp.apiai.result.action && resp.apiai.result.action.indexOf("smalltalk") !== -1;
+
+            return sendQuickResponses(res, channel, smalltalk ? [resp.apiai.result.fulfillment.speech] : resp.apiai.result.fulfillment.messages, resp.slack)
               .then(() => sendFeedback(res, channel, resp.apiai.result.action, message, resp.slack));
           }
 

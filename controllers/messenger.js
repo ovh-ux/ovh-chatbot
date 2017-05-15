@@ -139,7 +139,9 @@ module.exports = () => {
         }
 
         if (resp.result.fulfillment && resp.result.fulfillment.speech && Array.isArray(resp.result.fulfillment.messages) && resp.result.fulfillment.messages.length) {
-          return sendQuickResponses(res, senderId, resp.result.fulfillment.messages)
+          let smalltalk = resp.result.action && resp.result.action.indexOf("smalltalk") !== -1;
+
+          return sendQuickResponses(res, senderId, smalltalk ? [resp.result.fulfillment.speech] : resp.result.fulfillment.messages)
             .then(() => sendFeedback(res, senderId, resp.result.action, message)); // Ask if it was useful
         }
 
