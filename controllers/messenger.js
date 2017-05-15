@@ -140,8 +140,13 @@ module.exports = () => {
 
         if (resp.result.fulfillment && resp.result.fulfillment.speech && Array.isArray(resp.result.fulfillment.messages) && resp.result.fulfillment.messages.length) {
           let smalltalk = resp.result.action && resp.result.action.indexOf("smalltalk") !== -1;
+          let quickResponses = resp.result.fulfillment.messages;
 
-          return sendQuickResponses(res, senderId, smalltalk ? [resp.result.fulfillment.speech] : resp.result.fulfillment.messages)
+          if (smalltalk && Math.floor((Math.random() * 2))) { //random to change response from original smalltalk to our custom sentence
+            quickResponses = [{ speech: resp.result.fulfillment.speech }];
+          }
+
+          return sendQuickResponses(res, senderId, quickResponses)
             .then(() => sendFeedback(res, senderId, resp.result.action, message)); // Ask if it was useful
         }
 

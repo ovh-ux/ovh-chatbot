@@ -51,8 +51,14 @@ Pour l'instant je ne peux te répondre que sur des informations concernant un dy
 
           if (resp.apiai.result.fulfillment && resp.apiai.result.fulfillment.speech && Array.isArray(resp.apiai.result.fulfillment.messages) && resp.apiai.result.fulfillment.messages.length) {
             let smalltalk = resp.apiai.result.action && resp.apiai.result.action.indexOf("smalltalk") !== -1;
+            let quickResponses = resp.apiai.result.fulfillment.messages;
 
-            return sendQuickResponses(res, channel, smalltalk ? [resp.apiai.result.fulfillment.speech] : resp.apiai.result.fulfillment.messages, resp.slack)
+            if (smalltalk && Math.floor((Math.random() * 2))) { //random to change response from original smalltalk to our custom sentence
+              quickResponses = [{ speech: resp.apiai.result.fulfillment.speech }];
+            }
+
+
+            return sendQuickResponses(res, channel, quickResponses, resp.slack)
               .then(() => sendFeedback(res, channel, resp.apiai.result.action, message, resp.slack));
           }
 
