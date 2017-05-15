@@ -54,7 +54,7 @@ Pour l'instant je ne peux te répondre que sur des informations concernant un dy
             let quickResponses = resp.apiai.result.fulfillment.messages;
 
             if (smalltalk && Math.floor((Math.random() * 2))) { //random to change response from original smalltalk to our custom sentence
-              quickResponses = [{ speech: resp.apiai.result.fulfillment.speech }];
+              quickResponses = [{ speech: resp.apiai.result.fulfillment.speech, type: 0 }];
             }
 
 

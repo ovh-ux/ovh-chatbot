@@ -143,7 +143,7 @@ module.exports = () => {
           let quickResponses = resp.result.fulfillment.messages;
 
           if (smalltalk && Math.floor((Math.random() * 2))) { //random to change response from original smalltalk to our custom sentence
-            quickResponses = [{ speech: resp.result.fulfillment.speech }];
+            quickResponses = [{ speech: resp.result.fulfillment.speech, type: 0 }];
           }
 
           return sendQuickResponses(res, senderId, quickResponses)
