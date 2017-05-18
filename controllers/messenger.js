@@ -3,9 +3,11 @@
 const messenger = require("../platforms/messenger/messenger");
 const bot = require("../bots/hosting")();
 const config = require("../config/config-loader").load();
-const wit = require("../utils/wit");
+const apiai = require("../utils/apiai");
 const Bluebird = require("bluebird");
 const responsesCst = require("../constants/responses").FR;
+const { ButtonsListMessage, Button } = require("../platforms/generics");
+const { camelCase } = require("lodash");
 
 function getWebhook(req, res) {
   if (req.query["hub.mode"] === "subscribe" &&
@@ -102,11 +104,21 @@ module.exports = () => {
   }
 
   function receivedPostback(res, event) {
+    let needFeedback = false;
     let senderId = event.sender.id;
     let payload = event.postback.payload;
 
     bot.ask("postback", senderId, payload, null, null, res)
-      .then((responses) => sendResponses(res, senderId, responses))
+      .then((answer) => {
+        needFeedback = answer.feedback || needFeedback;
+
+        return sendResponses(res, senderId, answer.responses);
+      })
+      .then(() => {
+        if (needFeedback) {
+          return sendFeedback(res, senderId, payload, "message");
+        }
+      }) // Ask if it was useful
       .catch((err) => {
         res.logger.error(err);
         messenger.sendTextMessage(senderId, `Oups ! ${err.message}`);
@@ -114,25 +126,75 @@ module.exports = () => {
   }
 
   function sendCustomMessage(res, senderId, message) {
-    wit.message(message, {}) //Get intention
-      .then((resp) => {
-        if (resp.entities && Array.isArray(resp.entities.intent) && resp.entities.intent.length > 0) {
-          if (resp.entities.intent[0].value === "connection") {
-            messenger.sendTextMessage(senderId, responsesCst.welcome);
-            return messenger.sendAccountLinking(senderId, `${config.server.url}${config.server.basePath}/authorize?state=${senderId}-facebook_messenger`);
-          }
+    let needFeedback = false;
 
-          return bot.ask("message", senderId, message, resp.entities.intent[0].value, resp.entities, res)
-            .then((responses) => sendResponses(res, senderId, responses))
-            .catch((err) => {
-              res.logger.error(err);
-              messenger.sendTextMessage(senderId, `Oups ! ${err.message}`);
-            });
+    apiai.textRequestAsync(message, {
+      sessionId: senderId
+    })
+    .then((resp) => {
+      if (resp.status && resp.status.code === 200 && resp.result) {
+        if (resp.result.action === "connection" || resp.result.action === "welcome") {
+          messenger.sendTextMessage(senderId, responsesCst.welcome);
+          return messenger.sendAccountLinking(senderId, `${config.server.url}${config.server.basePath}/authorize?state=${senderId}-facebook_messenger`);
         }
 
-        messenger.sendTextMessage(senderId, responsesCst.noIntent);
-      })
-      .catch(res.logger.error);
+        if (resp.result.fulfillment && resp.result.fulfillment.speech && Array.isArray(resp.result.fulfillment.messages) && resp.result.fulfillment.messages.length) {
+          let smalltalk = resp.result.action && resp.result.action.indexOf("smalltalk") !== -1;
+          let quickResponses = resp.result.fulfillment.messages;
+
+          if (smalltalk && Math.floor((Math.random() * 2))) { //random to change response from original smalltalk to our custom sentence
+            quickResponses = [{ speech: resp.result.fulfillment.speech, type: 0 }];
+          }
+
+          return sendQuickResponses(res, senderId, quickResponses)
+            .then(() => sendFeedback(res, senderId, resp.result.action, message)); // Ask if it was useful
+        }
+
+        return bot.ask("message", senderId, message, resp.result.action, resp.result.parameters, res)
+          .then((answer) => {
+            needFeedback = answer.feedback || needFeedback;
+
+            return sendResponses(res, senderId, answer.responses);
+          })
+          .then(() => {
+            if (needFeedback) {
+              sendFeedback(res, senderId, resp.result.action, message);
+            }
+          }) // Ask if it was useful
+          .catch((err) => {
+            res.logger.error(err);
+            return messenger.sendTextMessage(senderId, `Oups ! ${err.message}`);
+          });
+      }
+    })
+    .catch(res.logger.error);
+  }
+
+  function sendFeedback(res, senderId, intent, message) {
+    if (intent === "unknown") {
+      return;
+    }
+
+    message = message.length >= 1000 ? "TOOLONG" : message;
+
+    let buttons = [
+      new Button("postback", `FEEDBACK_MISUNDERSTOOD_${camelCase(intent)}_${message}`, "Mauvaise compréhension"),
+      new Button("postback", `FEEDBACK_BAD_${camelCase(intent)}_${message}`, "Non"),
+      new Button("postback", `FEEDBACK_GOOD_${camelCase(intent)}_${message}`, "Oui")
+    ];
+
+    return sendResponse(res, senderId, new ButtonsListMessage("Est-ce que cette réponse vous a aidé ?", buttons));
+  }
+
+  function sendQuickResponses(res, senderId, responses) {
+    return Bluebird.mapSeries(responses, (response) => {
+      switch (response.type) {
+      case 0:
+      default:
+        let textResponse = response.speech.replace(/<(.*)\|+(.*)>/, "$1");
+        return sendResponse(res, senderId, textResponse);
+      }
+    });
   }
 
   function sendResponses(res, senderId, responses) {

@@ -37,6 +37,7 @@ function buttonsMessageAdapter(message) {
     });
 
   return {
+    delete_original: message.delete_original,
     actionsStr,
     attachments: [
       {

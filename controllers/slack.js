@@ -4,10 +4,12 @@ const Bluebird = require("bluebird");
 const slack = require("../platforms/slack/slack");
 const SlackModel = require("../models/slack.models");
 const config = require("../config/config-loader").load();
-const wit = require("../utils/wit");
 const bot = require("../bots/hosting")();
 const request = require("request-promise");
 const responsesCst = require("../constants/responses").FR;
+const apiai = require("../utils/apiai");
+const { camelCase } = require("lodash");
+const { ButtonsListMessage, Button } = require("../platforms/generics");
 
 module.exports = () => {
 
@@ -28,11 +30,13 @@ module.exports = () => {
       channel = req.body.event.channel;
 
       Bluebird.props({
-        wit: wit.message(message, {}),
+        apiai: apiai.textRequestAsync(message, { sessionId: channel }),
         slack: slack(req.body.team_id)
       }).then((resp) => {
-        if (resp.wit.entities && Array.isArray(resp.wit.entities.intent) && resp.wit.entities.intent.length > 0) {
-          if (resp.wit.entities.intent[0].value === "connection") {
+        let needFeedback = false;
+
+        if (resp.apiai.status && resp.apiai.status.code === 200 && resp.apiai.result) {
+          if (resp.apiai.result.action === "connection" || resp.apiai.result.action === "welcome" ) {
             return resp.slack.sendTextMessage(channel, `Pour te connecter il te suffit de <${config.server.url}${config.server.basePath}/authorize?state=${channel}-slack|cliquer ici.>
 Pour l'instant je ne peux te répondre que sur des informations concernant un dysfonctionnement sur ton site web.
   Voici des exemples de questions que tu peux me poser :
@@ -45,8 +49,30 @@ Pour l'instant je ne peux te répondre que sur des informations concernant un dy
               .catch(res.logger.error);
           }
 
-          return bot.ask("message", channel, message, resp.wit.entities.intent[0].value, resp.wit.entities, res)
-            .then((responses) => sendResponses(res, channel, responses, resp.slack))
+          if (resp.apiai.result.fulfillment && resp.apiai.result.fulfillment.speech && Array.isArray(resp.apiai.result.fulfillment.messages) && resp.apiai.result.fulfillment.messages.length) {
+            let smalltalk = resp.apiai.result.action && resp.apiai.result.action.indexOf("smalltalk") !== -1;
+            let quickResponses = resp.apiai.result.fulfillment.messages;
+
+            if (smalltalk && Math.floor((Math.random() * 2))) { //random to change response from original smalltalk to our custom sentence
+              quickResponses = [{ speech: resp.apiai.result.fulfillment.speech, type: 0 }];
+            }
+
+
+            return sendQuickResponses(res, channel, quickResponses, resp.slack)
+              .then(() => sendFeedback(res, channel, resp.apiai.result.action, message, resp.slack));
+          }
+
+          return bot.ask("message", channel, message, resp.apiai.result.action, resp.apiai.result.parameters, res)
+            .then((answer) => {
+              needFeedback = answer.feedback || needFeedback;
+
+              return sendResponses(res, channel, answer.responses, resp.slack);
+            })
+            .then(() => {
+              if (needFeedback) {
+                return sendFeedback(res, channel, resp.apiai.result.action, message, resp.slack);
+              }
+            })
             .catch((err) => {
               res.logger.error(err);
               resp.slack.sendTextMessage(channel, `Oups ! ${err.message}`);
@@ -64,12 +90,24 @@ Pour l'instant je ne peux te répondre que sur des informations concernant un dy
       const payload = JSON.parse(req.body.payload);
       const channel = payload.channel.id;
       const value = payload.actions[0].value;
+      let slackClient;
+      let needFeedback = false;
 
       Bluebird.props({
         bot: bot.ask("postback", channel, value, "", {}, res),
         slack: slack(payload.team.id)
       })
-      .then((responses) => sendResponses(res, channel, responses.bot, responses.slack))
+      .then((responses) => {
+        slackClient = responses.slack;
+        needFeedback = responses.bot.feedback || needFeedback;
+
+        return sendResponses(res, channel, responses.bot.responses, slackClient);
+      })
+      .then(() => {
+        if (needFeedback) {
+          return sendFeedback(res, channel, value, "message", slackClient);
+        }
+      })
       .catch((err) => {
         res.logger.error(err);
         slack(payload.team.id)
@@ -115,6 +153,35 @@ Pour l'instant je ne peux te répondre que sur des informations concernant un dy
     }
   };
 };
+
+function sendFeedback(res, senderId, intent, message, slack) {
+  if (intent === "unknown") {
+    return;
+  }
+
+  message = message.length >= 1000 ? "TOOLONG" : message;
+
+  let buttons = [
+    new Button("postback", `FEEDBACK_MISUNDERSTOOD_${camelCase(intent)}_${message}`, "Mauvaise compréhension"),
+    new Button("postback", `FEEDBACK_BAD_${camelCase(intent)}_${message}`, "Non"),
+    new Button("postback", `FEEDBACK_GOOD_${camelCase(intent)}_${message}`, "Oui")
+  ];
+  let buttonsList = new ButtonsListMessage("Est-ce que cette réponse vous a aidé ?", buttons);
+  buttonsList.delete_original = true;
+
+  return sendResponse(res, senderId, buttonsList, slack);
+}
+
+function sendQuickResponses(res, senderId, responses, slack) {
+  return Bluebird.mapSeries(responses, (response) => {
+    switch (response.type) {
+    case 0:
+      return sendResponse(res, senderId, response.speech, slack);
+    default:
+      return sendResponse(res, senderId, response.speech, slack);
+    }
+  });
+}
 
 function sendResponses(res, channel, responses, slack) {
   return Bluebird.mapSeries(responses, (response) => sendResponse(res, channel, response, slack));

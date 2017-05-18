@@ -16,8 +16,8 @@ module.exports = {
     appKey: process.env.OVH_KEY,
     appSecret: process.env.OVH_SECRET
   },
-  wit: {
-    token: process.env.WIT_TOKEN
+  apiai: {
+    token: process.env.APIAI_TOKEN
   },
   graylog: {
     host: "discover.logs.ovh.com",

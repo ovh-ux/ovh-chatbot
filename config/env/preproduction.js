@@ -12,5 +12,8 @@ module.exports = {
     pageAccessToken: process.env.FB_APP_ACCESS_TOKEN_PREPROD,
     validationToken: process.env.FB_VALIDATION_TOKEN
   },
+  apiai: {
+    token: process.env.APIAI_TOKEN_PREPROD
+  },
   redirectUrl: "https://bot.uxlabs.ovh/api/v1.0/ovh"
 };

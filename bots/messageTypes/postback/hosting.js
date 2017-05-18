@@ -21,7 +21,7 @@ module.exports = [{
         return ovhClient.requestPromised("GET", `/hosting/web/${hosting}/attachedDomain`);
       })
       .then((attachedDomains) => {
-        return [new TextMessage("Sélectionne le site concerné"), createWebsiteList(hosting, attachedDomains, 0, 4)];
+        return { responses: [new TextMessage("Sélectionne le site concerné"), createWebsiteList(hosting, attachedDomains, 0, 4)], feedback: false };
       })
       .catch((err) => {
         res.logger.error(err);
@@ -49,6 +49,7 @@ module.exports = [{
         });
       })
       .then(({ hosting, attachedDomain, hostingEmails, ssl, statistics }) => hostingDiagnostics.checkWebsite(res, hosting, attachedDomain, hostingEmails, ssl, statistics))
+      .then((responses) => ({ responses, feedback: true }))
       .catch((err) => {
         res.logger.error(err);
         if (err.error === 404) {

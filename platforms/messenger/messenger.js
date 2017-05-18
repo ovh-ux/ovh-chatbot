@@ -253,6 +253,10 @@ function sendFileMessage(recipientId) {
  *
  */
 function sendTextMessage(recipientId, messageText) {
+  if (!messageText) {
+    return Bluebird.resolve({});
+  }
+
   var messageData = {
     recipient: {
       id: recipientId
@@ -555,7 +559,8 @@ function send(recipientId, message) {
   }
 
   if (message instanceof ButtonsListMessage) {
-    return sendListMessage(recipientId, buttonsListMessageAdapter(message));
+    return sendTextMessage(recipientId, message.text)
+      .then(() => sendListMessage(recipientId, buttonsListMessageAdapter(message)));
   }
 
   if (message instanceof ButtonsMessage) {

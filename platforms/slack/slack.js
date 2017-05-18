@@ -18,11 +18,11 @@ function getSlackApi(team_id) {
         return slack.apiAsync(POST_MESSAGE, { channel, text });
       };
 
-      slack.sendButtonMessage = (channel, messageData) => {
+      slack.sendButtonMessage = (channel, messageData, deleteOriginal = false) => {
         let params = {
           channel,
           replace_original: false,
-          delete_original: false,
+          delete_original: deleteOriginal,
           attachments: JSON.stringify(messageData)
         };
 
@@ -46,7 +46,7 @@ function getSlackApi(team_id) {
             promise = Bluebird.each(messageData.actionsStr, (msg) => slack.sendTextMessage(channel, msg));
           }
 
-          return Bluebird.all([promise, slack.sendButtonMessage(channel, messageData.attachments)]);
+          return Bluebird.all([promise, slack.sendButtonMessage(channel, messageData.attachments, messageData.delete_original)]);
         }
 
         return slack.apiAsync(POST_MESSAGE, message);
