@@ -6,18 +6,17 @@
 + MongoDB (URL connection string in environment variable MONGO, example: `export MONGO="mongodb://username:password@host1:27017/ovhchatbot"`)
 + Facebook developer account with Facebook developer app created (more explanations below)
 + Slack developer account with Slack developer app created (more explanations below)
-+ Wit.ai account
++ Api.ai account
 + Public ip with domain linked in HTTPS
 
 **For each environment variable, if you want to use docker and docker-compose you can put the value in the `Dockerfile` of this project.**
 
-### Create a wit.ai account
+### Create a api.ai account
 
-+ Create an account on [wit.ai website](https://wit.ai)
-+ Go in **Stories** section on this [this project](https://wit.ai/bnjjj/ovh-status) and click on **Export App**.
-+ It will download a `zip` file. Now you can create a new **wit.ai** app and import this `zip` file to create.
-+ Copy your **Server Access Token** found in the **Settings** section
-+ And save it into the env variable named `WIT_TOKEN`
++ Create an account on [api.ai website](https://api.ai) and create a new agent
++ Go in settings of your agent in tab **Export and Import**
++ Click on restore from zip and import the zip that are in the `archives` directory of this project.
++ Go in settings, copy/paste **Client access token** and save it into the env variable named `APIAI_TOKEN`
 
 ### Deployment
 
@@ -26,7 +25,7 @@
 + Save your domain name into env variable **APP_URL** (for example: `export APP_URL=https://myCustomDomain.com`)
 
 ### Run the API on your server or with docker-compose
-Requirements --> environment variable: **WIT_TOKEN**, **MONGO** and **APP_URL**
+Requirements --> environment variable: **APIAI_TOKEN**, **MONGO** and **APP_URL**
 
 **Without docker**
 ```shell
