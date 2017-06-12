@@ -154,12 +154,12 @@ Pour l'instant je ne peux te répondre que sur des informations concernant un dy
   };
 };
 
-function sendFeedback(res, senderId, intent, message, slack) {
+function sendFeedback(res, senderId, intent, rawMessage, slack) {
+  let message = rawMessage.length >= config.maxMessageLength ? config.maxMessageLengthString : rawMessage;
+
   if (intent === "unknown") {
     return;
   }
-
-  message = message.length >= 1000 ? "TOOLONG" : message;
 
   let buttons = [
     new Button("postback", `FEEDBACK_MISUNDERSTOOD_${camelCase(intent)}_${message}`, "Mauvaise compréhension"),

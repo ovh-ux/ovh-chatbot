@@ -23,5 +23,8 @@ module.exports = {
     host: "discover.logs.ovh.com",
     port: 12202,
     token: process.env.GRAYLOG_TOKEN
-  }
+  },
+  historyLength: 50,
+  maxMessageLength: 1000,
+  maxMessageLengthString: "TOOLONG"
 };

@@ -170,12 +170,12 @@ module.exports = () => {
     .catch(res.logger.error);
   }
 
-  function sendFeedback(res, senderId, intent, message) {
+  function sendFeedback(res, senderId, intent, rawMessage) {
+    let message = rawMessage.length >= config.maxMessageLength ? config.maxMessageLengthString : rawMessage;
+
     if (intent === "unknown") {
       return;
     }
-
-    message = message.length >= 1000 ? "TOOLONG" : message;
 
     let buttons = [
       new Button("postback", `FEEDBACK_MISUNDERSTOOD_${camelCase(intent)}_${message}`, "Mauvaise compréhension"),

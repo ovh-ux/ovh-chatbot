@@ -3,6 +3,7 @@
 const ovh = require("ovh");
 const config = require("../config/config-loader").load();
 const messenger = require("../platforms/messenger/messenger");
+const web = require("../platforms/web/web");
 const User = require("../models/users.model");
 
 module.exports = () => {
@@ -57,9 +58,10 @@ Voici des exemples de questions que tu peux me poser :
   • Comment je fais pour changer mes serveurs dns de ma zone exemple.ovh ?
   • Comment je peux faire pointer mon domaine exemple.ovh sur mon hébergement web ?
     `)
-    .then(() => messenger.sendTextMessage(senderId, "Rassure toi je vais apprendre à t'aider sur d'autres sujets dans un avenir proche :)"))
+    .then(() => messenger.sendTextMessage(senderId, "Rassure-toi je vais apprendre à t'aider sur d'autres sujets dans un avenir proche :)"))
     .catch(console.error);
     break;
-
+  case "web":
+    web.send(senderId,`Vous êtes bien connecté sous le nic ${meInfos.nichandle}`);
   }
 }

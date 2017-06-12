@@ -17,7 +17,7 @@ module.exports = function () {
       });
       let consumerInfos = {};
 
-      senderId = senderId.replace(/-(facebook_messenger|slack)/g, "");
+      senderId = senderId.replace(/-(facebook_messenger|slack|web)/g, "");
 
       return ovhClient.requestPromised("POST", "/auth/credential", {
         accessRules: [
@@ -61,4 +61,10 @@ function getPlatform(senderId) {
   if (senderId.indexOf("-facebook_messenger") !== -1) {
     return "facebook_messenger";
   }
+
+  if (senderId.indexOf("-web") !== -1) {
+    return "web";
+  }
+
+  return null;
 }
