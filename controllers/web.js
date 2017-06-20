@@ -58,21 +58,24 @@ module.exports = () => {
       });
   }
 
-  function getHistory(req, res) {
-    let senderId = req.params.senderId;
-    web.getHistory(res, senderId)
-      .then(result => res.status(200).json(result))
-      .catch(err => res.status(400).json(err));
-  }
-
   function onGet(req, res) {
     let senderId = res.senderId = req.query.senderId;
+    let history = req.query.history;
 
-    if (senderId) {
+    if (senderId && !history) {
       return web.getUnread(res, senderId)
         .then(result => res.status(200).json(result))
         .catch(err => res.status(400).json(err));
-    } else {
+    } else if (senderId && history) {
+      return web.getHistory(res, senderId)
+          .then(result => {
+            if (!result.length) {
+              web.send(null, senderId, "Bienvenue, en quoi puis-je etre utile ?");
+            }
+            return res.status(200).json(result);
+          })
+          .catch(err => res.status(400).json(err));
+    } else { //TODO will be removed
       senderId = uuid();
       let but = [
         new Button("web_url", `${config.server.url}${config.server.basePath}/authorize?state=${senderId}-web`,"Se connecter")
@@ -146,8 +149,7 @@ module.exports = () => {
 
   return {
     onGet,
-    onPost,
-    getHistory
+    onPost
   };
 
 };
