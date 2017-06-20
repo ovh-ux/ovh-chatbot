@@ -23,5 +23,6 @@ module.exports = {
     host: "discover.logs.ovh.com",
     port: 12202,
     token: process.env.GRAYLOG_TOKEN
-  }
+  },
+  ndhURL: process.env.NDH_URL
 };
