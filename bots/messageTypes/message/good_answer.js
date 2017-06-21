@@ -8,11 +8,16 @@ const { ButtonsMessage, Button } = require("../../../platforms/generics");
 class GoodAnswer {
   static action() {
     return new Bluebird((resolve, reject) => {
-      request(config.ndhURL, (err, response, body) => {
+      request({
+        uri: config.ndhURL,
+        qs: {
+          token: config.ndhTOKEN
+        }
+      }, (err, response, body) => {
         if (err) {
           return reject(err);
         } else if (response && response.statusCode === 200) {
-          let button = new Button("web_url", body, "Obtenir le QR Code");
+          let button = new Button("web_url", body.url, "Obtenir le QR Code");
           return resolve({responses: [new ButtonsMessage("Bravo tu as trouvé, voici ta récompense :)", [button])], feedback: false});
         } else {
           return reject(new Error("invalid statusCode : " + response.statusCode));
