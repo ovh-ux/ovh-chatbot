@@ -7,7 +7,7 @@ const questions = [
   "Pourrais-tu nous dire combien fait la multiplication de ces 3 chiffres. Le nombre de datacenters chez OVH, le nombre de pays dans lesquels nous sommes implantés et l'âge de la société OVH ?",
   "Quel est le code de la couleur du logo d'OVH ?",
   "Où se situe le siège social d'OVH ?",
-  "Quel est le produit du nombre de langues disponibles sur le site ovh.com ?",
+  "Combien de langues sont disponibles sur le site ovh.com ?",
   "Que veut dire OVH ?",
   "Quelle est ma version ? Petit indice: je suis open source",
   "Combien j'ai de contributeurs (sur github)?",
