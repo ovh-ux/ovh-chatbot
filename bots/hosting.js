@@ -4,6 +4,7 @@ const postbackActions = require("./messageTypes/postback");
 const messageActions = require("./messageTypes/message");
 const Bluebird = require("bluebird");
 const Users = require("../models/users.model");
+const { TextMessage } = require("../platforms/generics");
 
 module.exports = () => {
   return {
@@ -28,6 +29,10 @@ module.exports = () => {
         return promise
           .catch(isDisconnected);
       case "message":
+        if (!messageActions[intent] || !messageActions[intent].action) {
+          return Bluebird.resolve({responses: [new TextMessage("Je ne peux pas encore répondre à cette question")], feedback: false});
+        }
+
         return messageActions[intent].action(senderId, message, entities, res)
           .catch(isDisconnected);
       default:

@@ -24,7 +24,6 @@ module.exports = {
     port: 12202,
     token: process.env.GRAYLOG_TOKEN
   },
-  historyLength: 50,
-  maxMessageLength: 1000,
-  maxMessageLengthString: "TOOLONG"
+  ndhURL: process.env.NDH_URL,
+  ndhTOKEN: process.env.NDH_TOKEN
 };
