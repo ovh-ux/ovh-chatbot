@@ -4,7 +4,7 @@ const postbackActions = require("./messageTypes/postback");
 const messageActions = require("./messageTypes/message");
 const Bluebird = require("bluebird");
 const Users = require("../models/users.model");
-const { TextMessage } = require("../../platforms/generics");
+const { TextMessage } = require("../platforms/generics");
 
 module.exports = () => {
   return {
