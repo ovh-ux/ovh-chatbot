@@ -28,6 +28,10 @@ module.exports = () => {
         return promise
           .catch(isDisconnected);
       case "message":
+        if (!messageActions[intent] || !messageActions[intent].action) {
+          return Bluebird.resolve({repsonses: "Je ne peux pas encore répondre à cette question", feedback: false});
+        }
+
         return messageActions[intent].action(senderId, message, entities, res)
           .catch(isDisconnected);
       default:
