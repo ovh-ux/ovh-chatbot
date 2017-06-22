@@ -2,11 +2,11 @@
 
 const { BUTTON_TYPE } = require("../generics");
 
-function textMessageAdapter(message) {
+function textMessageAdapter (message) {
   return message.text;
 }
 
-function buttonAdapter(button) {
+function buttonAdapter (button) {
   switch (button.type) {
   case BUTTON_TYPE.URL:
     return `<${button.value}|${button.text}>`;
@@ -23,18 +23,16 @@ function buttonAdapter(button) {
   }
 }
 
-function buttonsMessageAdapter(message) {
-  let actionsStr = [];
-  let buttons = message.attachments.buttons
-    .map(buttonAdapter)
-    .filter((button) => {
-      if (typeof button === "string") {
-        actionsStr.push(button);
-        return false;
-      }
+function buttonsMessageAdapter (message) {
+  const actionsStr = [];
+  const buttons = message.attachments.buttons.map(buttonAdapter).filter((button) => {
+    if (typeof button === "string") {
+      actionsStr.push(button);
+      return false;
+    }
 
-      return true;
-    });
+    return true;
+  });
 
   return {
     delete_original: message.delete_original,

@@ -6,25 +6,28 @@ const config = require("../../../config/config-loader.js").load();
 const { ButtonsMessage, Button } = require("../../../platforms/generics");
 
 class GoodAnswer {
-  static action() {
+  static action () {
     return new Bluebird((resolve, reject) => {
-      request({
-        uri: config.ndhURL,
-        qs: {
-          token: config.ndhTOKEN
+      request(
+        {
+          uri: config.ndhURL,
+          qs: {
+            token: config.ndhTOKEN
+          }
+        },
+        (err, response, body) => {
+          if (err) {
+            return reject(err);
+          } else if (response && response.statusCode === 200) {
+            const button = new Button("web_url", JSON.parse(body).url, "Obtenir le QR Code");
+            return resolve({ responses: [new ButtonsMessage("Bravo tu as trouvé, voici ta récompense :)", [button])], feedback: false });
+          }
+          return reject(new Error(`invalid statusCode : ${response.statusCode}`));
+
         }
-      }, (err, response, body) => {
-        if (err) {
-          return reject(err);
-        } else if (response && response.statusCode === 200) {
-          let button = new Button("web_url", JSON.parse(body).url, "Obtenir le QR Code");
-          return resolve({responses: [new ButtonsMessage("Bravo tu as trouvé, voici ta récompense :)", [button])], feedback: false});
-        } else {
-          return reject(new Error("invalid statusCode : " + response.statusCode));
-        }
-      });
+      );
     });
   }
 }
 
-module.exports = {good_answer: GoodAnswer};
+module.exports = { good_answer: GoodAnswer };

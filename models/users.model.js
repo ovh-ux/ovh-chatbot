@@ -16,51 +16,47 @@ const UserSchema = new mongoose.Schema({
   consumerKey: {
     type: String,
     required: true,
-    default: ""
+    "default": ""
   },
   consumerKeyTmp: {
     type: String,
     required: true,
-    default: ""
+    "default": ""
   },
   connected: {
     type: Boolean,
-    default: false
+    "default": false
   },
   createdAt: {
     type: Date,
-    default: Date.now
+    "default": Date.now
   },
   platform: {
     type: String
   },
   messageNumber: {
     type: Number,
-    default: 0
+    "default": 0
   }
 });
 
 /**
  * Methods
  */
-UserSchema.method({
-
-});
+UserSchema.method({});
 
 /**
  * Statics
  */
 UserSchema.statics = {
-  get(senderId) {
-    return this.findOne({ senderId })
-      .exec()
-      .then((user) => {
-        if (user) {
-          return user;
-        }
-        const err = { message: "User not found", statusCode: 404 };
-        return Bluebird.reject(err);
-      });
+  get (senderId) {
+    return this.findOne({ senderId }).exec().then((user) => {
+      if (user) {
+        return user;
+      }
+      const err = { message: "User not found", statusCode: 404 };
+      return Bluebird.reject(err);
+    });
   }
 };
 

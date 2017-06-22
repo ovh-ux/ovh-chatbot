@@ -26,15 +26,11 @@ const MessageSchema = new mongoose.Schema({
 /**
  * Methods
  */
-MessageSchema.method({
-
-});
+MessageSchema.method({});
 
 /**
  * Statics
  */
-MessageSchema.statics = {
-
-};
+MessageSchema.statics = {};
 
 module.exports = mongoose.model("Message", MessageSchema);
