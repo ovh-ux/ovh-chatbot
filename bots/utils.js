@@ -45,8 +45,8 @@ class OvhWebClient {
 }
 
 module.exports = {
-  getOvhClient (senderId) {
-    return User.findOne({ senderId }).exec().then((userInfos) => {
+  getOvhClient: (senderId) =>
+    User.findOne({ senderId }).exec().then((userInfos) => {
       if (!userInfos) {
         // check if web user and if so return the custom "ovhClientModule";
         return Web.findOne({ nichandle: senderId }).exec().then((webClient) => {
@@ -57,15 +57,12 @@ module.exports = {
         });
       }
 
-      const ovhClient = ovh({
+      return ovh({
         appKey: config.ovh.appKey,
         appSecret: config.ovh.appSecret,
         consumerKey: userInfos.consumerKey
       });
-
-      return ovhClient;
-    });
-  },
+    }),
   dig (hostname) {
     if (hostname.match(/https?:\/\//)) {
       hostname = URL.parse(hostname).hostname;

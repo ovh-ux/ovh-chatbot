@@ -6,8 +6,8 @@ const apiai = require("../utils/apiai");
 const Bluebird = require("bluebird");
 
 module.exports = () => {
-  function postbackReceived(res, nichandle, payload) {
-    return bot
+  const postbackReceived = (res, nichandle, payload) =>
+    bot
       .ask("postback", nichandle, payload, null, null, res)
       .then(answer => {
         answer.intent = payload;
@@ -15,10 +15,9 @@ module.exports = () => {
         return answer;
       })
       .catch(err => Bluebird.resolve(err));
-  }
 
-  function messageReceived(res, nichandle, message) {
-    return apiai
+  const messageReceived = (res, nichandle, message) =>
+    apiai
       .textRequestAsync(message, { sessionId: nichandle })
       .then(resp => {
         const nichandle = resp.sessionId;
@@ -65,7 +64,16 @@ module.exports = () => {
             .catch(err => Bluebird.resolve(err));
         }
       });
-  }
+
+  const sendQuickResponses = (res, nichandle, responses) =>
+    Bluebird.mapSeries(responses, response => {
+      switch (response.type) {
+      case 0:
+      default:
+        const textResponse = response.speech.replace(/<(.*)\|+(.*)>/, "$1");
+        return Bluebird.resolve(textResponse);
+      }
+    });
 
   function onGet(req, res) {
     const nichandle = req.user.nichandle;
@@ -129,17 +137,6 @@ module.exports = () => {
         res.logger.error(err);
         return res.status(503).json(err);
       });
-  }
-
-  function sendQuickResponses(res, nichandle, responses) {
-    return Bluebird.mapSeries(responses, response => {
-      switch (response.type) {
-      case 0:
-      default:
-        const textResponse = response.speech.replace(/<(.*)\|+(.*)>/, "$1");
-        return Bluebird.resolve(textResponse);
-      }
-    });
   }
 
   return {

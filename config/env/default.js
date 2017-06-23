@@ -7,7 +7,7 @@ module.exports = {
     url: process.env.APP_URL || "https://bot.uxlabs.ovh",
     basePath: "/api/v1.0",
     logType: "dev",
-    corsOrigin: process.env.CORS || "*"
+    corsOrigin: process.env.CORS_ORIGIN || "*"
   },
   mongo: {
     url: process.env.MONGO || "mongodb://mongo:27017",

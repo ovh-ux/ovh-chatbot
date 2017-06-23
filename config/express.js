@@ -2,7 +2,6 @@
 
 const assert = require("assert");
 const express = require("express");
-// const cors = require("cors");
 const bodyParser = require("body-parser");
 const compression = require("compression");
 const http = require("http");
@@ -30,9 +29,8 @@ module.exports = function (config) {
   app.all("/*", (req, res, next) => {
     // CORS headers
     // restrict it to the required domain
-    // res.header("Access-Control-Allow-Origin", "http://localhost:9000");
     res.header("Access-Control-Allow-Credentials", true);
-    res.header("Access-Control-Allow-Origin", config.server.corsOrigin);
+    res.header("Access-Control-Allow-Origin", config.server.corsOrigin );
     res.header("Access-Control-Allow-Methods", "GET,PUT,POST,DELETE,OPTIONS");
 
     // Set custom headers for CORS
@@ -46,8 +44,6 @@ module.exports = function (config) {
 
   app.use(requestLogger(config.server.logType));
   app.use(utilsMiddleware());
-
-  // app.use(cors());
   app.use(compression());
   app.use(bodyParser.urlencoded({ limit: "50mb", extended: false }));
   app.use(bodyParser.json({ limit: "50mb" }));
