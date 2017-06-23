@@ -8,28 +8,23 @@ const dns = require("dns");
 const URL = require("url");
 
 module.exports = {
-  getOvhClient(senderId) {
-    return User
-      .findOne({ senderId })
-      .exec()
-      .then((userInfos) => {
-        if (!userInfos) {
-          return Bluebird.reject({statusCode: 403, message: "Tu dois d'abord te connecter. Pour ce faire tu peux me le demander"});
-        }
+  getOvhClient (senderId) {
+    return User.findOne({ senderId }).exec().then((userInfos) => {
+      if (!userInfos) {
+        return Bluebird.reject({ statusCode: 403, message: "Tu dois d'abord te connecter. Pour ce faire tu peux me le demander" });
+      }
 
-        let ovhClient = ovh({
-          appKey: config.ovh.appKey,
-          appSecret: config.ovh.appSecret,
-          consumerKey: userInfos.consumerKey
-        });
-
-        return ovhClient;
+      const ovhClient = ovh({
+        appKey: config.ovh.appKey,
+        appSecret: config.ovh.appSecret,
+        consumerKey: userInfos.consumerKey
       });
+
+      return ovhClient;
+    });
   },
-  dig(hostname) {
-    if (hostname.match(/https?:\/\//)) {
-      hostname = URL.parse(hostname).hostname;
-    }
+  dig (hostnameRaw) {
+    const hostname = hostnameRaw.match(/https?:\/\//) ? URL.parse(hostnameRaw).hostname : hostnameRaw;
 
     return new Bluebird((resolve, reject) => {
       dns.lookup(hostname, (err, address) => {

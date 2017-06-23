@@ -18,9 +18,9 @@ const questions = [
 const base = "Salut à toi 👋, tu as soif ? 🍺 Il faut la mériter si tu en veux. ";
 
 class NdhQuestion {
-  static action() {
-    return Bluebird.resolve({ responses: [new TextMessage( base + questions[ Math.floor(Math.random() * questions.length) ])], feedback: false });
+  static action () {
+    return Bluebird.resolve({ responses: [new TextMessage(base + questions[Math.floor(Math.random() * questions.length)])], feedback: false });
   }
 }
 
-module.exports = {ndh_question: NdhQuestion};
+module.exports = { ndh_question: NdhQuestion };

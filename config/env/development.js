@@ -15,5 +15,5 @@ module.exports = {
   apiai: {
     token: process.env.APIAI_TOKEN
   },
-  redirectUrl: process.env.APP_URL + "/api/v1.0/ovh"
+  redirectUrl: `${process.env.APP_URL}/api/v1.0/ovh`
 };

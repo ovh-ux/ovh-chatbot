@@ -4,6 +4,7 @@ let messengerCtrl = require("../controllers/messenger");
 
 module.exports = function (app) {
   messengerCtrl = messengerCtrl();
+
   /*
    * Use your own validation token. Check that the token used in the Webhook
    * setup is the same token used here.

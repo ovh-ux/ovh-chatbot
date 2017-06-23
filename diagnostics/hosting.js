@@ -7,16 +7,16 @@ const Bluebird = require("bluebird").config({
 });
 const _ = require("lodash");
 const request = require("request-promise");
+
 // const mathjs = require("mathjs");
 const guides = require("../constants/guides").FR;
 
 module.exports = {
-
-  checkWebsite(res, hosting, domain, hostingEmails, ssl/*, statistics*/) {
+  checkWebsite (res, hosting, domain, hostingEmails, ssl /* , statistics*/) {
     res.logger.info(domain);
-    let protocol = domain.ssl ? "https://" : "http://";
+    const protocol = domain.ssl ? "https://" : "http://";
     let responses = this.checkEmailsState(hosting, hostingEmails);
-    let sslState = this.checkSSL(hosting, domain, ssl);
+    const sslState = this.checkSSL(hosting, domain, ssl);
 
     responses = responses.concat(sslState);
 
@@ -24,11 +24,12 @@ module.exports = {
     //   this.monitore(hosting, statistics);
     // }
 
-    return utils.dig(domain.domain)
+    return utils
+      .dig(domain.domain)
       .then((ip) => {
         res.logger.info(hosting);
         res.logger.info(ip);
-        let isDNSInvalid = this.checkDNS(ip, hosting, domain);
+        const isDNSInvalid = this.checkDNS(ip, hosting, domain);
 
         res.logger.info(isDNSInvalid);
         if (isDNSInvalid) {
@@ -47,10 +48,18 @@ module.exports = {
           }
           break;
         case "bloqued":
-          responses = [...responses, new TextMessage("Il semblerait qu'il y ai un problème sur ton serveur mutualisé, il est bloqué pour l'instant"), new TextMessage(`Je te conseille de consulter ce guide pour essayer de te débloquer ${guides.websiteHack}`)];
+          responses = [
+            ...responses,
+            new TextMessage("Il semblerait qu'il y ai un problème sur ton serveur mutualisé, il est bloqué pour l'instant"),
+            new TextMessage(`Je te conseille de consulter ce guide pour essayer de te débloquer ${guides.websiteHack}`)
+          ];
           break;
         case "maintenance":
-          responses = [...responses, new TextMessage("Il semblerait qu'il y ai un problème sur ton serveur mutualisé, il est actuellement en maintenance"), new TextMessage(`Je te conseille de consulter ce guide pour essayer de te débloquer ${guides.websiteHack}`)];
+          responses = [
+            ...responses,
+            new TextMessage("Il semblerait qu'il y ai un problème sur ton serveur mutualisé, il est actuellement en maintenance"),
+            new TextMessage(`Je te conseille de consulter ce guide pour essayer de te débloquer ${guides.websiteHack}`)
+          ];
           break;
         default:
           responses.push(new TextMessage("Ton serveur est dans un état inconnu, veuillez contacter le support pour plus d'informations"));
@@ -71,21 +80,28 @@ module.exports = {
           return responses.concat(this.error500(err, hosting));
         case 404:
           managerButton = new Button("web_url", `https://www.ovh.com/manager/web/#/configuration/hosting/${hosting.serviceName}?tab=DOMAINS`, "Vérifier la configuration");
-          return [...responses, new ButtonsMessage("Il semblerait que la page à laquelle tu souhaites accéder n'existe pas, le fichier correspondant à cette page semble introuvable. Vérifie aussi si ton site pointe sur le bon dossier de destination dans le manager onglet 'multisites'.", [managerButton])];
+          return [
+            ...responses,
+            new ButtonsMessage(
+                "Il semblerait que la page à laquelle tu souhaites accéder n'existe pas, le fichier correspondant à cette page semble introuvable." +
+                  " Vérifie aussi si ton site pointe sur le bon dossier de destination dans le manager onglet 'multisites'.",
+                [managerButton]
+              )
+          ];
         case 401:
           return [...responses, new TextMessage("Il semblerait que ton site essaie d'accéder à un fichier ou à un espace auquel il n'a pas les droits")];
         case 403:
           managerButton = new Button("web_url", `https://www.ovh.com/manager/web/#/configuration/hosting/${hosting.serviceName}?tab=DOMAINS`, "Vérifier la configuration");
           return [...responses, new ButtonsMessage("Il semblerait que ton site possède des problèmes de droits. Vérifie si ton site pointe sur le bon dossier de destination dans le manager onglet 'multisites'.", [managerButton])];
         case 429:
-          return [...responses, new TextMessage("Ce guide pourrait peut être t'aider à résoudre ton problème : " + guides.blankPage)];
+          return [...responses, new TextMessage(`Ce guide pourrait peut être t'aider à résoudre ton problème : ${guides.blankPage}`)];
         default:
           if (err.code) {
             return responses.concat(this.explainError(err, hosting));
           }
 
           if (!sslState.length) {
-            return [...responses, new TextMessage("Problème non diagnostiquable, ce guide pourrait néanmoins t'aider : " + guides.errorApache)];
+            return [...responses, new TextMessage(`Problème non diagnostiquable, ce guide pourrait néanmoins t'aider : ${guides.errorApache}`)];
           }
 
           return responses;
@@ -115,26 +131,32 @@ module.exports = {
   //   console.log("median dynamic", mathjs.median(dynamicStats));
   // },
 
-  checkSSL(hosting, domain, ssl) {
-    let responses = [];
-    let managerButton = new Button("web_url", `https://www.ovh.com/manager/web/#/configuration/hosting/${hosting.serviceName}?tab=DOMAINS`, "Corriger le problème");
+  checkSSL (hosting, domain, ssl) {
+    const responses = [];
+    const managerButton = new Button("web_url", `https://www.ovh.com/manager/web/#/configuration/hosting/${hosting.serviceName}?tab=DOMAINS`, "Corriger le problème");
 
     if ((domain.ssl && !ssl.infos) || (domain.ssl && ssl.infos && ssl.domains.indexOf(domain.domain) === -1)) {
       responses.push(new ButtonsMessage("Tu as activé le SSL sur ton site mais ton certificat SSL ne contient pas ton domaine. Tu dois regénérer ton certificat via le manager", [managerButton]));
     } else if (!domain.ssl && ssl.infos && ssl.infos.provider === "LETSENCRYPT" && ssl.domains.indexOf(domain.domain) !== -1) {
-      responses.push(new ButtonsMessage("Attention, ton site est compris dans le certificat SSL actuel et fonctionne actuellement en https. Cependant ta configuration indique que lors de la regénération automatique du certificat SSL ton site ne sera plus accessible en https. Si c'est le comportement voulu ou que tu n'utilises pas https sur ce site ne prend pas en compte cet avertissement.", [managerButton]));
+      responses.push(
+        new ButtonsMessage(
+          "Attention, ton site est compris dans le certificat SSL actuel et fonctionne actuellement en https. Cependant ta configuration indique que lors de la regénération automatique du certificat SSL ton site ne sera plus accessible en https." +
+            " Si c'est le comportement voulu ou que tu n'utilises pas https sur ce site ne prend pas en compte cet avertissement.",
+          [managerButton]
+        )
+      );
     }
 
     if (responses.length) {
-      responses.push(new TextMessage("Ce guide va pouvoir te rendre service pour configurer https sur ton site : " + guides.leError));
+      responses.push(new TextMessage(`Ce guide va pouvoir te rendre service pour configurer https sur ton site : ${guides.leError}`));
     }
 
     return responses;
   },
 
-  checkEmailsState(hosting, hostingEmails) {
-    let responses = [];
-    let managerButton = new Button("web_url", `https://www.ovh.com/manager/web/#/configuration/hosting/${hosting.serviceName}?tab=AUTOMATED_EMAILS`, "Corriger le problème");
+  checkEmailsState (hosting, hostingEmails) {
+    const responses = [];
+    const managerButton = new Button("web_url", `https://www.ovh.com/manager/web/#/configuration/hosting/${hosting.serviceName}?tab=AUTOMATED_EMAILS`, "Corriger le problème");
 
     switch (hostingEmails.state) {
     case "bounce":
@@ -157,16 +179,19 @@ module.exports = {
     }
 
     if (responses.length) {
-      responses.push(new TextMessage("Ce guide va pouvoir t'aider à débloquer tes e-mails : " + guides.mailBlock));
+      responses.push(new TextMessage(`Ce guide va pouvoir t'aider à débloquer tes e-mails : ${guides.mailBlock}`));
     }
 
     return responses;
   },
 
-  explainError(error, hosting) {
-    switch(error.code) {
+  explainError (error, hosting) {
+    switch (error.code) {
     case "ECONNREFUSED":
-      return [new TextMessage(`Il semblerait que ce soit un problème de pointage sur ton site, je te conseille de vérifier ta configuration DNS pour que ton nom de domaine pointe sur l'ip ${hosting.hostingIp}`), new TextMessage("Voici un guide qui pourra t'aider " + guides.pointingError)];
+      return [
+        new TextMessage(`Il semblerait que ce soit un problème de pointage sur ton site, je te conseille de vérifier ta configuration DNS pour que ton nom de domaine pointe sur l'ip ${hosting.hostingIp}`),
+        new TextMessage(`Voici un guide qui pourra t'aider ${guides.pointingError}`)
+      ];
     case "ENOTFOUND":
       return [new TextMessage("Il semblerait que ta zone dns soit mal configurée")];
     case "EAI_AGAIN":
@@ -176,38 +201,49 @@ module.exports = {
     }
   },
 
-  checkDNS(ip, hostingInfos, domain) {
+  checkDNS (ip, hostingInfos, domain) {
     let goodIp;
 
-    if (domain.cdn === "active") { //ONLY CDN
+    if (domain.cdn === "active") {
+      // ONLY CDN
       if (ip !== hostingInfos.hostingIp) {
         goodIp = hostingInfos.hostingIp;
       }
     } else if (domain.ssl) {
-      let countryIp = _.find(hostingInfos.countriesIp, { country: domain.ipLocation }) || {};
+      const countryIp = _.find(hostingInfos.countriesIp, { country: domain.ipLocation }) || {};
 
       if (ip !== countryIp.ip) {
         goodIp = countryIp.ip;
       }
-    } else if (ip !== hostingInfos.clusterIp){
+    } else if (ip !== hostingInfos.clusterIp) {
       goodIp = hostingInfos.clusterIp;
     }
 
     if (goodIp) {
-      return [new TextMessage(`Ton site ne pointe pas sur la bonne ip (actuellement ${ip}), ton domaine "${domain.domain}" devrait pointer sur l'ip ${goodIp}`), new TextMessage("Ce guide pourrait t'aider si tu ne sais pas comment faire ces modifications : " + guides.dnsConfig)];
+      return [
+        new TextMessage(`Ton site ne pointe pas sur la bonne ip (actuellement ${ip}), ton domaine "${domain.domain}" devrait pointer sur l'ip ${goodIp}`),
+        new TextMessage(`Ce guide pourrait t'aider si tu ne sais pas comment faire ces modifications : ${guides.dnsConfig}`)
+      ];
     }
+
+    return [];
   },
 
-  error500(err, hosting) {
-    let rxDatababse = /(database.*connection)|(base.*donn[ée])/gi;
+  error500 (err, hosting) {
+    const rxDatababse = /(database.*connection)|(base.*donn[ée])/gi;
 
     if ((err.body && err.body.match(rxDatababse)) || (err.message && err.message.match(rxDatababse))) {
-      let managerButton = new Button("web_url", `https://www.ovh.com/manager/web/#/configuration/hosting/${hosting.serviceName}?tab=DATABASES`, "Corriger le problème");
+      const managerButton = new Button("web_url", `https://www.ovh.com/manager/web/#/configuration/hosting/${hosting.serviceName}?tab=DATABASES`, "Corriger le problème");
 
-      return [new ButtonsMessage("Ton site n'arrive pas à se connecter à la base de données, je te conseille de vérifier le login et mot de passe de la base de données.", [managerButton]), new TextMessage("Voici un guide pour essayer de résoudre ce soucis : " + guides.dbError)];
-    } else {
-      return [new TextMessage("Il semblerait que tu aies fait une erreur de programmation sur ton site web. Dans ce genre de situation le support OVH n'intervient pas."), new TextMessage(`Voici un guide qui pourrait éventuellement t'aider : ${guides.error500}`)];
+      return [
+        new ButtonsMessage("Ton site n'arrive pas à se connecter à la base de données, je te conseille de vérifier le login et mot de passe de la base de données.", [managerButton]),
+        new TextMessage(`Voici un guide pour essayer de résoudre ce soucis : ${guides.dbError}`)
+      ];
     }
+    return [
+      new TextMessage("Il semblerait que tu aies fait une erreur de programmation sur ton site web. Dans ce genre de situation le support OVH n'intervient pas."),
+      new TextMessage(`Voici un guide qui pourrait éventuellement t'aider : ${guides.error500}`)
+    ];
   }
 };
 

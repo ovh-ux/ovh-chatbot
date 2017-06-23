@@ -9,9 +9,8 @@ const responsesCst = require("../constants/responses").FR;
 const { ButtonsListMessage, Button } = require("../platforms/generics");
 const { camelCase } = require("lodash");
 
-function getWebhook(req, res) {
-  if (req.query["hub.mode"] === "subscribe" &&
-      req.query["hub.verify_token"] === config.facebook.validationToken) {
+function getWebhook (req, res) {
+  if (req.query["hub.mode"] === "subscribe" && req.query["hub.verify_token"] === config.facebook.validationToken) {
     console.log("Validating webhook");
     res.status(200).send(req.query["hub.challenge"]);
   } else {
@@ -21,18 +20,19 @@ function getWebhook(req, res) {
 }
 
 module.exports = () => {
-  function postWebhook(req, res) {
-    let data = req.body;
+  function postWebhook (req, res) {
+    const data = req.body;
+
     // Make sure this is a page subscription
     if (data.object === "page") {
       // Iterate over each entry
       // There may be multiple if batched
-      data.entry.forEach(function(pageEntry) {
+      data.entry.forEach((pageEntry) => {
         // var pageID = pageEntry.id;
         // let timeOfEvent = pageEntry.time;
 
         // Iterate over each messaging event
-        pageEntry.messaging.forEach(function(messagingEvent) {
+        pageEntry.messaging.forEach((messagingEvent) => {
           if (messagingEvent.optin) {
             messenger.receivedAuthentication(messagingEvent);
           } else if (messagingEvent.message) {
@@ -75,26 +75,24 @@ module.exports = () => {
    * then we"ll simply confirm that we"ve received the attachment.
    *
    */
-  function receivedMessage(res, event) {
-    let senderID = event.sender.id;
-    let recipientID = event.recipient.id;
-    let timeOfMessage = event.timestamp;
-    let message = event.message;
-    let isEcho = message.is_echo;
-    let messageId = message.mid;
-    let appId = message.app_id;
-    let metadata = message.metadata;
+  function receivedMessage (res, event) {
+    const senderID = event.sender.id;
+    const recipientID = event.recipient.id;
+    const timeOfMessage = event.timestamp;
+    const message = event.message;
+    const isEcho = message.is_echo;
+    const messageId = message.mid;
+    const appId = message.app_id;
+    const metadata = message.metadata;
 
-    console.log("Received message for user %d and page %d at %d with message:",
-      senderID, recipientID, timeOfMessage);
+    console.log("Received message for user %d and page %d at %d with message:", senderID, recipientID, timeOfMessage);
 
     // You may get a text or attachment but not both
-    let messageText = message.text;
+    const messageText = message.text;
 
     if (isEcho) {
       // Just logging message echoes to console
-      console.log("Received echo for message %s and app %d with metadata %s",
-        messageId, appId, metadata);
+      console.log("Received echo for message %s and app %d with metadata %s", messageId, appId, metadata);
       return;
     }
 
@@ -103,12 +101,13 @@ module.exports = () => {
     }
   }
 
-  function receivedPostback(res, event) {
+  function receivedPostback (res, event) {
     let needFeedback = false;
-    let senderId = event.sender.id;
-    let payload = event.postback.payload;
+    const senderId = event.sender.id;
+    const payload = event.postback.payload;
 
-    bot.ask("postback", senderId, payload, null, null, res)
+    bot
+      .ask("postback", senderId, payload, null, null, res)
       .then((answer) => {
         needFeedback = answer.feedback || needFeedback;
 
@@ -118,6 +117,7 @@ module.exports = () => {
         if (needFeedback) {
           return sendFeedback(res, senderId, payload, "message");
         }
+        return null;
       }) // Ask if it was useful
       .catch((err) => {
         res.logger.error(err);
@@ -125,59 +125,61 @@ module.exports = () => {
       });
   }
 
-  function sendCustomMessage(res, senderId, message) {
+  function sendCustomMessage (res, senderId, message) {
     let needFeedback = false;
 
-    apiai.textRequestAsync(message, {
-      sessionId: senderId
-    })
-    .then((resp) => {
-      if (resp.status && resp.status.code === 200 && resp.result) {
-        if (resp.result.action === "connection" || resp.result.action === "welcome") {
-          messenger.sendTextMessage(senderId, responsesCst.welcome);
-          return messenger.sendAccountLinking(senderId, `${config.server.url}${config.server.basePath}/authorize?state=${senderId}-facebook_messenger`);
-        }
-
-        if (resp.result.fulfillment && resp.result.fulfillment.speech && Array.isArray(resp.result.fulfillment.messages) && resp.result.fulfillment.messages.length) {
-          let smalltalk = resp.result.action && resp.result.action.indexOf("smalltalk") !== -1;
-          let quickResponses = resp.result.fulfillment.messages;
-
-          if (smalltalk && Math.floor((Math.random() * 2))) { //random to change response from original smalltalk to our custom sentence
-            quickResponses = [{ speech: resp.result.fulfillment.speech, type: 0 }];
+    apiai
+      .textRequestAsync(message, {
+        sessionId: senderId
+      })
+      .then((resp) => {
+        if (resp.status && resp.status.code === 200 && resp.result) {
+          if (resp.result.action === "connection" || resp.result.action === "welcome") {
+            messenger.sendTextMessage(senderId, responsesCst.welcome);
+            return messenger.sendAccountLinking(senderId, `${config.server.url}${config.server.basePath}/authorize?state=${senderId}-facebook_messenger`);
           }
 
-          return sendQuickResponses(res, senderId, quickResponses)
-            .then(() => sendFeedback(res, senderId, resp.result.action, message)); // Ask if it was useful
-        }
+          if (resp.result.fulfillment && resp.result.fulfillment.speech && Array.isArray(resp.result.fulfillment.messages) && resp.result.fulfillment.messages.length) {
+            const smalltalk = resp.result.action && resp.result.action.indexOf("smalltalk") !== -1;
+            let quickResponses = resp.result.fulfillment.messages;
 
-        return bot.ask("message", senderId, message, resp.result.action, resp.result.parameters, res)
-          .then((answer) => {
-            needFeedback = answer.feedback || needFeedback;
-
-            return sendResponses(res, senderId, answer.responses);
-          })
-          .then(() => {
-            if (needFeedback) {
-              sendFeedback(res, senderId, resp.result.action, message);
+            if (smalltalk && Math.floor(Math.random() * 2)) {
+              // random to change response from original smalltalk to our custom sentence
+              quickResponses = [{ speech: resp.result.fulfillment.speech, type: 0 }];
             }
-          }) // Ask if it was useful
-          .catch((err) => {
-            res.logger.error(err);
-            return messenger.sendTextMessage(senderId, `Oups ! ${err.message}`);
-          });
-      }
-    })
-    .catch(res.logger.error);
+
+            return sendQuickResponses(res, senderId, quickResponses).then(() => sendFeedback(res, senderId, resp.result.action, message)); // Ask if it was useful
+          }
+
+          return bot
+            .ask("message", senderId, message, resp.result.action, resp.result.parameters, res)
+            .then((answer) => {
+              needFeedback = answer.feedback || needFeedback;
+
+              return sendResponses(res, senderId, answer.responses);
+            })
+            .then(() => {
+              if (needFeedback) {
+                sendFeedback(res, senderId, resp.result.action, message);
+              }
+            }) // Ask if it was useful
+            .catch((err) => {
+              res.logger.error(err);
+              return messenger.sendTextMessage(senderId, `Oups ! ${err.message}`);
+            });
+        }
+        return null;
+      })
+      .catch(res.logger.error);
   }
 
-  function sendFeedback(res, senderId, intent, message) {
+  function sendFeedback (res, senderId, intent, messageRaw) {
+    const message = messageRaw.length >= 1000 ? "TOOLONG" : messageRaw;
     if (intent === "unknown") {
-      return;
+      return null;
     }
 
-    message = message.length >= 1000 ? "TOOLONG" : message;
-
-    let buttons = [
+    const buttons = [
       new Button("postback", `FEEDBACK_MISUNDERSTOOD_${camelCase(intent)}_${message}`, "Mauvaise compréhension"),
       new Button("postback", `FEEDBACK_BAD_${camelCase(intent)}_${message}`, "Non"),
       new Button("postback", `FEEDBACK_GOOD_${camelCase(intent)}_${message}`, "Oui")
@@ -186,22 +188,22 @@ module.exports = () => {
     return sendResponse(res, senderId, new ButtonsListMessage("Est-ce que cette réponse vous a aidé ?", buttons));
   }
 
-  function sendQuickResponses(res, senderId, responses) {
+  function sendQuickResponses (res, senderId, responses) {
     return Bluebird.mapSeries(responses, (response) => {
       switch (response.type) {
-      case 0:
-      default:
-        let textResponse = response.speech.replace(/<(.*)\|+(.*)>/, "$1");
+      default: {
+        const textResponse = response.speech.replace(/<(.*)\|+(.*)>/, "$1");
         return sendResponse(res, senderId, textResponse);
+      }
       }
     });
   }
 
-  function sendResponses(res, senderId, responses) {
+  function sendResponses (res, senderId, responses) {
     return Bluebird.mapSeries(responses, (response) => sendResponse(res, senderId, response));
   }
 
-  function sendResponse(res, senderId, response) {
+  function sendResponse (res, senderId, response) {
     return messenger.send(senderId, response);
   }
 

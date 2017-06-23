@@ -12,20 +12,20 @@ const SlackSchema = new mongoose.Schema({
   access_token: {
     type: String,
     required: true,
-    default: ""
+    "default": ""
   },
   scope: {
     type: String,
     required: true,
-    default: ""
+    "default": ""
   },
   team_id: {
     type: String,
-    default: ""
+    "default": ""
   },
   team_name: {
     type: String,
-    default: ""
+    "default": ""
   },
   bot: {
     bot_user_id: {
@@ -37,31 +37,27 @@ const SlackSchema = new mongoose.Schema({
   },
   createdAt: {
     type: Date,
-    default: Date.now
+    "default": Date.now
   }
 });
 
 /**
  * Methods
  */
-SlackSchema.method({
-
-});
+SlackSchema.method({});
 
 /**
  * Statics
  */
 SlackSchema.statics = {
-  get(team_id) {
-    return this.findOne({ team_id })
-      .exec()
-      .then((user) => {
-        if (user) {
-          return user;
-        }
-        const err = { message: "Slack not found", statusCode: 404 };
-        return Bluebird.reject(err);
-      });
+  get (team_id) {
+    return this.findOne({ team_id }).exec().then((user) => {
+      if (user) {
+        return user;
+      }
+      const err = { message: "Slack not found", statusCode: 404 };
+      return Bluebird.reject(err);
+    });
   }
 };
 
