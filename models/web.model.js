@@ -11,7 +11,7 @@ mongoose.Promise = Bluebird;
 const ButtonSchema = new mongoose.Schema({
   type: String,
   value: String,
-  text: String,
+  text: String
 });
 
 const HistoryMessageSchema = new mongoose.Schema({
@@ -24,44 +24,39 @@ const HistoryMessageSchema = new mongoose.Schema({
   buttons: [ButtonSchema]
 });
 
-const UnreadMessageSchema = new mongoose.Schema({
-  message: {
-    type: String
-  },
-  buttons: [ButtonSchema]
-});
-
 const WebSchema = new mongoose.Schema({
-  senderId: {
+  nichandle: {
     type: String,
     required: true,
-    unique : true
+    unique: true
   },
-  history: [HistoryMessageSchema],
-  unread: [UnreadMessageSchema]
+  cookie: {
+    type: String,
+    required: true
+  },
+  userAgent: {
+    type: String
+  },
+  history: [HistoryMessageSchema]
 });
 
 /**
  * Methods
  */
-WebSchema.method({
-
-});
+WebSchema.method({});
 
 /**
  * Statics
  */
 WebSchema.statics = {
-  get(senderId) {
-    return this.findOne({ senderId })
-      .exec()
-      .then((user) => {
-        if (user) {
-          return user;
-        }
-        const err = { message: "Web User not found", statusCode: 404 };
-        return Bluebird.reject(err);
-      });
+  get (senderId) {
+    return this.findOne({ senderId }).exec().then((user) => {
+      if (user) {
+        return user;
+      }
+      const err = { message: "Web User not found", statusCode: 404 };
+      return Bluebird.reject(err);
+    });
   }
 };
 

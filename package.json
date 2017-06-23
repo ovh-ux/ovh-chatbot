@@ -21,6 +21,7 @@
     "body-parser": "^1.16.0",
     "compression": "^1.6.2",
     "config": "^1.20.4",
+    "cookie-parser": "^1.4.3",
     "cors": "^2.8.1",
     "ejs": "^2.4.2",
     "express": "^4.14.1",
@@ -38,7 +39,6 @@
     "request-promise": "^4.1.1",
     "require-dir": "^0.3.1",
     "slack-node": "^0.1.8",
-    "uuid": "^3.0.1",
     "winston": "^2.3.1"
   },
   "engines": {

@@ -2,17 +2,14 @@
 
 const web = require("../platforms/web/web");
 const bot = require("../bots/hosting")();
-const config = require("../config/config-loader").load();
 const apiai = require("../utils/apiai");
 const Bluebird = require("bluebird");
-const { ButtonsListMessage, Button} = require("../platforms/generics");
-const uuid = require("uuid/v4");
 
 module.exports = () => {
-
-  function postbackReceived(res, senderId, payload) {
-    return bot.ask("postback", senderId, payload, null, null, res)
-      .then((answer) => {
+  function postbackReceived(res, nichandle, payload) {
+    return bot
+      .ask("postback", nichandle, payload, null, null, res)
+      .then(answer => {
         answer.intent = payload;
         answer.message = "message";
         return answer;
@@ -20,35 +17,47 @@ module.exports = () => {
       .catch(err => Bluebird.resolve(err));
   }
 
-  function messageReceived(res, senderId, message) {
-    return apiai.textRequestAsync(message, { sessionId: senderId })
-      .then((resp) => {
-        let senderId = resp.sessionId;
+  function messageReceived(res, nichandle, message) {
+    return apiai
+      .textRequestAsync(message, { sessionId: nichandle })
+      .then(resp => {
+        const nichandle = resp.sessionId;
         if (resp.status && resp.status.code === 200 && resp.result) {
-          //successful request
+          // successful request
 
-          //if user need to login
-          if (resp.result.action === "connection" || resp.result.action === "welcome") {
-            let but = [
-              new Button("web_url", `${config.server.url}${config.server.basePath}/authorize?state=${senderId}-web`,"Se connecter !")
-            ];
-            return Bluebird.resolve(new ButtonsListMessage("Tu peux te connecter en cliquant sur ce bouton", but));
-          }
-
-          //if api.ai has a premade response
-          if (resp.result.fulfillment && resp.result.fulfillment.speech && Array.isArray(resp.result.fulfillment.messages) && resp.result.fulfillment.messages.length) {
-            let smalltalk = resp.result.action && resp.result.action.indexOf("smalltalk") !== -1;
+          // if api.ai has a premade response
+          if (
+            resp.result.fulfillment &&
+            resp.result.fulfillment.speech &&
+            Array.isArray(resp.result.fulfillment.messages) &&
+            resp.result.fulfillment.messages.length
+          ) {
+            const smalltalk =
+              resp.result.action &&
+              resp.result.action.indexOf("smalltalk") !== -1;
             let quickResponses = resp.result.fulfillment.messages;
 
-            if (smalltalk && Math.floor((Math.random() * 2))) { //random to change response from original smalltalk to our custom sentence
-              quickResponses = [{ speech: resp.result.fulfillment.speech, type: 0 }];
+            if (smalltalk && Math.floor(Math.random() * 2)) {
+              // random to change response from original smalltalk to our custom sentence
+              quickResponses = [
+                { speech: resp.result.fulfillment.speech, type: 0 }
+              ];
             }
 
-            return sendQuickResponses(res, senderId, quickResponses);
+            return sendQuickResponses(res, nichandle, quickResponses);
           }
-          //else bot take over
-          return bot.ask("message", senderId, message, resp.result.action, resp.result.parameters, res)
-            .then((result) => {
+
+          // else bot take over
+          return bot
+            .ask(
+              "message",
+              nichandle,
+              message,
+              resp.result.action,
+              resp.result.parameters,
+              res
+            )
+            .then(result => {
               result.intent = resp.result.action;
               result.message = message;
               return result;
@@ -59,52 +68,38 @@ module.exports = () => {
   }
 
   function onGet(req, res) {
-    let senderId = res.senderId = req.query.senderId;
-    let history = req.query.history;
-
-    if (senderId && !history) {
-      return web.getUnread(res, senderId)
-        .then(result => res.status(200).json(result))
-        .catch(err => res.status(400).json(err));
-    } else if (senderId && history) {
-      return web.getHistory(res, senderId)
-          .then(result => {
-            if (!result.length) {
-              web.send(null, senderId, "Bienvenue, en quoi puis-je etre utile ?");
-            }
-            return res.status(200).json(result);
-          })
-          .catch(err => res.status(400).json(err));
-    } else { //TODO will be removed
-      senderId = uuid();
-      let but = [
-        new Button("web_url", `${config.server.url}${config.server.basePath}/authorize?state=${senderId}-web`,"Se connecter")
-      ];
-      return web.send(null, senderId, new ButtonsListMessage("Pour commencer, connecter vous :)", but))
-        .then(() => res.status(200).json(senderId))
-        .catch(err => res.status(503).json(err));
-    }
+    const nichandle = req.user.nichandle;
+    return web
+      .getHistory(res, nichandle)
+      .then(result => {
+        if (!result.length) {
+          web.send(null, nichandle, "Bienvenue, en quoi puis-je etre utile ?");
+        }
+        return res.status(200).json(result);
+      })
+      .catch(err => res.status(400).json(err));
   }
-  function onPost(req, res) {
-    let message = req.body.message;
-    let senderId = res.senderId = req.body.senderId;
-    let type = req.body.type;
 
-    //check the data sent first;
-    if (!senderId) {
-      return res.status(403).json(new Error("Missing senderid"));
+  function onPost(req, res) {
+    const message = req.body.message;
+    const nichandle = req.user.nichandle;
+    const type = req.body.type;
+
+    // check the data sent first;
+    if (!nichandle) {
+      return res.status(403).json(new Error("Missing nichandle"));
     }
 
     if (!message) {
       return res.status(400).json(new Error("Missing message"));
     }
 
-    if (!type) {
-      return res.status(400).json(new Error("Missing message type"));
+    if (!type || (type !== "postback" && type !== "message")) {
+      return res.status(400).json(new Error(`Unknown message type : ${type}`));
     }
 
-    //save user message to db first
-    let userMsg = {
+    // save user message to db first
+    const userMsg = {
       message,
       origin: "user"
     };
@@ -114,34 +109,34 @@ module.exports = () => {
     }
 
     return web
-      .pushToHistory(senderId, userMsg)
+      .pushToHistory(nichandle, userMsg)
       .then(() => {
         if (type === "message") {
-          return messageReceived(res, senderId, message);
-        } else if(type === "postback") {
-          return postbackReceived(res, senderId, message);
+          return messageReceived(res, nichandle, message);
+        } else if (type === "postback") {
+          return postbackReceived(res, nichandle, message);
         }
       })
-      .then((result) => {
-        //if result.responses then the origin is the bot, ie there might be a feedback request
+      .then(result => {
+        // if result.responses then the origin is the bot, ie there might be a feedback request
         if (result.responses) {
-          return web.send(res, senderId, result.responses, result);
+          return web.send(res, nichandle, result.responses, result);
         }
-        return web.send(res, senderId, result);
+        return web.send(res, nichandle, result);
       })
-      .then((result) => res.status(200).json(result))
+      .then(result => res.status(200).json(result))
       .catch(err => {
         res.logger.error(err);
         return res.status(503).json(err);
       });
   }
 
-  function sendQuickResponses(res, senderId, responses) {
-    return Bluebird.mapSeries(responses, (response) => {
+  function sendQuickResponses(res, nichandle, responses) {
+    return Bluebird.mapSeries(responses, response => {
       switch (response.type) {
       case 0:
       default:
-        let textResponse = response.speech.replace(/<(.*)\|+(.*)>/, "$1");
+        const textResponse = response.speech.replace(/<(.*)\|+(.*)>/, "$1");
         return Bluebird.resolve(textResponse);
       }
     });
@@ -151,5 +146,4 @@ module.exports = () => {
     onGet,
     onPost
   };
-
 };
