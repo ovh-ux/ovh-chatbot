@@ -23,7 +23,7 @@ module.exports = () =>
     return new Bluebird((resolve, reject) => {
       request(options, (err, resp, body) => {
         if (err || resp.statusCode >= 400) {
-          return reject({ statusCode: err ? 500 : resp.statusCode, data: err ? err : body });
+          return reject(resp && resp.statusCode ? { statusCode: resp.statusCode, data: body } : { statusCode: 500, data: err});
         }
         return resolve(body);
       });
