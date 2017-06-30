@@ -6,14 +6,28 @@ const utils = require("../../utils");
 const Bluebird = require("bluebird");
 const responsesCst = require("../../../constants/responses").FR;
 const URL = require("url");
+const { uniq, intersection } = require("lodash");
 
 class WebsiteBreak {
   static action (senderId, message, entities, res) {
+    let incidentResp = [];
+
     return utils
       .getOvhClient(senderId)
-      .then((ovhClient) => ovhClient.requestPromised("GET", "/hosting/web"))
-      .then((hostings) => {
+      .then((ovhClient) => Bluebird.props({
+        hostings: ovhClient.requestPromised("GET", "/hosting/web"),
+        incident: ovhClient.requestPromised("GET", "/hosting/web/incident")
+      }))
+      .then(({ hostings, incident }) => {
         let eltInfos = [];
+
+        if (Array.isArray(incident) && incident.length) {
+          let hostingsDown = intersection(uniq(incident), hostings);
+
+          if (hostingsDown.length) {
+            incidentResp = [new TextMessage(responsesCst.welcome_task), new TextMessage(`Ces services sont impactés par notre panne : ${hostingsDown.join(", ")}`)];
+          }
+        }
 
         if (!hostings.length) {
           return { responses: [new TextMessage("Tu n'as pas d'hébergement web :("), new TextMessage(responsesCst.upsellingWeb)], feedback: false };
@@ -45,7 +59,7 @@ class WebsiteBreak {
 
         return { responses: [createPostBackList("Sélectionne l'hébergement web sur lequel est installé ton site", eltInfos, "MORE_HOSTING", 0, 4)], feedback: false };
       })
-      .then((resp) => Object.assign({}, resp, { responses: [responsesCst.welcome_task].concat(resp.responses) }))
+      .then((resp) => Object.assign({}, resp, { responses: incidentResp.concat(resp.responses) }))
       .catch((err) => {
         res.logger.error(err);
         return Bluebird.reject(error(err.error || err.statusCode || 400, err));
