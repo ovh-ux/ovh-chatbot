@@ -136,6 +136,7 @@ export default () => {
         if (resp.status && resp.status.code === 200 && resp.result) {
           if (resp.result.action === "connection" || resp.result.action === "welcome") {
             messenger.sendTextMessage(senderId, responsesCst.welcome);
+            messenger.sendTextMessage(senderId, responsesCst.welcome_task);
             return messenger.sendAccountLinking(senderId, `${config.server.url}${config.server.basePath}/authorize?state=${senderId}-facebook_messenger`);
           }
 

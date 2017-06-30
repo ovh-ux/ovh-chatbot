@@ -45,6 +45,9 @@ class WebsiteBreak {
 
         return { responses: [new TextMessage("Sélectionne l'hébergement web sur lequel est installé ton site"), createPostBackList("Sélectionne l'hébergement web sur lequel est installé ton site", eltInfos, "MORE_HOSTING", 0, 4)], feedback: false };
       })
+      .then((resp) => {
+        return Object.assign({}, resp, {responses: [new TextMessage(responsesCst.welcome_task)].concat(resp.responses)});
+      })
       .catch((err) => {
         res.logger.error(err);
         return Bluebird.reject(error(err.error || err.statusCode || 400, err));
