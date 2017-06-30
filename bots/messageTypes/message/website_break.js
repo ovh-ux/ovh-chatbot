@@ -30,7 +30,7 @@ class WebsiteBreak {
           eltInfos = hostings.map((hosting) => new Button("postback", `ATTACHED_DOMAIN_SELECTED_${hosting}_${URL.parse(website).hostname}`, hosting));
 
           return {
-            responses: [new TextMessage("Sélectionne l'hébergement web sur lequel est installé ton site"), createPostBackList("Sélectionne l'hébergement web sur lequel est installé ton site", eltInfos, "MORE_HOSTING", 0, 4)],
+            responses: [createPostBackList("Sélectionne l'hébergement web sur lequel est installé ton site", eltInfos, "MORE_HOSTING", 0, 4)],
             feedback: false
           };
         }
@@ -43,8 +43,9 @@ class WebsiteBreak {
 
         eltInfos = hostings.map((hosting) => new Button("postback", `HOSTING_SELECTED_${hosting}`, hosting));
 
-        return { responses: [new TextMessage("Sélectionne l'hébergement web sur lequel est installé ton site"), createPostBackList("Sélectionne l'hébergement web sur lequel est installé ton site", eltInfos, "MORE_HOSTING", 0, 4)], feedback: false };
+        return { responses: [createPostBackList("Sélectionne l'hébergement web sur lequel est installé ton site", eltInfos, "MORE_HOSTING", 0, 4)], feedback: false };
       })
+      .then((resp) => Object.assign({}, resp, { responses: [responsesCst.welcome_task].concat(resp.responses) }))
       .catch((err) => {
         res.logger.error(err);
         return Bluebird.reject(error(err.error || err.statusCode || 400, err));
