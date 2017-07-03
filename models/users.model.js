@@ -36,7 +36,8 @@ const UserSchema = new mongoose.Schema({
     "default": ""
   },
   team_id: {
-    type: String
+    type: String,
+    "default": ""
   },
   messageNumber: {
     type: Number,
