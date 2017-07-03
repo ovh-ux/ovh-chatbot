@@ -39,7 +39,7 @@ module.exports = () => ({
             return resp.slack
               .sendTextMessage(
                 channel,
-                `Pour te connecter il te suffit de <${config.server.url}${config.server.basePath}/authorize?state=${channel}-slack|cliquer ici.>
+                `Pour te connecter il te suffit de <${config.server.url}${config.server.basePath}/authorize?state=${channel}-slack-${req.body.team_id}|cliquer ici.>
 Pour l'instant je ne peux te répondre que sur des informations concernant un dysfonctionnement sur ton site web.
   Voici des exemples de questions que tu peux me poser :
     • Mon site ne fonctionne plus

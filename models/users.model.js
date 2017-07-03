@@ -32,6 +32,10 @@ const UserSchema = new mongoose.Schema({
     "default": Date.now
   },
   platform: {
+    type: String,
+    "default": ""
+  },
+  team_id: {
     type: String
   },
   messageNumber: {

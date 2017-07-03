@@ -8,15 +8,24 @@ module.exports = function () {
   return {
     getAuthorize (req, res) {
       let senderId = req.query.state;
-      const platform = getPlatform(senderId);
+      let platform = "unknown";
       const ovhClient = ovh({
         endpoint: "ovh-eu",
         appKey: config.ovh.appKey,
         appSecret: config.ovh.appSecret
       });
       let consumerInfos = {};
+      let team_id;
 
-      senderId = senderId.replace(/-(facebook_messenger|slack)/g, "");
+      if (senderId.match(/-(facebook_messenger|slack)/g)) {
+        platform = senderId.match(/-(facebook_messenger|slack)/g)[0];
+      }
+
+      if (platform === "slack") {
+        team_id = senderId.match(/-slack-(\w*)/g)[0];
+      }
+
+      senderId = senderId.replace(/-(facebook_messenger|slack-\w*)/g, "");
 
       return ovhClient
         .requestPromised("POST", "/auth/credential", {
@@ -29,7 +38,7 @@ module.exports = function () {
           return User.findOne({ senderId });
         })
         .then((userRaw) => {
-          const user = !userRaw ? new User({ senderId, consumerKey: consumerInfos.consumerKey, consumerKeyTmp: consumerInfos.consumerKey, platform }) : userRaw;
+          const user = !userRaw ? new User({ senderId, consumerKey: consumerInfos.consumerKey, consumerKeyTmp: consumerInfos.consumerKey, platform, team_id }) : userRaw;
           user.consumerKeyTmp = consumerInfos.consumerKey;
           user.connected = true;
 
@@ -46,15 +55,3 @@ module.exports = function () {
     }
   };
 };
-
-function getPlatform (senderId) {
-  if (senderId.indexOf("-slack") !== -1) {
-    return "slack";
-  }
-
-  if (senderId.indexOf("-facebook_messenger") !== -1) {
-    return "facebook_messenger";
-  }
-
-  return "unknown";
-}
