@@ -17,12 +17,12 @@ module.exports = function () {
       let consumerInfos = {};
       let team_id;
 
-      if (senderId.match(/-(facebook_messenger|slack)/g)) {
-        platform = senderId.match(/-(facebook_messenger|slack)/g)[0];
+      if (senderId.match(/-(facebook_messenger|slack)/g) && senderId.match(/-(facebook_messenger|slack)/g).length > 1) {
+        platform = senderId.match(/-(facebook_messenger|slack)/g)[1];
       }
 
-      if (platform === "slack") {
-        team_id = senderId.match(/-slack-(\w*)/g)[0];
+      if (platform === "slack" && senderId.match(/-slack-(\w*)/g) && senderId.match(/-slack-(\w*)/g).length > 1) {
+        team_id = senderId.match(/-slack-(\w*)/g)[1];
       }
 
       senderId = senderId.replace(/-(facebook_messenger|slack-\w*)/g, "");
