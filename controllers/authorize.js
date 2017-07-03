@@ -15,9 +15,14 @@ module.exports = function () {
         appSecret: config.ovh.appSecret
       });
       let consumerInfos = {};
+      let team_id;
 
-      if (senderId.match(/-(facebook_messenger|slack-\w*)/g)) {
-        platform = senderId.match(/-(facebook_messenger|slack-\w*)/g)[0];
+      if (senderId.match(/-(facebook_messenger|slack)/g)) {
+        platform = senderId.match(/-(facebook_messenger|slack)/g)[0];
+      }
+
+      if (platform === "slack") {
+        team_id = senderId.match(/-slack-(\w*)/g)[0];
       }
 
       senderId = senderId.replace(/-(facebook_messenger|slack-\w*)/g, "");
@@ -33,7 +38,7 @@ module.exports = function () {
           return User.findOne({ senderId });
         })
         .then((userRaw) => {
-          const user = !userRaw ? new User({ senderId, consumerKey: consumerInfos.consumerKey, consumerKeyTmp: consumerInfos.consumerKey, platform }) : userRaw;
+          const user = !userRaw ? new User({ senderId, consumerKey: consumerInfos.consumerKey, consumerKeyTmp: consumerInfos.consumerKey, platform, team_id }) : userRaw;
           user.consumerKeyTmp = consumerInfos.consumerKey;
           user.connected = true;
 

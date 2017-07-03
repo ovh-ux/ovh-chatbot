@@ -31,7 +31,7 @@ module.exports = () => ({
         return ovhClient.requestPromised("GET", "/me");
       })
       .then((meInfos) => {
-        welcome(senderId, meInfos, userInfos.platform);
+        welcome(senderId, meInfos, userInfos);
         return res.render("authorize", { user: meInfos });
       })
       .catch((err) => {
@@ -43,19 +43,22 @@ module.exports = () => ({
   }
 });
 
-function welcome (senderId, meInfos, platform) {
-  if (platform.indexOf("facebook_messenger") !== -1) {
+function welcome (senderId, meInfos, userInfos) {
+  switch (userInfos.platform) {
+  case "facebook_messenger": {
     messenger
       .sendTextMessage(senderId, responsesCst.welcome_logged.replace("%s", meInfos.nichandle))
       .then(() => messenger.sendTextMessage(senderId, "Rassure toi je vais apprendre à t'aider sur d'autres sujets dans un avenir proche :)"))
       .catch(console.error);
+    break;
   }
-
-  if (platform.indexOf("slack") !== -1) {
-    const team_id = platform.replace("slack-", "");
-    const slack = slackSDK(team_id);
+  case "slack": {
+    const slack = slackSDK(userInfos.team_id);
     slack.sendTextMessage(senderId, responsesCst.welcome_logged.replace("%s", meInfos.nichandle))
-    .then(() => slack.sendTextMessage(senderId, "Rassure toi je vais apprendre à t'aider sur d'autres sujets dans un avenir proche :)"))
-    .catch(console.error);
+      .then(() => slack.sendTextMessage(senderId, "Rassure toi je vais apprendre à t'aider sur d'autres sujets dans un avenir proche :)"))
+      .catch(console.error);
+    break;
+  }
+  default: break;
   }
 }
