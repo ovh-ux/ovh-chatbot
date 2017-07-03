@@ -8,7 +8,7 @@ module.exports = function () {
   return {
     getAuthorize (req, res) {
       let senderId = req.query.state;
-      const platform = getPlatform(senderId);
+      let platform = "unknown";
       const ovhClient = ovh({
         endpoint: "ovh-eu",
         appKey: config.ovh.appKey,
@@ -16,7 +16,11 @@ module.exports = function () {
       });
       let consumerInfos = {};
 
-      senderId = senderId.replace(/-(facebook_messenger|slack)/g, "");
+      if (senderId.match(/-(facebook_messenger|slack-\w*)/g)) {
+        platform = senderId.match(/-(facebook_messenger|slack-\w*)/g)[0];
+      }
+
+      senderId = senderId.replace(/-(facebook_messenger|slack-\w*)/g, "");
 
       return ovhClient
         .requestPromised("POST", "/auth/credential", {
@@ -46,15 +50,3 @@ module.exports = function () {
     }
   };
 };
-
-function getPlatform (senderId) {
-  if (senderId.indexOf("-slack") !== -1) {
-    return "slack";
-  }
-
-  if (senderId.indexOf("-facebook_messenger") !== -1) {
-    return "facebook_messenger";
-  }
-
-  return "unknown";
-}
