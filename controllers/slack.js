@@ -48,6 +48,7 @@ Pour l'instant je ne peux te répondre que sur des informations concernant un dy
     • Comment je fais pour changer mes serveurs dns de ma zone exemple.ovh ?
     • Comment je peux faire pointer mon domaine exemple.ovh sur mon hébergement web ?`
               )
+              .then(() => resp.slack.sendTextMessage(channel, responsesCst.welcome_task))
               .then(res.logger.info)
               .catch(res.logger.error);
           }
