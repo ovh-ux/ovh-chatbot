@@ -21,5 +21,5 @@ module.exports = {
   apiai: {
     token: process.env.APIAI_TOKEN_PREPROD
   },
-  redirectUrl: "https://bot.uxlabs.ovh/api/v1.0/ovh"
+  redirectUrl: `${process.env.APP_URL_PREPROD || "https://bot.uxlabs.ovh"}/api/v1.0/ovh`
 };

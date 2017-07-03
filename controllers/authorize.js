@@ -38,7 +38,8 @@ module.exports = function () {
           return User.findOne({ senderId });
         })
         .then((userRaw) => {
-          const user = !userRaw ? new User({ senderId, consumerKey: consumerInfos.consumerKey, consumerKeyTmp: consumerInfos.consumerKey, platform, team_id }) : userRaw;
+          const user = !userRaw ? new User({ senderId, consumerKey: consumerInfos.consumerKey, consumerKeyTmp: consumerInfos.consumerKey, platform }) : userRaw;
+          user.team_id = team_id;
           user.consumerKeyTmp = consumerInfos.consumerKey;
           user.connected = true;
 
