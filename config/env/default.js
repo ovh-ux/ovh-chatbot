@@ -2,12 +2,6 @@
 
 module.exports = {
   name: "ovh-chatbot",
-  server: {
-    port: process.env.APP_PORT || 8080,
-    url: process.env.APP_URL || "https://bot.uxlabs.ovh",
-    basePath: "/api/v1.0",
-    logType: "dev"
-  },
   mongo: {
     url: process.env.MONGO || "mongodb://mongo:27017",
     debug: false

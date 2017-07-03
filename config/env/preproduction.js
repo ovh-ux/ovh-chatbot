@@ -1,6 +1,12 @@
 "use strict";
 
 module.exports = {
+  server: {
+    port: process.env.APP_PORT || 8080,
+    url: process.env.APP_URL_PREPROD || "https://bot.uxlabs.ovh",
+    basePath: "/api/v1.0",
+    logType: "dev"
+  },
   slack: {
     clientId: process.env.SLACK_ID_PREPROD,
     clientSecret: process.env.SLACK_SECRET_PREPROD,
