@@ -15,14 +15,17 @@ module.exports = function () {
         appSecret: config.ovh.appSecret
       });
       let consumerInfos = {};
+      let platformMatch = /-(facebook_messenger|slack)/g.exec(senderId);
+      let teamIdMatch = /-slack-(\w*)/g.exec(senderId);
       let team_id;
 
-      if (senderId.match(/-(facebook_messenger|slack)/g) && senderId.match(/-(facebook_messenger|slack)/g).length > 1) {
-        platform = senderId.match(/-(facebook_messenger|slack)/g)[1];
+
+      if (platformMatch && platformMatch.length > 1) {
+        platform = platformMatch[1];
       }
 
-      if (platform === "slack" && senderId.match(/-slack-(\w*)/g) && senderId.match(/-slack-(\w*)/g).length > 1) {
-        team_id = senderId.match(/-slack-(\w*)/g)[1];
+      if (platform === "slack" && teamIdMatch && teamIdMatch.length > 1) {
+        team_id = teamIdMatch[1];
       }
 
       senderId = senderId.replace(/-(facebook_messenger|slack-\w*)/g, "");
