@@ -15,8 +15,8 @@ module.exports = function () {
         appSecret: config.ovh.appSecret
       });
       let consumerInfos = {};
-      let platformMatch = senderId.match(/-(facebook_messenger|slack)/g);
-      let teamIdMatch = senderId.match(/-slack-(\w*)/g);
+      let platformMatch = /-(facebook_messenger|slack)/g.exec(senderId);
+      let teamIdMatch = /-slack-(\w*)/g.exec(senderId);
       let team_id;
 
 
