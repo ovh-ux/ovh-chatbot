@@ -31,12 +31,10 @@ module.exports = () => ({
         return ovhClient.requestPromised("GET", "/me");
       })
       .then((meInfos) => {
-        console.log("meInfos:", meInfos);
         welcome(senderId, meInfos, userInfos);
         return res.render("authorize", { user: meInfos });
       })
       .catch((err) => {
-        console.error(err);
         const errorApi = res.error(403, err);
         User.remove({ senderId }).exec();
 
@@ -46,21 +44,17 @@ module.exports = () => ({
 });
 
 function welcome (senderId, meInfos, userInfos) {
-  console.log("userInfos: ", userInfos);
   switch (userInfos.platform) {
   case "facebook_messenger": {
     messenger
       .sendTextMessage(senderId, responsesCst.welcome_logged.replace("%s", meInfos.nichandle))
-      .then(() => messenger.sendTextMessage(senderId, "Rassure toi je vais apprendre à t'aider sur d'autres sujets dans un avenir proche :)"))
       .catch(console.error);
     break;
   }
   case "slack": {
-    const slack = slackSDK(userInfos.team_id);
-    console.log("slack:", slack);
-    slack.sendTextMessage(senderId, responsesCst.welcome_logged.replace("%s", meInfos.nichandle))
-      .then(() => slack.sendTextMessage(senderId, "Rassure toi je vais apprendre à t'aider sur d'autres sujets dans un avenir proche :)"))
-      .catch(console.error);
+    slackSDK(userInfos.team_id)
+    .then((slack) => slack.sendTextMessage(senderId, responsesCst.welcome_logged.replace("%s", meInfos.nichandle)))
+    .catch(console.error);
     break;
   }
   default: break;

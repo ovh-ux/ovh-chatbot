@@ -41,20 +41,14 @@ module.exports = function () {
           return User.findOne({ senderId });
         })
         .then((userRaw) => {
-          console.log("userRaw", userRaw);
           const user = !userRaw ? new User({ senderId, consumerKey: consumerInfos.consumerKey, consumerKeyTmp: consumerInfos.consumerKey, platform, team_id }) : userRaw;
-          console.log("user : ", user);
           user.team_id = team_id;
           user.consumerKeyTmp = consumerInfos.consumerKey;
           user.connected = true;
 
-          console.log("user updated: ", user);
           return user.save();
         })
-        .then((resp) => {
-          console.log("resp : ", resp);
-          return res.redirect(consumerInfos.validationUrl);
-        })
+        .then(() => res.redirect(consumerInfos.validationUrl))
         .catch(() => {
           const errorApi = res.error(403, "Unable to connect");
 
