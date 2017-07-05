@@ -4,7 +4,7 @@ const Bluebird = require("bluebird");
 const slackSDK = require("../platforms/slack/slack");
 const SlackModel = require("../models/slack.models");
 const config = require("../config/config-loader").load();
-const bot = require("../bots/hosting")();
+const bot = require("../bots/common")();
 const request = require("request-promise");
 const responsesCst = require("../constants/responses").FR;
 const apiai = require("../utils/apiai");
@@ -188,7 +188,9 @@ function sendQuickResponses (res, senderId, responses, slack) {
 }
 
 function sendResponses (res, channel, responses, slack) {
-  return Bluebird.mapSeries(responses, (response) => sendResponse(res, channel, response, slack));
+  return Bluebird.mapSeries(responses, (response) =>
+    Bluebird.resolve(response)
+      .then((resp) => Array.isArray(resp) ? sendResponses(res, channel, resp, slack) : sendResponse(res, channel, resp, slack)));
 }
 
 function sendResponse (res, channel, response, slack) {

@@ -1,7 +1,7 @@
 "use strict";
 
 const messenger = require("../platforms/messenger/messenger");
-const bot = require("../bots/hosting")();
+const bot = require("../bots/common")();
 const config = require("../config/config-loader").load();
 const apiai = require("../utils/apiai");
 const Bluebird = require("bluebird");
@@ -200,7 +200,9 @@ module.exports = () => {
   }
 
   function sendResponses (res, senderId, responses) {
-    return Bluebird.mapSeries(responses, (response) => sendResponse(res, senderId, response));
+    return Bluebird.mapSeries(responses, (response) =>
+      Bluebird.resolve(response)
+        .then((resp) => Array.isArray(resp) ? sendResponses(res, senderId, resp) : sendResponse(res, senderId, resp)));
   }
 
   function sendResponse (res, senderId, response) {
