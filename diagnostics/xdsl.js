@@ -22,6 +22,20 @@ const checkxDSLDiagAdvanced = (diag) => {
       // detect sync
       const lineDiag = diag.lineDetails[i];
       responses += `\t\t• ${lineDiag.number}: ${lineDiag.sync ? "" : "non"} synchronisé\n`;
+      if (lineDiag.lineTest != null) {
+        switch (lineDiag.lineTest) {
+        case "customerSideProblem":
+          responses += "\t\t\tIl s'agit d'un probleme avec votre installation\n";
+          break;
+        case "ovhSideProblem":
+          responses += "\t\t\tIl s'agit d'un probleme de notre part\n";
+          break;
+        case "error":
+          responses += "\t\t\tIl y a eu une erreur lors du diagnostique\n";
+          break;
+        default:break;
+        }
+      }
       if (!lineDiag.sync) {
         linePb = true;
       }
@@ -42,6 +56,8 @@ const checkxDSLDiagAdvanced = (diag) => {
   } else {
     responses += "Il y a effectivement un soucis, sur votre installation\n";
   }
+
+  responses += "Pour toutes informations complémentaires, rendez-vous sur : https://docs.ovh.com/display/public/CRXDSL/Accueil+xDSL\n";
 
   return [new TextMessage(responses)];
 };

@@ -8,22 +8,26 @@ const responsesCst = require("../../../constants/responses").FR;
 
 class XdslBreak {
   static action (senderId) {
+    let user;
     return utils
       .getOvhClient(senderId)
-      .then((user) => user.requestPromised("GET", "/xdsl"))
+      .then((lUser) => {
+        user = lUser;
+        return user.requestPromised("GET", "/xdsl");
+      })
       .then((xdsl) => {
-        let xdslOffers = [];
         if (!Array.isArray(xdsl) || !xdsl.length) {
-          return { responses: [new TextMessage(`Il semblerait que vous n'avez pas d'offre xDSL. ${responsesCst.upsellingXDSL}`)], feedback: false };
+          return Bluebird.resolve({ responses: [new TextMessage(`Il semblerait que vous n'avez pas d'offre xDSL. ${responsesCst.upsellingXDSL}`)], feedback: false });
         }
 
-        xdslOffers = xdsl.map((offer) => new Button("postback", `XDSL_SELECTED_${offer}`, offer));
-
-        return {
-          responses: [createPostBackList("Sélectionne ton offre xDSL", xdslOffers, "MORE_XDSL", 0, 4)],
-          feedback: false
-        };
+        return Bluebird.map(xdsl, (offer) =>
+          user.requestPromised("GET", `/xdsl/${offer}`)
+          .then((xdslInfo) => new Button("postback", `XDSL_SELECTED_${xdslInfo.accessName}`, xdslInfo.description)));
       })
+      .then((resp) => Array.isArray(resp) ? {
+        responses: [createPostBackList("Sélectionne ton offre xDSL", resp, "MORE_XDSL", 0, 4)],
+        feedback: false
+      } : resp)
       .catch((err) => {
         Bluebird.reject(error(err.error || err.statusCode || 400, err));
       });

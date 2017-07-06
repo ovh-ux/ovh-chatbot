@@ -80,6 +80,9 @@ module.exports = [
         return Bluebird.resolve({ responses: [new TextMessage("Diagnostique en cours... Veuillez patienter quelques instants, merci :)"), promise], feedback: false });
       })
       .catch((err) => {
+        if (err.error === 401 || err.statusCode === 401 || err.errorCode === 401) {
+          return Bluebird.resolve({ responses: [new TextMessage("Votre quota de diagnostiques a été atteint")] });
+        }
         res.logger.error(err);
         return Bluebird.reject(error(err));
       });
@@ -89,13 +92,18 @@ module.exports = [
   {
     regx: "MORE_XDSL_([0-9]+)",
     action (senderId, postback, regx, entites, res) {
+      let user;
       return utils
         .getOvhClient(senderId)
-        .then((user) => user.requestPromised("GET", "/xdsl"))
-        .then((offers) => {
-          const buttons = offers.map((offer) => new Button("postback", `XDSL_SELECTED_${offer}`, offer));
-          return { responses: createPostBackList("Selectionne ta ligne", buttons, "MORE_XDSL", parseInt(new RegExp(regx)[1], 10), 10), feedback: false };
+        .then((lUser) => {
+          user = lUser;
+          return user.requestPromised("GET", "/xdsl");
         })
+        .then((offers) => Bluebird.map(offers, (offer) =>
+            user.requestPromised("GET", `/xdsl/${offer}`)
+            .then((xdslInfo) => new Button("postback", `XDSL_SELECTED_${xdslInfo.accessName}`, xdslInfo.description)))
+        )
+        .then((buttons) => ({ responses: createPostBackList("Selectionne ta ligne", buttons, "MORE_XDSL", parseInt(new RegExp(regx)[1], 10), 10), feedback: false }))
         .catch((err) => {
           res.logger.error(err);
           return Bluebird.reject(error(err));
