@@ -104,7 +104,7 @@ const checkxDSLDiag = (xdslOffer, serviceInfos, orderFollowUp, incident, diag) =
   }
 
   if (diag) {
-    responses = [...responses, new TextMessage("Voici le résultat du dernier diagnostique réalisé"), ...checkxDSLDiagAdvanced(diag)];
+    responses = [...responses, new TextMessage(`Voici le résultat du dernier diagnostique réalisé. Vous pouvez encore effectuer ${diag.remaining} diagnostique(s) aujourd'hui.`), ...checkxDSLDiagAdvanced(diag)];
   }
   return responses;
 };

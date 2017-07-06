@@ -7,5 +7,6 @@ const websiteBreak = require("./website_break");
 const goodAnswer = require("./good_answer");
 const ndhQuestion = require("./ndh_question");
 const xdslBreak = require("./xdsl_break");
+const whoami = require("./whoami");
 
-module.exports = Object.assign({}, dnsServerConfig, domainToHosting, thanks, websiteBreak, goodAnswer, ndhQuestion, xdslBreak);
+module.exports = Object.assign({}, dnsServerConfig, domainToHosting, thanks, websiteBreak, goodAnswer, ndhQuestion, xdslBreak, whoami);
