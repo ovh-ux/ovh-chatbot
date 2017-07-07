@@ -30,7 +30,7 @@ module.exports = function (config) {
     // CORS headers
     // restrict it to the required domain
     res.header("Access-Control-Allow-Credentials", true);
-    res.header("Access-Control-Allow-Origin", config.server.corsOrigin );
+    res.header("Access-Control-Allow-Origin", config.server.corsOrigin);
     res.header("Access-Control-Allow-Methods", "GET,PUT,POST,DELETE,OPTIONS");
 
     // Set custom headers for CORS

@@ -55,7 +55,7 @@ function sendFeedback (nichandle, intent, rawMessage) {
   const message = rawMessage.length >= config.maxMessageLength ? config.maxMessageLengthString : rawMessage;
 
   if (intent === "unknown") {
-    return;
+    return null;
   }
 
   const buttons = [
@@ -67,9 +67,10 @@ function sendFeedback (nichandle, intent, rawMessage) {
   return send(null, nichandle, new ButtonsListMessage("Est-ce que cette réponse vous a aidé ?", buttons));
 }
 
-function send (res, id, rawResponses, opt) {
+function send (res, id, rawResponsesPar, opt) {
   let flagUseRes = true;
   let nichandle = id;
+  let rawResponses = rawResponsesPar;
   let responses;
 
   // input validation
@@ -115,6 +116,7 @@ function send (res, id, rawResponses, opt) {
       return Bluebird.resolve();
     });
   }
+  return null;
 }
 
 function getHistory (res, nichandle) {

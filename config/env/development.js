@@ -1,6 +1,12 @@
 "use strict";
 
 module.exports = {
+  server: {
+    port: process.env.APP_PORT || 8080,
+    url: process.env.APP_URL || "https://bot.uxlabs.ovh",
+    basePath: "/api/v1.0",
+    logType: "dev"
+  },
   slack: {
     clientId: process.env.SLACK_ID,
     clientSecret: process.env.SLACK_SECRET,
@@ -15,5 +21,5 @@ module.exports = {
   apiai: {
     token: process.env.APIAI_TOKEN
   },
-  redirectUrl: process.env.APP_URL + "/api/v1.0/ovh"
+  redirectUrl: `${process.env.APP_URL}/api/v1.0/ovh`
 };

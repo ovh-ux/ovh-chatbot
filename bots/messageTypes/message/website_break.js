@@ -8,8 +8,9 @@ const responsesCst = require("../../../constants/responses").FR;
 const URL = require("url");
 
 class WebsiteBreak {
-  static action(senderId, message, entities, res) {
-    return utils.getOvhClient(senderId)
+  static action (senderId, message, entities, res) {
+    return utils
+      .getOvhClient(senderId)
       .then((ovhClient) => ovhClient.requestPromised("GET", "/hosting/web"))
       .then((hostings) => {
         let eltInfos = [];
@@ -19,27 +20,30 @@ class WebsiteBreak {
         }
 
         if (entities.url) {
-          let website = entities.url.indexOf("http") !== -1 ? entities.url : "http://" + entities.url;
+          const website = entities.url.indexOf("http") !== -1 ? entities.url : `http://${entities.url}`;
 
           if (hostings.length === 1) {
-            let buttons = [new Button("postback", `ATTACHED_DOMAIN_SELECTED_${hostings[0]}_${URL.parse(website).hostname}`, hostings[0])];
+            const buttons = [new Button("postback", `ATTACHED_DOMAIN_SELECTED_${hostings[0]}_${URL.parse(website).hostname}`, hostings[0])];
 
             return { responses: [new ButtonsMessage("Sélectionne l'hébergement web sur lequel est installé ton site", buttons)], feedback: false };
           }
           eltInfos = hostings.map((hosting) => new Button("postback", `ATTACHED_DOMAIN_SELECTED_${hosting}_${URL.parse(website).hostname}`, hosting));
 
-          return { responses: [new TextMessage("Sélectionne l'hébergement web sur lequel est installé ton site"), createPostBackList("Sélectionne l'hébergement web sur lequel est installé ton site", eltInfos, "MORE_HOSTING", 0, 4)], feedback: false };
+          return {
+            responses: [createPostBackList("Sélectionne l'hébergement web sur lequel est installé ton site", eltInfos, "MORE_HOSTING", 0, 4)],
+            feedback: false
+          };
         }
 
         if (hostings.length === 1) {
-          let buttons = [new Button("postback", `HOSTING_SELECTED_${hostings[0]}`, hostings[0])];
+          const buttons = [new Button("postback", `HOSTING_SELECTED_${hostings[0]}`, hostings[0])];
 
           return { responses: [new ButtonsMessage("Sélectionne l'hébergement web sur lequel est installé ton site", buttons)], feedback: false };
         }
 
         eltInfos = hostings.map((hosting) => new Button("postback", `HOSTING_SELECTED_${hosting}`, hosting));
 
-        return { responses: [new TextMessage("Sélectionne l'hébergement web sur lequel est installé ton site"), createPostBackList("Sélectionne l'hébergement web sur lequel est installé ton site", eltInfos, "MORE_HOSTING", 0, 4)], feedback: false };
+        return { responses: [createPostBackList("Sélectionne l'hébergement web sur lequel est installé ton site", eltInfos, "MORE_HOSTING", 0, 4)], feedback: false };
       })
       .catch((err) => {
         res.logger.error(err);

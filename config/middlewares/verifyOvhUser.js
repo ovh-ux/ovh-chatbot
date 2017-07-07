@@ -23,7 +23,7 @@ module.exports = () =>
     return new Bluebird((resolve, reject) => {
       request(options, (err, resp, body) => {
         if (err || resp.statusCode >= 400) {
-          return reject(resp && resp.statusCode ? { statusCode: resp.statusCode, data: body } : { statusCode: 500, data: err});
+          return reject(resp && resp.statusCode ? { statusCode: resp.statusCode, data: body } : { statusCode: 500, data: err });
         }
         return resolve(body);
       });
@@ -32,13 +32,10 @@ module.exports = () =>
         req.user = resp;
         return WebUser.findOne({ nichandle: req.user.nichandle });
       })
-      .then((user) => {
-        if (!user) {
-          user = new WebUser({ nichandle: req.user.nichandle, cookie: req.cookies.SESSION, userAgent: req.headers["user-agent"] });
-        } else {
-          user.cookie = req.cookies.SESSION;
-          user.userAgent = req.headers["user-agent"];
-        }
+      .then((rawUser) => {
+        let user = !rawUser ? new WebUser({ nichandle: req.user.nichandle, cookie: req.cookies.SESSION, userAgent: req.headers["user-agent"] }) : rawUser;
+        user.cookie = req.cookies.SESSION;
+        user.userAgent = req.headers["user-agent"];
         return user.save();
       })
       .then(() => next())

@@ -2,7 +2,7 @@
 
 let webCtrl = require("../controllers/web");
 
-module.exports = function(app) {
+module.exports = function (app) {
   webCtrl = webCtrl();
 
   app.get("/web", webCtrl.onGet);

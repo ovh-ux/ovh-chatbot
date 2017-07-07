@@ -6,20 +6,34 @@ const apiai = require("../utils/apiai");
 const Bluebird = require("bluebird");
 
 module.exports = () => {
+  const sendQuickResponses = (res, nichandle, responses) =>
+    Bluebird.mapSeries(responses, (response) => {
+      switch (response.type) {
+      case 0: {
+        const textResponse = response.speech.replace(/<(.*)\|+(.*)>/, "$1");
+        return Bluebird.resolve(textResponse);
+      }
+      default: {
+        const textResponse = response.speech.replace(/<(.*)\|+(.*)>/, "$1");
+        return Bluebird.resolve(textResponse);
+      }
+      }
+    });
+
   const postbackReceived = (res, nichandle, payload) =>
     bot
       .ask("postback", nichandle, payload, null, null, res)
-      .then(answer => {
+      .then((answer) => {
         answer.intent = payload;
         answer.message = "message";
         return answer;
       })
-      .catch(err => Bluebird.resolve(err));
+      .catch((err) => Bluebird.resolve(err));
 
-  const messageReceived = (res, nichandle, message) =>
+  const messageReceived = (res, nic, message) =>
     apiai
-      .textRequestAsync(message, { sessionId: nichandle })
-      .then(resp => {
+      .textRequestAsync(message, { sessionId: nic })
+      .then((resp) => {
         const nichandle = resp.sessionId;
         if (resp.status && resp.status.code === 200 && resp.result) {
           // successful request
@@ -56,39 +70,30 @@ module.exports = () => {
               resp.result.parameters,
               res
             )
-            .then(result => {
+            .then((result) => {
               result.intent = resp.result.action;
               result.message = message;
               return result;
             })
-            .catch(err => Bluebird.resolve(err));
+            .catch((err) => Bluebird.resolve(err));
         }
+        return null;
       });
 
-  const sendQuickResponses = (res, nichandle, responses) =>
-    Bluebird.mapSeries(responses, response => {
-      switch (response.type) {
-      case 0:
-      default:
-        const textResponse = response.speech.replace(/<(.*)\|+(.*)>/, "$1");
-        return Bluebird.resolve(textResponse);
-      }
-    });
-
-  function onGet(req, res) {
+  function onGet (req, res) {
     const nichandle = req.user.nichandle;
     return web
       .getHistory(res, nichandle)
-      .then(result => {
+      .then((result) => {
         if (!result.length) {
           web.send(null, nichandle, "Bienvenue, en quoi puis-je etre utile ?");
         }
         return res.status(200).json(result);
       })
-      .catch(err => res.status(400).json(err));
+      .catch((err) => res.status(400).json(err));
   }
 
-  function onPost(req, res) {
+  function onPost (req, res) {
     const message = req.body.message;
     const nichandle = req.user.nichandle;
     const type = req.body.type;
@@ -124,16 +129,17 @@ module.exports = () => {
         } else if (type === "postback") {
           return postbackReceived(res, nichandle, message);
         }
+        throw new Error(`unknown type, ${type}`);
       })
-      .then(result => {
+      .then((result) => {
         // if result.responses then the origin is the bot, ie there might be a feedback request
         if (result.responses) {
           return web.send(res, nichandle, result.responses, result);
         }
         return web.send(res, nichandle, result);
       })
-      .then(result => res.status(200).json(result))
-      .catch(err => {
+      .then((result) => res.status(200).json(result))
+      .catch((err) => {
         res.logger.error(err);
         return res.status(503).json(err);
       });

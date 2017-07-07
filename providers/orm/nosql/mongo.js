@@ -7,9 +7,9 @@ const util = require("util");
 mongoose.Promise = Bluebird;
 
 module.exports = {
-  connect(config) {
-    let self = this;
-    let options = {};
+  connect (config) {
+    const self = this;
+    const options = {};
 
     if (mongoose.connection.readyState) {
       return;
@@ -43,7 +43,7 @@ module.exports = {
 
     mongoose.connect(config.url, options);
   },
-  close(signal) {
+  close (signal) {
     return () => {
       mongoose.connection.close(() => {
         console.log("Mongoose connection closed"); // TODO Use logger

@@ -7,13 +7,13 @@ const BUTTON_TYPE = {
 };
 
 class TextMessage {
-  constructor(text) {
+  constructor (text) {
     this.text = text;
   }
 }
 
 class Button {
-  constructor(type, value, text) {
+  constructor (type, value, text) {
     this.type = type;
     this.value = value;
     this.text = text;
@@ -21,7 +21,7 @@ class Button {
 }
 
 class ButtonsMessage {
-  constructor(text, buttons) {
+  constructor (text, buttons) {
     this.text = text;
 
     if (!Array.isArray(buttons) || buttons.length <= 0 || !(buttons[0] instanceof Button)) {
@@ -35,7 +35,7 @@ class ButtonsMessage {
 }
 
 class ButtonsListMessage {
-  constructor(text, buttons) {
+  constructor (text, buttons) {
     this.text = text;
 
     if (!Array.isArray(buttons) || buttons.length <= 0 || !(buttons[0] instanceof Button)) {
@@ -48,9 +48,9 @@ class ButtonsListMessage {
   }
 }
 
-function createPostBackList(text, listInfos, morePayload, offset, limit) {
-  let buttons = listInfos.slice(offset, limit + offset);
-  let moreButton = offset + limit >= listInfos.length ? null : new Button(BUTTON_TYPE.MORE, morePayload + "_" + (offset + limit), "Voir plus");
+function createPostBackList (text, listInfos, morePayload, offset, limit) {
+  const buttons = listInfos.slice(offset, limit + offset);
+  const moreButton = offset + limit >= listInfos.length ? null : new Button(BUTTON_TYPE.MORE, `${morePayload}_${offset + limit}`, "Voir plus");
 
   if (moreButton) {
     buttons.push(moreButton);

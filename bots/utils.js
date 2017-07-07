@@ -63,10 +63,9 @@ module.exports = {
         consumerKey: userInfos.consumerKey
       });
     }),
-  dig (hostname) {
-    if (hostname.match(/https?:\/\//)) {
-      hostname = URL.parse(hostname).hostname;
-    }
+
+  dig (hostnameRaw) {
+    const hostname = hostnameRaw.match(/https?:\/\//) ? URL.parse(hostnameRaw).hostname : hostnameRaw;
 
     return new Bluebird((resolve, reject) => {
       dns.lookup(hostname, (err, address) => {

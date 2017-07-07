@@ -2,11 +2,11 @@
 
 const { BUTTON_TYPE } = require("../generics");
 
-function textMessageAdapter(message) {
+function textMessageAdapter (message) {
   return message.text;
 }
 
-function buttonAdapter(button) {
+function buttonAdapter (button) {
   switch (button.type) {
   case BUTTON_TYPE.POSTBACK:
   case BUTTON_TYPE.MORE:
@@ -26,7 +26,7 @@ function buttonAdapter(button) {
   }
 }
 
-function buttonsMessageAdapter(message) {
+function buttonsMessageAdapter (message) {
   return {
     template_type: "button",
     text: message.text,
@@ -34,16 +34,16 @@ function buttonsMessageAdapter(message) {
   };
 }
 
-function elementAdapter(button) {
+function elementAdapter (button) {
   return {
     title: button.title,
     buttons: [button]
   };
 }
 
-function buttonsListMessageAdapter(message) {
-  let moreButtons = [];
-  let eltButtons = message.attachments.buttons.filter((button) => {
+function buttonsListMessageAdapter (message) {
+  const moreButtons = [];
+  const eltButtons = message.attachments.buttons.filter((button) => {
     if (button.type !== BUTTON_TYPE.MORE) {
       return true;
     }
