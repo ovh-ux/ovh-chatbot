@@ -60,7 +60,7 @@
   },
   "aapi": {
     "method": "/api/v1.0/web",
-    "request": "POST",
+    "request": "GET",
     "apiv7Ignored": true
   },
   "signature": {
