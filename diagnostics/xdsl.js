@@ -68,12 +68,7 @@ const checkxDSLDiag = (xdslOffer, serviceInfos, orderFollowUp, incident, diag) =
   let orderString = "";
 
   if (incident != null) {
-    let eta = "N/A";
-    const button = new Button("web_url", `http://travaux.ovh.net/?do=details&id=${incident.taskId}`, "Plus de details");
-    if (incident.endDate != null) {
-      eta = incident.endDate;
-    }
-    responses = [new ButtonsListMessage(`il y a un incident, sur la ligne : ${incident.comment || "N/A"}, la résolution est prévue pour : ${eta}`, [button])];
+    responses = [new TextMessage(`il y a un incident, sur la ligne : ${incident.comment || "N/A"}, la résolution est prévue pour : ${incident.endDate || "N/A"}, Plus de Details : http://travaux.ovh.net/?do=details&id=${incident.taskId}`)];
   }
 
   for (let i = 0; i < orderFollowUp.length; i++) {
@@ -106,7 +101,7 @@ const checkxDSLDiag = (xdslOffer, serviceInfos, orderFollowUp, incident, diag) =
 
   if (serviceInfos.status === "unPaid") {
     const button = new Button("web_url", "https://www.ovhtelecom.fr/manager/index.html", "Acceder au manager");
-    responses = [...responses, new ButtonsListMessage("Il semblerait que vous avez oublié de payer", [button])];
+    responses = [...responses, new ButtonsListMessage("Il semblerait que vous avez oublié de payer, Acceder au manage", [button])];
   }
 
   if (responses.length === 0) {

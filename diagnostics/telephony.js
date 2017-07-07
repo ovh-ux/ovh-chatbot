@@ -1,6 +1,6 @@
 "use strict";
 
-const { TextMessage, Button, ButtonsListMessage } = require("../platforms/generics");
+const { TextMessage } = require("../platforms/generics");
 const MANAGER_TELECOM = "https://www.ovhtelecom.fr/manager/index.html#/telephony";
 
 const telephonyDiag = (billing, portability, serviceInfos) => {
@@ -26,8 +26,7 @@ const telephonyDiag = (billing, portability, serviceInfos) => {
     responses = [...responses, new TextMessage("Votre ligne est en cours de création")];
     break;
   case "unPaid":
-    responses = [...responses, new ButtonsListMessage("Il semblerait que vous avez oublié de payer, rendez vous dans votre manager pour gérer la facturation",
-      [new Button("web_url", `${MANAGER_TELECOM}/${billing.billingAccount}/billing`, "Acceder au manager")])];
+    responses = [...responses, new TextMessage(`Il semblerait que vous avez oublié de payer, rendez vous dans votre manager pour gérer la facturation : ${MANAGER_TELECOM}/${billing.billingAccount}/billing`)];
     break;
   case "expired":
   case "ok":
@@ -36,8 +35,7 @@ const telephonyDiag = (billing, portability, serviceInfos) => {
   }
 
   if (billing.currentOutplan.value >= billing.allowedOutplan.value) {
-    let button = new Button("web_url", `${MANAGER_TELECOM}/${billing.billingAccount}/creditThreshold`, "Acceder au manager");
-    responses = [...responses, new ButtonsListMessage("Vous avez dépassé, le montant maximal en hors-forfait, rendez vous dans votre manager pour modifier votre limite", [button])];
+    responses = [...responses, new TextMessage(`Vous avez dépassé, le montant maximal en hors-forfait, rendez vous dans votre manager pour modifier votre limite : ${MANAGER_TELECOM}/${billing.billingAccount}/creditThreshold`)];
   }
 
   if (portability.length > 0) {
@@ -52,13 +50,13 @@ const telephonyDiag = (billing, portability, serviceInfos) => {
       portabilityString += `Date d'éxécution prévu : ${portability.desiredExecutionDate}`;
       responses = [...responses, new TextMessage(portabilityString)];
     }
-    responses = [...responses, new ButtonsListMessage("Pour modifer votre portabilité, rendez vous dans votre manager.", [new Button("web_url", `${MANAGER_TELECOM}/${billing.billingAccount}/alias/default/portabilities`, "Acceder au manager")])];
+    responses = [...responses, new TextMessage(`Pour modifer votre portabilité, rendez vous dans votre manager : ${MANAGER_TELECOM}/${billing.billingAccount}/alias/default/portabilities`)];
   }
 
   if (!responses.length) {
     responses = [...responses, new TextMessage("Nous n'avons pas trouver de probleme")];
   }
-  responses = [...responses, new ButtonsListMessage("Pour tout autres renseignements, rendez vous dans votre manager", [new Button("web_url", `${MANAGER_TELECOM}/${billing.billingAccount}`, "Acceder au manager")])];
+  responses = [...responses, new TextMessage(`Pour tout autres renseignements, rendez vous dans votre manager : ${MANAGER_TELECOM}/${billing.billingAccount}`)];
 
   return responses;
 };
