@@ -86,7 +86,7 @@ module.exports = () => {
       .getHistory(res, nichandle)
       .then((result) => {
         if (!result.length) {
-          web.send(null, nichandle, "Bienvenue, en quoi puis-je etre utile ?");
+          web.send(null, nichandle, "Bienvenue, en quoi puis-je être utile ?");
         }
         return res.status(200).json(result);
       })

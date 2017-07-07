@@ -3,7 +3,6 @@
 const ovh = require("ovh");
 const config = require("../config/config-loader").load();
 const messenger = require("../platforms/messenger/messenger");
-const web = require("../platforms/web/web");
 const User = require("../models/users.model");
 const responsesCst = require("../constants/responses").FR;
 const slackSDK = require("../platforms/slack/slack");
@@ -56,10 +55,6 @@ function welcome (senderId, meInfos, userInfos) {
     slackSDK(userInfos.team_id)
     .then((slack) => slack.sendTextMessage(senderId, responsesCst.welcome_logged.replace("%s", meInfos.nichandle)))
     .catch(console.error);
-    break;
-  }
-  case "web": {
-    web.send(senderId, `Vous êtes bien connecté sous le nic ${meInfos.nichandle}`);
     break;
   }
   default: break;

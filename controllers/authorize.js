@@ -15,7 +15,7 @@ module.exports = function () {
         appSecret: config.ovh.appSecret
       });
       let consumerInfos = {};
-      let platformMatch = /-(facebook_messenger|slack|web)/g.exec(senderId);
+      let platformMatch = /-(facebook_messenger|slack)/g.exec(senderId);
       let teamIdMatch = /-slack-(\w*)/g.exec(senderId);
       let team_id;
 
@@ -28,7 +28,7 @@ module.exports = function () {
         team_id = teamIdMatch[1];
       }
 
-      senderId = senderId.replace(/-(facebook_messenger|slack-\w*|web)/g, "");
+      senderId = senderId.replace(/-(facebook_messenger|slack-\w*)/g, "");
 
       return ovhClient
         .requestPromised("POST", "/auth/credential", {
