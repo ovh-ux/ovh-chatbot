@@ -40,7 +40,7 @@ module.exports = [
           })
         )
         .then(({ xdsl, serviceInfos, orderFollowUp, incident, diag }) => xDSLDiag.checkxDSLDiag(xdsl, serviceInfos, orderFollowUp, incident, diag))
-        .then((responses) => Bluebird.resolve({ responses, feedback: false }))
+        .then((responses) => Bluebird.resolve({ responses, feedback: true }))
         .catch((err) => {
           res.logger.error(err);
           return Bluebird.reject(error(err));
@@ -99,11 +99,10 @@ module.exports = [
           user = lUser;
           return user.requestPromised("GET", "/xdsl");
         })
-        .then((offers) => Bluebird.map(offers, (offer) =>
-            user.requestPromised("GET", `/xdsl/${offer}`)
-            .then((xdslInfo) => new Button("postback", `XDSL_SELECTED_${xdslInfo.accessName}`, xdslInfo.description)))
+        .map((offer) => user.requestPromised("GET", `/xdsl/${offer}`)
+          .then((xdslInfo) => new Button("postback", `XDSL_SELECTED_${xdslInfo.accessName}`, xdslInfo.description))
         )
-        .then((buttons) => ({ responses: createPostBackList("Selectionne ta ligne", buttons, "MORE_XDSL", parseInt(new RegExp(regx)[1], 10), 10), feedback: false }))
+        .then((buttons) => ({ responses: createPostBackList("Selectionne ta ligne", buttons, "MORE_XDSL", parseInt(postback.match(new RegExp(regx))[1], 10), 10), feedback: false }))
         .catch((err) => {
           res.logger.error(err);
           return Bluebird.reject(error(err));

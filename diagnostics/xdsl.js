@@ -5,7 +5,7 @@ const checkxDSLDiagAdvanced = (diag) => {
   let responses = "";
   let linePb = false;
 
-  responses = `Diagnostique réalisé à : ${diag.diagnosticTime}\n`;
+  responses = `Diagnostique réalisé ${new Date(diag.diagnosticTime).toUTCString()}\n`;
 
   if (diag.isModemConnected != null) {
     if (!diag.isModemConnected) {

@@ -15,19 +15,13 @@ class XdslBreak {
         user = lUser;
         return user.requestPromised("GET", "/xdsl");
       })
-      .then((xdsl) => {
-        if (!Array.isArray(xdsl) || !xdsl.length) {
-          return Bluebird.resolve({ responses: [new TextMessage(`Il semblerait que vous n'avez pas d'offre xDSL. ${responsesCst.upsellingXDSL}`)], feedback: false });
-        }
-
-        return Bluebird.map(xdsl, (offer) =>
-          user.requestPromised("GET", `/xdsl/${offer}`)
-          .then((xdslInfo) => new Button("postback", `XDSL_SELECTED_${xdslInfo.accessName}`, xdslInfo.description)));
-      })
-      .then((resp) => Array.isArray(resp) ? {
-        responses: [createPostBackList("Sélectionne ton offre xDSL", resp, "MORE_XDSL", 0, 4)],
+      .map((offer) => user.requestPromised("GET", `/xdsl/${offer}`)
+          .then((xdslInfo) => new Button("postback", `XDSL_SELECTED_${xdslInfo.accessName}`, xdslInfo.description))
+      )
+      .then((buttons) => ({
+        responses: [buttons.length > 0 ? createPostBackList("Sélectionne ton offre xDSL", buttons, "MORE_XDSL", 0, 4) : new TextMessage(`Il semblerait que vous n'avez pas d'offre xDSL. ${responsesCst.upsellingXDSL}`)],
         feedback: false
-      } : resp)
+      }))
       .catch((err) => {
         Bluebird.reject(error(err.error || err.statusCode || 400, err));
       });
