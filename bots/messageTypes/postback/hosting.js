@@ -58,9 +58,10 @@ module.exports = [
           }
 
           if (err.error === 460) {
-            return Bluebird.resolve([
+            return Bluebird.resolve({ responses: [
               new TextMessage("Ton service hébergement web semble être suspendu, pour le réactiver il faut le renouveler via le manager", `Voici un guide qui va te permettre de renouveler ton hébergement web : ${guides.renewOvh}`)
-            ]);
+            ],
+              feedback: false });
           }
 
           return Bluebird.reject(error(err.error || err.statusCode || 400, err));
@@ -79,7 +80,7 @@ module.exports = [
 
           return ovhClient.requestPromised("GET", `/hosting/web/${hosting}/attachedDomain`);
         })
-        .then((domains) => [createWebsiteList(hosting, domains, parseInt(postback.match(new RegExp(regx))[2], 10), 4)])
+        .then((domains) => ({ responses: [createWebsiteList(hosting, domains, parseInt(postback.match(new RegExp(regx))[2], 10), 4)], feedback: false }))
         .catch((err) => {
           res.logger.error(err);
           return Bluebird.reject(error(err.error || err.statusCode || 400, err));
@@ -95,7 +96,7 @@ module.exports = [
         .then((hostings) => {
           const eltInfos = hostings.map((hosting) => new Button("postback", `HOSTING_SELECTED_${hosting}`, hosting));
 
-          return [createPostBackList("Sélectionne l'hébergement web sur lequel est installé ton site", eltInfos, "MORE_HOSTING", parseInt(postback.match(new RegExp(regx))[1], 10), 4)];
+          return { responses: [createPostBackList("Sélectionne l'hébergement web sur lequel est installé ton site", eltInfos, "MORE_HOSTING", parseInt(postback.match(new RegExp(regx))[1], 10), 4)], feedback: false };
         })
         .catch((err) => {
           res.logger.error(err);

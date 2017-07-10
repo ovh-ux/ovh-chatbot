@@ -110,7 +110,6 @@ module.exports = () => {
       .ask("postback", senderId, payload, null, null, res)
       .then((answer) => {
         needFeedback = answer.feedback || needFeedback;
-
         return sendResponses(res, senderId, answer.responses);
       })
       .then(() => {
