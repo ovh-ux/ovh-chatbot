@@ -21,6 +21,11 @@ function buttonAdapter (button) {
       url: button.value,
       title: button.text
     };
+  case BUTTON_TYPE.ACCOUNT_LINKING:
+    return {
+      type: button.type,
+      url: button.value
+    };
   default:
     return button;
   }
@@ -49,7 +54,7 @@ function buttonsListMessageAdapter (message) {
     }
 
     button.type = BUTTON_TYPE.POSTBACK;
-    moreButtons.push(button);
+    moreButtons.push(buttonAdapter(button));
     return false;
   });
 

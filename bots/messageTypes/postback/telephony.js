@@ -2,12 +2,14 @@
 
 
 const error = require("../../../providers/errors/apiError");
-const { Button, createPostBackList, TextMessage } = require("../../../platforms/generics");
+const { Button, createPostBackList, TextMessage, BUTTON_TYPE } = require("../../../platforms/generics");
 const utils = require("../../utils");
 const Bluebird = require("bluebird").config({
   warnings: false
 });
 const telephonyDiag = require("../../../diagnostics/telephony");
+const responsesCst = require("../../../constants/responses").FR;
+
 
 module.exports = [
   {
@@ -54,10 +56,10 @@ module.exports = [
         return user.requestPromised("GET", "/telephony");
       })
       .map((service) => user.requestPromised("GET", `/telephony/${service}`)
-          .then((info) => new Button("postback", `TELEPHONY_SELECTED_${info.billingAccount}`, info.description))
+          .then((info) => new Button(BUTTON_TYPE.POSTBACK, `TELEPHONY_SELECTED_${info.billingAccount}`, info.description))
       )
       .then((buttons) => ({
-        responses: [buttons.length > 0 ? createPostBackList("Selectionnez votre compte", buttons, "MORE_TELEPHONY", parseInt(postback.match(new RegExp(regx))[1], 10), 10) : new TextMessage("Vous n'avez pas d'offre telephonie")],
+        responses: [buttons.length > 0 ? createPostBackList(responsesCst.telephonySelectAccount, buttons, "MORE_TELEPHONY", parseInt(postback.match(new RegExp(regx))[1], 10), 10) : new TextMessage(responsesCst.telephonyNoAccount)],
         feedback: false
       }));
     }

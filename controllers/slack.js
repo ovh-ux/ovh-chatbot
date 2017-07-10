@@ -9,7 +9,7 @@ const request = require("request-promise");
 const responsesCst = require("../constants/responses").FR;
 const apiai = require("../utils/apiai");
 const { camelCase } = require("lodash");
-const { ButtonsListMessage, Button } = require("../platforms/generics");
+const { ButtonsListMessage, Button, BUTTON_TYPE } = require("../platforms/generics");
 
 module.exports = () => ({
   receiveMessage (req, res) {
@@ -36,20 +36,8 @@ module.exports = () => ({
 
         if (resp.apiai.status && resp.apiai.status.code === 200 && resp.apiai.result) {
           if (resp.apiai.result.action === "connection" || resp.apiai.result.action === "welcome") {
-            return resp.slack
-              .sendTextMessage(
-                channel,
-                `Pour te connecter il te suffit de <${config.server.url}${config.server.basePath}/authorize?state=${channel}-slack-${req.body.team_id}|cliquer ici.>
-Pour l'instant je ne peux te répondre que sur des informations concernant un dysfonctionnement sur ton site web.
-  Voici des exemples de questions que tu peux me poser :
-    • Mon site ne fonctionne plus
-    • J'ai un problème sur mon site ovh.com
-    • Peux-tu m'aider à réparer mon site ?
-    • Comment je fais pour changer mes serveurs dns de ma zone exemple.ovh ?
-    • Comment je peux faire pointer mon domaine exemple.ovh sur mon hébergement web ?`
-              )
-              .then(res.logger.info)
-              .catch(res.logger.error);
+            const accountLinkButton = new Button(BUTTON_TYPE.WEB_URL, `${config.server.url}${config.server.basePath}/authorize?state=${channel}-slack-${req.body.team_id}`, responsesCst.signIn);
+            return sendResponse(res, channel, new ButtonsListMessage(responsesCst.welcome, [accountLinkButton]), resp.slack);
           }
 
           if (resp.apiai.result.fulfillment && resp.apiai.result.fulfillment.speech && Array.isArray(resp.apiai.result.fulfillment.messages) && resp.apiai.result.fulfillment.messages.length) {
@@ -98,7 +86,7 @@ Pour l'instant je ne peux te répondre que sur des informations concernant un dy
     let needFeedback = false;
 
     Bluebird.props({
-      bot: bot.ask("postback", channel, value, "", {}, res),
+      bot: bot.ask(BUTTON_TYPE.POSTBACK, channel, value, "", {}, res),
       slack: slackSDK(payload.team.id)
     })
       .then((responses) => {
@@ -166,11 +154,11 @@ function sendFeedback (res, senderId, intent, messageRaw, slack) {
   }
 
   const buttons = [
-    new Button("postback", `FEEDBACK_MISUNDERSTOOD_${camelCase(intent)}_${message}`, "Mauvaise compréhension"),
-    new Button("postback", `FEEDBACK_BAD_${camelCase(intent)}_${message}`, "Non"),
-    new Button("postback", `FEEDBACK_GOOD_${camelCase(intent)}_${message}`, "Oui")
+    new Button(BUTTON_TYPE.POSTBACK, `FEEDBACK_MISUNDERSTOOD_${camelCase(intent)}_${message}`, responsesCst.feedbackBadUnderstanding),
+    new Button(BUTTON_TYPE.POSTBACK, `FEEDBACK_BAD_${camelCase(intent)}_${message}`, responsesCst.feedbackNo),
+    new Button(BUTTON_TYPE.POSTBACK, `FEEDBACK_GOOD_${camelCase(intent)}_${message}`, responsesCst.feedbackYes)
   ];
-  const buttonsList = new ButtonsListMessage("Est-ce que cette réponse vous a aidé ?", buttons);
+  const buttonsList = new ButtonsListMessage(responsesCst.feedbackHelp, buttons);
   buttonsList.delete_original = true;
 
   return sendResponse(res, senderId, buttonsList, slack);

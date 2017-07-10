@@ -3,14 +3,15 @@
 const Bluebird = require("bluebird");
 const { TextMessage } = require("../../../platforms/generics");
 const utils = require("../../utils");
+const responsesCst = require("../../../constants/responses").FR;
 
 class WhoAmI {
   static action (senderId) {
     return utils
       .getOvhClient(senderId)
       .then((user) => user.requestPromised("GET", "/me"))
-      .then((me) => ({ responses: [new TextMessage(`Tu es connecté en tant que ${me.nichandle}`)], feedback: false }))
-      .catch(() => Bluebird.resolve({ responses: [new TextMessage("Tu n'es pas connecté, mais tu peux te connecter en me demandant: 'connecte moi'")], feedback: false }));
+      .then((me) => ({ responses: [new TextMessage(responsesCst.connectedAs.replace("%s", me.nichandle))], feedback: false }))
+      .catch(() => Bluebird.resolve({ responses: [new TextMessage(responsesCst.notConnected)], feedback: false }));
   }
 }
 

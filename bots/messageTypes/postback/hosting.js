@@ -1,12 +1,13 @@
 "use strict";
 
 const error = require("../../../providers/errors/apiError");
-const { ButtonsListMessage, Button, createPostBackList, TextMessage } = require("../../../platforms/generics");
+const { ButtonsListMessage, Button, createPostBackList, TextMessage, BUTTON_TYPE } = require("../../../platforms/generics");
 const utils = require("../../utils");
 const Bluebird = require("bluebird").config({
   warnings: false
 });
 const guides = require("../../../constants/guides").FR;
+const responsesCst = require("../../../constants/responses").FR;
 const hostingDiagnostics = require("../../../diagnostics/hosting");
 
 module.exports = [
@@ -22,7 +23,7 @@ module.exports = [
 
           return ovhClient.requestPromised("GET", `/hosting/web/${hosting}/attachedDomain`);
         })
-        .then((attachedDomains) => ({ responses: [new TextMessage("Sélectionne le site concerné"), createWebsiteList(hosting, attachedDomains, 0, 4)], feedback: false }))
+        .then((attachedDomains) => ({ responses: [new TextMessage(responsesCst.hostingSelectSite), createWebsiteList(hosting, attachedDomains, 0, 4)], feedback: false }))
         .catch((err) => {
           res.logger.error(err);
 
@@ -54,13 +55,15 @@ module.exports = [
         .catch((err) => {
           res.logger.error(err);
           if (err.error === 404) {
-            return Bluebird.reject(error(404, "Tu as du sélectionner le mauvais hébergement web associé à ce domaine."));
+            return Bluebird.reject(error(404, responsesCst.hostingWrongSite));
           }
 
           if (err.error === 460) {
-            return Bluebird.resolve([
-              new TextMessage("Ton service hébergement web semble être suspendu, pour le réactiver il faut le renouveler via le manager", `Voici un guide qui va te permettre de renouveler ton hébergement web : ${guides.renewOvh}`)
-            ]);
+            return Bluebird.resolve({ responses: [
+              new TextMessage(responsesCst.hostingSuspended),
+              new TextMessage(guides.help(guides.renewOvh))
+            ],
+              feedback: false });
           }
 
           return Bluebird.reject(error(err.error || err.statusCode || 400, err));
@@ -79,7 +82,7 @@ module.exports = [
 
           return ovhClient.requestPromised("GET", `/hosting/web/${hosting}/attachedDomain`);
         })
-        .then((domains) => [createWebsiteList(hosting, domains, parseInt(postback.match(new RegExp(regx))[2], 10), 4)])
+        .then((domains) => ({ responses: [createWebsiteList(hosting, domains, parseInt(postback.match(new RegExp(regx))[2], 10), 4)], feedback: false }))
         .catch((err) => {
           res.logger.error(err);
           return Bluebird.reject(error(err.error || err.statusCode || 400, err));
@@ -93,9 +96,9 @@ module.exports = [
         .getOvhClient(senderId)
         .then((ovhClient) => ovhClient.requestPromised("GET", "/hosting/web"))
         .then((hostings) => {
-          const eltInfos = hostings.map((hosting) => new Button("postback", `HOSTING_SELECTED_${hosting}`, hosting));
+          const eltInfos = hostings.map((hosting) => new Button(BUTTON_TYPE.POSTBACK, `HOSTING_SELECTED_${hosting}`, hosting));
 
-          return [createPostBackList("Sélectionne l'hébergement web sur lequel est installé ton site", eltInfos, "MORE_HOSTING", parseInt(postback.match(new RegExp(regx))[1], 10), 4)];
+          return { responses: [createPostBackList(responsesCst.hostingSelectHost, eltInfos, "MORE_HOSTING", parseInt(postback.match(new RegExp(regx))[1], 10), 4)], feedback: false };
         })
         .catch((err) => {
           res.logger.error(err);
@@ -116,10 +119,10 @@ function createWebsiteList (hosting, domains, offset, limit) {
   const elements = [];
 
   for (let i = offset; i < limit + offset && i < domains.length; i++) {
-    elements.push(new Button("postback", `ATTACHED_DOMAIN_SELECTED_${hosting}_${domains[i]}`, domains[i]));
+    elements.push(new Button(BUTTON_TYPE.POSTBACK, `ATTACHED_DOMAIN_SELECTED_${hosting}_${domains[i]}`, domains[i]));
   }
 
-  const moreButton = offset + limit >= domains.length ? null : new Button("postback_more", `MORE_ATTACHED_DOMAIN_${hosting}_${offset + limit}`, "Voir plus");
+  const moreButton = offset + limit >= domains.length ? null : new Button(BUTTON_TYPE.MORE, `MORE_ATTACHED_DOMAIN_${hosting}_${offset + limit}`, responsesCst.moreButton);
 
   if (moreButton) {
     elements.push(moreButton);

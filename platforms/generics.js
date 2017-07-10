@@ -1,9 +1,12 @@
 "use strict";
 
+const responsesCst = require("../constants/responses").FR;
+
 const BUTTON_TYPE = {
   URL: "web_url",
   POSTBACK: "postback",
-  MORE: "postback_more"
+  MORE: "postback_more",
+  ACCOUNT_LINKING: "account_link"
 };
 
 class TextMessage {
@@ -50,7 +53,7 @@ class ButtonsListMessage {
 
 function createPostBackList (text, listInfos, morePayload, offset, limit) {
   const buttons = listInfos.slice(offset, limit + offset);
-  const moreButton = offset + limit >= listInfos.length ? null : new Button(BUTTON_TYPE.MORE, `${morePayload}_${offset + limit}`, "Voir plus");
+  const moreButton = offset + limit >= listInfos.length ? null : new Button(BUTTON_TYPE.MORE, `${morePayload}_${offset + limit}`, responsesCst.moreButton);
 
   if (moreButton) {
     buttons.push(moreButton);

@@ -6,7 +6,7 @@ const config = require("../config/config-loader").load();
 const apiai = require("../utils/apiai");
 const Bluebird = require("bluebird");
 const responsesCst = require("../constants/responses").FR;
-const { ButtonsListMessage, Button } = require("../platforms/generics");
+const { Button, ButtonsMessage, BUTTON_TYPE } = require("../platforms/generics");
 const { camelCase } = require("lodash");
 
 function getWebhook (req, res) {
@@ -110,7 +110,6 @@ module.exports = () => {
       .ask("postback", senderId, payload, null, null, res)
       .then((answer) => {
         needFeedback = answer.feedback || needFeedback;
-
         return sendResponses(res, senderId, answer.responses);
       })
       .then(() => {
@@ -135,8 +134,8 @@ module.exports = () => {
       .then((resp) => {
         if (resp.status && resp.status.code === 200 && resp.result) {
           if (resp.result.action === "connection" || resp.result.action === "welcome") {
-            messenger.sendTextMessage(senderId, responsesCst.welcome);
-            return messenger.sendAccountLinking(senderId, `${config.server.url}${config.server.basePath}/authorize?state=${senderId}-facebook_messenger`);
+            const accountLinkButton = new Button(BUTTON_TYPE.ACCOUNT_LINKING, `${config.server.url}${config.server.basePath}/authorize?state=${senderId}-facebook_messenger`, "");
+            return sendResponse(res, senderId, new ButtonsMessage(responsesCst.welcome, [accountLinkButton]));
           }
 
           if (resp.result.fulfillment && resp.result.fulfillment.speech && Array.isArray(resp.result.fulfillment.messages) && resp.result.fulfillment.messages.length) {
@@ -180,12 +179,12 @@ module.exports = () => {
     }
 
     const buttons = [
-      new Button("postback", `FEEDBACK_MISUNDERSTOOD_${camelCase(intent)}_${message}`, "Mauvaise compréhension"),
-      new Button("postback", `FEEDBACK_BAD_${camelCase(intent)}_${message}`, "Non"),
-      new Button("postback", `FEEDBACK_GOOD_${camelCase(intent)}_${message}`, "Oui")
+      new Button(BUTTON_TYPE.POSTBACK, `FEEDBACK_MISUNDERSTOOD_${camelCase(intent)}_${message}`, responsesCst.feedbackBadUnderstanding),
+      new Button(BUTTON_TYPE.POSTBACK, `FEEDBACK_BAD_${camelCase(intent)}_${message}`, responsesCst.feedbackNo),
+      new Button(BUTTON_TYPE.POSTBACK, `FEEDBACK_GOOD_${camelCase(intent)}_${message}`, responsesCst.feedbackYes)
     ];
 
-    return sendResponse(res, senderId, new ButtonsListMessage("Est-ce que cette réponse vous a aidé ?", buttons));
+    return sendResponse(res, senderId, new ButtonsMessage(responsesCst.feedbackHelp, buttons));
   }
 
   function sendQuickResponses (res, senderId, responses) {

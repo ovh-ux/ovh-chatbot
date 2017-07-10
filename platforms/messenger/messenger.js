@@ -506,7 +506,7 @@ function sendAccountLinking (recipientId, url) {
         type: "template",
         payload: {
           template_type: "button",
-          text: "Bonjour, connectez vous à votre compte OVH afin de commencer :)",
+          text: "",
           buttons: [
             {
               type: "account_link",

@@ -1,10 +1,11 @@
 "use strict";
 
 const error = require("../../../providers/errors/apiError");
-const { Button, createPostBackList, TextMessage } = require("../../../platforms/generics");
+const { Button, createPostBackList, TextMessage, BUTTON_TYPE } = require("../../../platforms/generics");
 const utils = require("../../utils");
 const Bluebird = require("bluebird");
 const xDSLDiag = require("../../../diagnostics/xdsl");
+const responsesCst = require("../../../constants/responses").FR;
 
 Bluebird.config({
   warnings: false
@@ -77,11 +78,11 @@ module.exports = [
             });
           }, 1000);
         }).then((diag) => xDSLDiag.checkxDSLDiagAdvanced(diag));
-        return Bluebird.resolve({ responses: [new TextMessage("Diagnostique en cours... Veuillez patienter quelques instants, merci :)"), promise], feedback: false });
+        return Bluebird.resolve({ responses: [new TextMessage(responsesCst.xdslDiagInProgress), promise], feedback: false });
       })
       .catch((err) => {
         if (err.error === 401 || err.statusCode === 401 || err.errorCode === 401) {
-          return Bluebird.resolve({ responses: [new TextMessage("Votre quota de diagnostiques a été atteint")] });
+          return Bluebird.resolve({ responses: [new TextMessage(responsesCst.xdslQuotaReached)] });
         }
         res.logger.error(err);
         return Bluebird.reject(error(err));
@@ -100,9 +101,9 @@ module.exports = [
           return user.requestPromised("GET", "/xdsl");
         })
         .map((offer) => user.requestPromised("GET", `/xdsl/${offer}`)
-          .then((xdslInfo) => new Button("postback", `XDSL_SELECTED_${xdslInfo.accessName}`, xdslInfo.description))
+          .then((xdslInfo) => new Button(BUTTON_TYPE.POSTBACK, `XDSL_SELECTED_${xdslInfo.accessName}`, xdslInfo.description))
         )
-        .then((buttons) => ({ responses: createPostBackList("Selectionne ta ligne", buttons, "MORE_XDSL", parseInt(postback.match(new RegExp(regx))[1], 10), 10), feedback: false }))
+        .then((buttons) => ({ responses: createPostBackList(responsesCst.xdslSelect, buttons, "MORE_XDSL", parseInt(postback.match(new RegExp(regx))[1], 10), 10), feedback: false }))
         .catch((err) => {
           res.logger.error(err);
           return Bluebird.reject(error(err));

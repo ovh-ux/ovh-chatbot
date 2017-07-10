@@ -6,12 +6,13 @@ const ovh = require("ovh");
 const Bluebird = require("bluebird");
 const dns = require("dns");
 const URL = require("url");
+const responsesCst = require("../constants/responses").FR;
 
 module.exports = {
   getOvhClient (senderId) {
     return User.findOne({ senderId }).exec().then((userInfos) => {
       if (!userInfos) {
-        return Bluebird.reject({ statusCode: 403, message: "Tu dois d'abord te connecter. Pour ce faire tu peux me le demander" });
+        return Bluebird.reject({ statusCode: 403, message: responsesCst.signInFirst });
       }
 
       const ovhClient = ovh({

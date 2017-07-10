@@ -1,6 +1,7 @@
 "use strict";
 
 const { BUTTON_TYPE } = require("../generics");
+const responsesCst = require("../../constants/responsesCst").FR;
 
 function textMessageAdapter (message) {
   return message.text;
@@ -8,6 +9,7 @@ function textMessageAdapter (message) {
 
 function buttonAdapter (button) {
   switch (button.type) {
+  case BUTTON_TYPE.ACCOUNT_LINKING:
   case BUTTON_TYPE.URL:
     return `<${button.value}|${button.text}>`;
   case BUTTON_TYPE.POSTBACK:
@@ -40,7 +42,7 @@ function buttonsMessageAdapter (message) {
     attachments: [
       {
         text: message.text,
-        fallback: "Vous ne pouvez pas utiliser cette fonctionnalité avec ce navigateur",
+        fallback: responsesCst.slackFallback,
         callback_id: "button_list",
         attachment_type: "default",
         actions: buttons

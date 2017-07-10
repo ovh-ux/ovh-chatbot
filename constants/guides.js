@@ -2,6 +2,7 @@
 
 module.exports = {
   FR: {
+    help: (guide) => `Je te conseille de consulter ce guide pour t'aider: ${guide}`,
     error500: "https://docs.ovh.com/fr/fr/web/hosting/erreur-500-internal-server-error/",
     blankPage: "https://docs.ovh.com/fr/fr/web/hosting/comment-diagnostiquer-page-blanche/",
     errorApache: "https://docs.ovh.com/fr/fr/web/hosting/mutualise-les-codes-de-reponse-dun-serveur-http/",
