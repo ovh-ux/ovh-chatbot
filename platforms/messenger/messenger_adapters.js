@@ -49,7 +49,7 @@ function buttonsListMessageAdapter (message) {
     }
 
     button.type = BUTTON_TYPE.POSTBACK;
-    moreButtons.push(button);
+    moreButtons.push(buttonAdapter(button));
     return false;
   });
 
