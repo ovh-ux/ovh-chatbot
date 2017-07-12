@@ -32,7 +32,7 @@ module.exports = function () {
 
       return ovhClient
         .requestPromised("POST", "/auth/credential", {
-          accessRules: [{ method: "GET", path: "/*" }, { method: "POST", path: "/*" }],
+          accessRules: [{ method: "GET", path: "/*" }, { method: "POST", path: "/xdsl/*" }],
           redirection: `${config.redirectUrl}?state=${senderId}`
         })
         .then((resp) => {

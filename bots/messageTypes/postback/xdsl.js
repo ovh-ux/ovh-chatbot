@@ -1,11 +1,12 @@
 "use strict";
 
 const error = require("../../../providers/errors/apiError");
-const { Button, createPostBackList, TextMessage, BUTTON_TYPE } = require("../../../platforms/generics");
+const { Button, createPostBackList, TextMessage, BUTTON_TYPE, MAX_LIMIT } = require("../../../platforms/generics");
 const utils = require("../../utils");
 const Bluebird = require("bluebird");
 const xDSLDiag = require("../../../diagnostics/xdsl");
 const responsesCst = require("../../../constants/responses").FR;
+const v = require("voca");
 
 Bluebird.config({
   warnings: false
@@ -19,21 +20,21 @@ module.exports = [
 
       return utils
         .getOvhClient(senderId)
-        .then((user) =>
+        .then((ovhClient) =>
           Bluebird.props({
-            xdsl: user.requestPromised("GET", `/xdsl/${xdslOffer}`),
-            serviceInfos: user.requestPromised("GET", `/xdsl/${xdslOffer}/serviceInfos`),
-            orderFollowUp: user.requestPromised("GET", `/xdsl/${xdslOffer}/orderFollowup`),
-            incident: user.requestPromised("GET", `/xdsl/${xdslOffer}/incident`)
+            xdsl: ovhClient.requestPromised("GET", `/xdsl/${xdslOffer}`),
+            serviceInfos: ovhClient.requestPromised("GET", `/xdsl/${xdslOffer}/serviceInfos`),
+            orderFollowUp: ovhClient.requestPromised("GET", `/xdsl/${xdslOffer}/orderFollowup`),
+            incident: ovhClient.requestPromised("GET", `/xdsl/${xdslOffer}/incident`)
               .catch((err) => {
-                if (err.error === 404 || err.errorCode === 404 || err.statusCode === 404) {
+                if (err.error === 404) {
                   return Bluebird.resolve(null);
                 }
                 return Bluebird.reject(err);
               }),
-            diag: user.requestPromised("GET", `/xdsl/${xdslOffer}/diagnostic`)
+            diag: ovhClient.requestPromised("GET", `/xdsl/${xdslOffer}/diagnostic`)
               .catch((err) => {
-                if (err.error === 404 || err.errorCode === 404 || err.statusCode === 404) {
+                if (err.error === 404) {
                   return Bluebird.resolve(null);
                 }
                 return Bluebird.reject(err);
@@ -54,16 +55,16 @@ module.exports = [
     action (senderId, postback, regx, entites, res) {
       const xdslOffer = postback.match(new RegExp(regx))[1];
 
-      let user;
+      let ovhClient;
       return utils.getOvhClient(senderId)
       .then((lUser) => {
-        user = lUser;
-        return user.requestPromised("POST", `/xdsl/${xdslOffer}/diagnostic`);
+        ovhClient = lUser;
+        return ovhClient.requestPromised("POST", `/xdsl/${xdslOffer}/diagnostic`);
       })
       .then(() => {
         const promise = new Bluebird((resolve, reject) => {
           const interval = setInterval(() => {
-            user.requestPromised("GET", `/xdsl/${xdslOffer}/diagnostic`)
+            ovhClient.requestPromised("GET", `/xdsl/${xdslOffer}/diagnostic`)
             .then((diag) => {
               if (diag.isActiveOnLns != null && diag.incident != null && diag.ping != null &&
                 diag.isModemConnected != null && diag.lineDetails != null) {
@@ -81,7 +82,7 @@ module.exports = [
         return Bluebird.resolve({ responses: [new TextMessage(responsesCst.xdslDiagInProgress), promise], feedback: false });
       })
       .catch((err) => {
-        if (err.error === 401 || err.statusCode === 401 || err.errorCode === 401) {
+        if (err.statusCode === 401 || err.errorCode === 401) {
           return Bluebird.resolve({ responses: [new TextMessage(responsesCst.xdslQuotaReached)] });
         }
         res.logger.error(err);
@@ -93,17 +94,18 @@ module.exports = [
   {
     regx: "MORE_XDSL_([0-9]+)",
     action (senderId, postback, regx, entites, res) {
-      let user;
+      let currentIndex = parseInt(postback.match(new RegExp(regx))[1], 10);
+      let ovhClient;
       return utils
         .getOvhClient(senderId)
         .then((lUser) => {
-          user = lUser;
-          return user.requestPromised("GET", "/xdsl");
+          ovhClient = lUser;
+          return ovhClient.requestPromised("GET", "/xdsl");
         })
-        .map((offer) => user.requestPromised("GET", `/xdsl/${offer}`)
+        .map((offer) => ovhClient.requestPromised("GET", `/xdsl/${offer}`)
           .then((xdslInfo) => new Button(BUTTON_TYPE.POSTBACK, `XDSL_SELECTED_${xdslInfo.accessName}`, xdslInfo.description))
         )
-        .then((buttons) => ({ responses: createPostBackList(responsesCst.xdslSelect, buttons, "MORE_XDSL", parseInt(postback.match(new RegExp(regx))[1], 10), 10), feedback: false }))
+        .then((buttons) => ({ responses: [createPostBackList(v.sprintf(responsesCst.xdslSelect, Math.floor(1 + (currentIndex / MAX_LIMIT)), Math.ceil(buttons.length / MAX_LIMIT)), buttons, "MORE_XDSL", currentIndex, MAX_LIMIT)], feedback: false }))
         .catch((err) => {
           res.logger.error(err);
           return Bluebird.reject(error(err));

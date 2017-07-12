@@ -255,8 +255,7 @@ function sendTextMessage (recipientId, messageText) {
       id: recipientId
     },
     message: {
-      text: messageText,
-      metadata: "DEVELOPER_DEFINED_METADATA"
+      text: messageText
     }
   };
 
@@ -267,7 +266,7 @@ function sendTextMessage (recipientId, messageText) {
  * Send a button message using the Send API.
  *
  */
-function sendButtonMessage (recipientId, text, title, url) {
+function sendButtonMessage (recipientId, buttonMessage) {
   const messageData = {
     recipient: {
       id: recipientId
@@ -275,17 +274,7 @@ function sendButtonMessage (recipientId, text, title, url) {
     message: {
       attachment: {
         type: "template",
-        payload: {
-          template_type: "button",
-          text,
-          buttons: [
-            {
-              type: "web_url",
-              url,
-              title
-            }
-          ]
-        }
+        payload: buttonMessage
       }
     }
   };
@@ -302,6 +291,7 @@ function sendListMessage (recipientId, list) {
     recipient: {
       id: recipientId
     },
+
     message: {
       attachment: {
         type: "template",
@@ -412,31 +402,12 @@ function sendReceiptMessage (recipientId) {
  * Send a message with Quick Reply buttons.
  *
  */
-function sendQuickReply (recipientId) {
+function sendQuickReply (recipientId, message) {
   const messageData = {
     recipient: {
       id: recipientId
     },
-    message: {
-      text: "What's your favorite movie genre?",
-      quick_replies: [
-        {
-          content_type: "text",
-          title: "Action",
-          payload: "DEVELOPER_DEFINED_PAYLOAD_FOR_PICKING_ACTION"
-        },
-        {
-          content_type: "text",
-          title: "Comedy",
-          payload: "DEVELOPER_DEFINED_PAYLOAD_FOR_PICKING_COMEDY"
-        },
-        {
-          content_type: "text",
-          title: "Drama",
-          payload: "DEVELOPER_DEFINED_PAYLOAD_FOR_PICKING_DRAMA"
-        }
-      ]
-    }
+    message
   };
 
   callSendAPI(messageData);
@@ -565,11 +536,11 @@ function send (recipientId, message) {
   }
 
   if (message instanceof ButtonsListMessage) {
-    return sendTextMessage(recipientId, message.text).then(() => sendListMessage(recipientId, buttonsListMessageAdapter(message)));
+    return sendQuickReply(recipientId, buttonsListMessageAdapter(message));
   }
 
   if (message instanceof ButtonsMessage) {
-    return sendListMessage(recipientId, buttonsMessageAdapter(message));
+    return sendButtonMessage(recipientId, buttonsMessageAdapter(message));
   }
 
   return callSendAPI(message);

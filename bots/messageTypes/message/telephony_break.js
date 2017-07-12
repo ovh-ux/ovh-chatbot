@@ -1,24 +1,25 @@
 "use strict";
 
-// const Bluebird = require("bluebird");
-const { TextMessage, createPostBackList, Button, BUTTON_TYPE } = require("../../../platforms/generics");
+const { TextMessage, createPostBackList, Button, BUTTON_TYPE, MAX_LIMIT } = require("../../../platforms/generics");
 const utils = require("../../utils");
 const responsesCst = require("../../../constants/responses").FR;
+const v = require("voca");
 
 class TelephonyBreak {
   static action (senderId) {
-    let user;
+    let ovhClient;
 
     return utils.getOvhClient(senderId)
-    .then((lUser) => {
-      user = lUser;
-      return user.requestPromised("GET", "/telephony");
+    .then((lOvhClient) => {
+      ovhClient = lOvhClient;
+      return ovhClient.requestPromised("GET", "/telephony");
     })
-    .map((service) => user.requestPromised("GET", `/telephony/${service}`)
+    .map((service) => ovhClient.requestPromised("GET", `/telephony/${service}`)
       .then((info) => new Button(BUTTON_TYPE.POSTBACK, `TELEPHONY_SELECTED_${info.billingAccount}`, info.description))
     )
     .then((buttons) => ({
-      responses: [buttons.length > 0 ? createPostBackList(responsesCst.telephonySelectAccount, buttons, "MORE_TELEPHONY", 0, 4) : new TextMessage(responsesCst.telephonyNoAccount), new TextMessage(responsesCst.upsellingPhone)],
+      responses: buttons.length > 0 ? [createPostBackList(v.sprintf(responsesCst.telephonySelectAccount, 1, Math.ceil(buttons.length / MAX_LIMIT)), buttons, "MORE_TELEPHONY", 0, MAX_LIMIT)] :
+        [new TextMessage(responsesCst.telephonyNoAccount), new TextMessage(responsesCst.upsellingPhone)],
       feedback: false
     }));
   }

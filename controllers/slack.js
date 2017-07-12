@@ -9,7 +9,7 @@ const request = require("request-promise");
 const responsesCst = require("../constants/responses").FR;
 const apiai = require("../utils/apiai");
 const { camelCase } = require("lodash");
-const { ButtonsListMessage, Button, BUTTON_TYPE } = require("../platforms/generics");
+const { TextMessage, ButtonsListMessage, Button, BUTTON_TYPE } = require("../platforms/generics");
 
 module.exports = () => ({
   receiveMessage (req, res) {
@@ -36,8 +36,9 @@ module.exports = () => ({
 
         if (resp.apiai.status && resp.apiai.status.code === 200 && resp.apiai.result) {
           if (resp.apiai.result.action === "connection" || resp.apiai.result.action === "welcome") {
-            const accountLinkButton = new Button(BUTTON_TYPE.WEB_URL, `${config.server.url}${config.server.basePath}/authorize?state=${channel}-slack-${req.body.team_id}`, responsesCst.signIn);
-            return sendResponse(res, channel, new ButtonsListMessage(responsesCst.welcome, [accountLinkButton]), resp.slack);
+            const accountLinkButton = new Button(BUTTON_TYPE.URL, `${config.server.url}${config.server.basePath}/authorize?state=${channel}-slack-${req.body.team_id}`, responsesCst.signIn);
+            return sendResponse(res, channel, new TextMessage(responsesCst.welcome), resp.slack)
+              .then(() => sendResponse(res, channel, new ButtonsListMessage("", [accountLinkButton]), resp.slack));
           }
 
           if (resp.apiai.result.fulfillment && resp.apiai.result.fulfillment.speech && Array.isArray(resp.apiai.result.fulfillment.messages) && resp.apiai.result.fulfillment.messages.length) {
@@ -67,11 +68,11 @@ module.exports = () => ({
             })
             .catch((err) => {
               res.logger.error(err);
-              resp.slack.sendTextMessage(channel, `Oups ! ${err.message}`);
+              resp.slack.send(channel, `Oups ! ${err.message}`);
             });
         }
 
-        return resp.slack.sendTextMessage(channel, responsesCst.noIntent);
+        return resp.slack.send(channel, responsesCst.noIntent);
       })
       .catch(res.logger.error);
 
@@ -82,10 +83,11 @@ module.exports = () => ({
     const payload = JSON.parse(req.body.payload);
     const channel = payload.channel.id;
     const value = payload.actions[0].value;
+    const message_ts = payload.message_ts;
     let slackClient;
     let needFeedback = false;
 
-    Bluebird.props({
+    return Bluebird.props({
       bot: bot.ask(BUTTON_TYPE.POSTBACK, channel, value, "", {}, res),
       slack: slackSDK(payload.team.id)
     })
@@ -93,7 +95,7 @@ module.exports = () => ({
         slackClient = responses.slack;
         needFeedback = responses.bot.feedback || needFeedback;
 
-        return sendResponses(res, channel, responses.bot.responses, slackClient);
+        return sendResponses(res, channel, responses.bot.responses, slackClient, message_ts);
       })
       .then(() => {
         if (needFeedback) {
@@ -102,12 +104,13 @@ module.exports = () => ({
 
         return null;
       })
+      .then(() => res.status(200).end())
       .catch((err) => {
         res.logger.error(err);
         slackSDK(payload.team.id).then((uSlackClient) => uSlackClient.sendTextMessage(channel, `Oups ! ${err.message}`));
+        return res.status(200).end();
       });
 
-    return res.status(200).end();
   },
 
   authorize (req, res) {
@@ -175,12 +178,13 @@ function sendQuickResponses (res, senderId, responses, slack) {
   });
 }
 
-function sendResponses (res, channel, responses, slack) {
-  return Bluebird.mapSeries(responses, (response) =>
+function sendResponses (res, channel, responses, slack, message_ts) {
+  return Bluebird.mapSeries(responses, (response, index) =>
     Bluebird.resolve(response)
-      .then((resp) => Array.isArray(resp) ? sendResponses(res, channel, resp, slack) : sendResponse(res, channel, resp, slack)));
+      .then((resp) => Array.isArray(resp) ? sendResponses(res, channel, resp, slack, message_ts) : sendResponse(res, channel, resp, slack, index === 0 ? message_ts : null)));
 }
 
-function sendResponse (res, channel, response, slack) {
-  return slack.send(channel, response);
+function sendResponse (res, channel, response, slack, message_ts) {
+  return slack.send(channel, response, message_ts)
+    .then((result) => !result.ok ? console.error(result.error) : console.log(`Sucessfully sent ${result.ts} to ${result.channel}`));
 }

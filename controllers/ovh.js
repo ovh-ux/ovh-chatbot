@@ -6,6 +6,7 @@ const messenger = require("../platforms/messenger/messenger");
 const User = require("../models/users.model");
 const responsesCst = require("../constants/responses").FR;
 const slackSDK = require("../platforms/slack/slack");
+const v = require("voca");
 
 module.exports = () => ({
   getAuth (req, res) {
@@ -47,13 +48,13 @@ function welcome (senderId, meInfos, userInfos) {
   switch (userInfos.platform) {
   case "facebook_messenger": {
     messenger
-      .sendTextMessage(senderId, responsesCst.welcome_logged.replace("%s", meInfos.nichandle))
+      .sendTextMessage(senderId, v.sprintf(responsesCst.connectedAs, meInfos.nichandle))
       .catch(console.error);
     break;
   }
   case "slack": {
     slackSDK(userInfos.team_id)
-    .then((slack) => slack.sendTextMessage(senderId, responsesCst.welcome_logged.replace("%s", meInfos.nichandle)))
+    .then((slack) => slack.send(senderId, v.sprintf(responsesCst.connectedAs, meInfos.nichandle)))
     .catch(console.error);
     break;
   }

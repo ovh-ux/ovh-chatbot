@@ -1,7 +1,7 @@
 "use strict";
 
 const error = require("../../../providers/errors/apiError");
-const { ButtonsListMessage, Button, createPostBackList, TextMessage, BUTTON_TYPE } = require("../../../platforms/generics");
+const { Button, createPostBackList, TextMessage, BUTTON_TYPE, MAX_LIMIT } = require("../../../platforms/generics");
 const utils = require("../../utils");
 const Bluebird = require("bluebird").config({
   warnings: false
@@ -9,6 +9,7 @@ const Bluebird = require("bluebird").config({
 const guides = require("../../../constants/guides").FR;
 const responsesCst = require("../../../constants/responses").FR;
 const hostingDiagnostics = require("../../../diagnostics/hosting");
+const v = require("voca");
 
 module.exports = [
   {
@@ -23,7 +24,10 @@ module.exports = [
 
           return ovhClient.requestPromised("GET", `/hosting/web/${hosting}/attachedDomain`);
         })
-        .then((attachedDomains) => ({ responses: [new TextMessage(responsesCst.hostingSelectSite), createWebsiteList(hosting, attachedDomains, 0, 4)], feedback: false }))
+        .then((attachedDomains) => {
+          let buttons = attachedDomains.map((domain) => new Button(BUTTON_TYPE.POSTBACK, `ATTACHED_DOMAIN_SELECTED_${hosting}_${domain}`, domain));
+          return { responses: [createPostBackList(v.sprintf(responsesCst.hostingSelectSite, 1, Math.ceil(buttons.length / MAX_LIMIT)), buttons, `MORE_ATTACHED_DOMAIN_${hosting}`, 0, MAX_LIMIT)], feedback: false };
+        })
         .catch((err) => {
           res.logger.error(err);
 
@@ -73,6 +77,7 @@ module.exports = [
   {
     regx: "MORE_ATTACHED_DOMAIN_(.*)_([0-9]+)",
     action (senderId, postback, regx, entities, res) {
+      let currentIndex = parseInt(postback.match(new RegExp(regx))[2], 10);
       let hosting;
 
       return utils
@@ -82,7 +87,13 @@ module.exports = [
 
           return ovhClient.requestPromised("GET", `/hosting/web/${hosting}/attachedDomain`);
         })
-        .then((domains) => ({ responses: [createWebsiteList(hosting, domains, parseInt(postback.match(new RegExp(regx))[2], 10), 4)], feedback: false }))
+        .then((domains) => {
+          let buttons = domains.map((domain) => new Button(BUTTON_TYPE.POSTBACK, `ATTACHED_DOMAIN_SELECTED_${hosting}_${domain}`, domain));
+          return {
+            responses: [createPostBackList(v.sprintf(responsesCst.hostingSelectSite, Math.floor(1 + (currentIndex / MAX_LIMIT)), Math.ceil(buttons.length / MAX_LIMIT)), buttons, `MORE_ATTACHED_DOMAIN_${hosting}`, currentIndex, MAX_LIMIT)],
+            feedback: false
+          };
+        })
         .catch((err) => {
           res.logger.error(err);
           return Bluebird.reject(error(err.error || err.statusCode || 400, err));
@@ -92,13 +103,14 @@ module.exports = [
   {
     regx: "MORE_HOSTING_([0-9]+)",
     action (senderId, postback, regx, entities, res) {
+      let currentIndex = parseInt(postback.match(new RegExp(regx))[1], 10);
       return utils
         .getOvhClient(senderId)
         .then((ovhClient) => ovhClient.requestPromised("GET", "/hosting/web"))
         .then((hostings) => {
           const eltInfos = hostings.map((hosting) => new Button(BUTTON_TYPE.POSTBACK, `HOSTING_SELECTED_${hosting}`, hosting));
 
-          return { responses: [createPostBackList(responsesCst.hostingSelectHost, eltInfos, "MORE_HOSTING", parseInt(postback.match(new RegExp(regx))[1], 10), 4)], feedback: false };
+          return { responses: [createPostBackList(v.sprintf(responsesCst.hostingSelectHost, Math.floor(1 + (currentIndex / MAX_LIMIT)), Math.ceil(eltInfos.length / 4)), eltInfos, "MORE_HOSTING", currentIndex, MAX_LIMIT)], feedback: false };
         })
         .catch((err) => {
           res.logger.error(err);
@@ -113,20 +125,4 @@ function getSSLState (ovhClient, hosting) {
     infos: ovhClient.requestPromised("GET", `/hosting/web/${hosting}/ssl`).catch((err) => err.error === 404 ? Bluebird.resolve(null) : Bluebird.reject(err)),
     domains: ovhClient.requestPromised("GET", `/hosting/web/${hosting}/ssl/domains`).catch((err) => err.error === 404 ? Bluebird.resolve([]) : Bluebird.reject(err))
   });
-}
-
-function createWebsiteList (hosting, domains, offset, limit) {
-  const elements = [];
-
-  for (let i = offset; i < limit + offset && i < domains.length; i++) {
-    elements.push(new Button(BUTTON_TYPE.POSTBACK, `ATTACHED_DOMAIN_SELECTED_${hosting}_${domains[i]}`, domains[i]));
-  }
-
-  const moreButton = offset + limit >= domains.length ? null : new Button(BUTTON_TYPE.MORE, `MORE_ATTACHED_DOMAIN_${hosting}_${offset + limit}`, responsesCst.moreButton);
-
-  if (moreButton) {
-    elements.push(moreButton);
-  }
-
-  return new ButtonsListMessage("", elements);
 }

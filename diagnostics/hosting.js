@@ -11,6 +11,7 @@ const request = require("request-promise");
 // const mathjs = require("mathjs");
 const guides = require("../constants/guides").FR;
 const diagCst = require("../constants/diagnostics").hosting.FR;
+const v = require("voca");
 
 module.exports = {
   checkWebsite (res, hosting, domain, hostingEmails, ssl /* , statistics*/) {
@@ -177,7 +178,7 @@ module.exports = {
     switch (error.code) {
     case "ECONNREFUSED":
       return [
-        new TextMessage(diagCst.errorConnRefused.replace("%s", hosting.hostingIp)),
+        new TextMessage(v.sprintf(diagCst.errorConnRefused, hosting.hostingIp)),
         new TextMessage(guides.help(guides.pointingError))
       ];
     case "ENOTFOUND":
@@ -209,7 +210,7 @@ module.exports = {
 
     if (goodIp) {
       return [
-        new TextMessage(diagCst.dns.replace("%1s", ip).replace("%2s", domain.domain).replace("%3s", goodIp)),
+        new TextMessage(v.sprintf(diagCst.dns, ip, domain.domain, goodIp)),
         new TextMessage(guides.help(guides.dnsConfig))
       ];
     }

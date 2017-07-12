@@ -2,14 +2,33 @@
 
 
 const error = require("../../../providers/errors/apiError");
-const { Button, createPostBackList, TextMessage, BUTTON_TYPE } = require("../../../platforms/generics");
+const { Button, createPostBackList, TextMessage, BUTTON_TYPE, MAX_LIMIT } = require("../../../platforms/generics");
 const utils = require("../../utils");
 const Bluebird = require("bluebird").config({
   warnings: false
 });
 const telephonyDiag = require("../../../diagnostics/telephony");
 const responsesCst = require("../../../constants/responses").FR;
+const v = require("voca");
 
+
+const parsePortability = (ovhClient, service) =>
+  ovhClient.requestPromised("GET", `/telephony/${service}/portability`)
+    .then((arr) => arr.map((id) => {
+      let portability;
+
+      return ovhClient.requestPromised("GET", `/telephony/${service}/portability/${id}`)
+      .then((dataPortability) => {
+        portability = dataPortability;
+
+        return ovhClient.requestPromised("GET", `/telephony/${service}/portability/${id}/status`);
+      })
+      .then((status) => {
+        portability.status = status;
+
+        return portability;
+      });
+    }));
 
 module.exports = [
   {
@@ -18,25 +37,10 @@ module.exports = [
       let service = postback.match(new RegExp(regx))[1];
 
       return utils.getOvhClient(senderId)
-      .then((user) => Bluebird.props({
-        billing: user.requestPromised("GET", `/telephony/${service}/`),
-        portability: user.requestPromised("GET", `/telephony/${service}/portability`)
-          .then((arr) => arr.map((id) => {
-            let portability;
-
-            return user.requestPromised("GET", `/telephony/${service}/portability/${id}`)
-            .then((dataPortability) => {
-              portability = dataPortability;
-
-              return user.requestPromised("GET", `/telephony/${service}/portability/${id}/status`);
-            })
-            .then((status) => {
-              portability.status = status;
-
-              return portability;
-            });
-          })),
-        serviceInfos: user.requestPromised("GET", `/telephony/${service}/serviceInfos`)
+      .then((ovhClient) => Bluebird.props({
+        billing: ovhClient.requestPromised("GET", `/telephony/${service}/`),
+        portability: parsePortability(ovhClient, service),
+        serviceInfos: ovhClient.requestPromised("GET", `/telephony/${service}/serviceInfos`)
       }))
       .then(({ billing, portability, serviceInfos }) => ({ responses: telephonyDiag.telephonyDiag(billing, portability, serviceInfos), feedback: true }))
       .catch((err) => {
@@ -48,18 +52,20 @@ module.exports = [
   {
     regx: "MORE_TELEPHONY_([0-9]+)",
     action (senderId, postback, regx) {
-      let user;
+      let currentIndex = parseInt(postback.match(new RegExp(regx))[1], 10);
+      let ovhClient;
 
       return utils.getOvhClient(senderId)
-      .then((lUser) => {
-        user = lUser;
-        return user.requestPromised("GET", "/telephony");
+      .then((lOvhClient) => {
+        ovhClient = lOvhClient;
+        return ovhClient.requestPromised("GET", "/telephony");
       })
-      .map((service) => user.requestPromised("GET", `/telephony/${service}`)
+      .map((service) => ovhClient.requestPromised("GET", `/telephony/${service}`)
           .then((info) => new Button(BUTTON_TYPE.POSTBACK, `TELEPHONY_SELECTED_${info.billingAccount}`, info.description))
       )
       .then((buttons) => ({
-        responses: [buttons.length > 0 ? createPostBackList(responsesCst.telephonySelectAccount, buttons, "MORE_TELEPHONY", parseInt(postback.match(new RegExp(regx))[1], 10), 10) : new TextMessage(responsesCst.telephonyNoAccount)],
+        responses: buttons.length > 0 ? [createPostBackList(v.sprintf(responsesCst.telephonySelectAccount, Math.floor(1 + (currentIndex / MAX_LIMIT)), Math.ceil(buttons.length / MAX_LIMIT)), buttons, "MORE_TELEPHONY", currentIndex, MAX_LIMIT)] :
+          [new TextMessage(responsesCst.telephonyNoAccount)],
         feedback: false
       }));
     }

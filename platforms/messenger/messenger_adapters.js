@@ -41,28 +41,23 @@ function buttonsMessageAdapter (message) {
 
 function elementAdapter (button) {
   return {
+    content_type: "text",
     title: button.title,
-    buttons: [button]
+    payload: button.payload
   };
 }
 
 function buttonsListMessageAdapter (message) {
-  const moreButtons = [];
   const eltButtons = message.attachments.buttons.filter((button) => {
-    if (button.type !== BUTTON_TYPE.MORE) {
-      return true;
+    if (button.text === "" || button.value === "") {
+      return false;
     }
-
-    button.type = BUTTON_TYPE.POSTBACK;
-    moreButtons.push(buttonAdapter(button));
-    return false;
+    return true;
   });
 
   return {
-    template_type: "list",
-    top_element_style: "compact",
-    elements: eltButtons.map((button) => elementAdapter(buttonAdapter(button))),
-    buttons: moreButtons
+    text: message.text,
+    quick_replies: eltButtons.map((button) => elementAdapter(buttonAdapter(button)))
   };
 }
 

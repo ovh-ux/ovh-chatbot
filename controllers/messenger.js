@@ -36,7 +36,12 @@ module.exports = () => {
           if (messagingEvent.optin) {
             messenger.receivedAuthentication(messagingEvent);
           } else if (messagingEvent.message) {
-            receivedMessage(res, messagingEvent);
+            // checks for quick_replies => use postback handler
+            if (messagingEvent.message.quick_reply) {
+              receivedPostback(res, Object.assign(messagingEvent, { postback: messagingEvent.message.quick_reply }));
+            } else {
+              receivedMessage(res, messagingEvent);
+            }
           } else if (messagingEvent.delivery) {
             messenger.receivedDeliveryConfirmation(messagingEvent);
           } else if (messagingEvent.postback) {
