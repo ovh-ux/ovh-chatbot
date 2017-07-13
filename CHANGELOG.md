@@ -18,3 +18,4 @@
 * **controllers:** add smalltalk feature ([9788bcb](https://github.com/ovh-ux/ovh-chatbot/commit/9788bcb))
 * **diagnostics:** add telephony diagnostic ([9dc9ee4](https://github.com/ovh-ux/ovh-chatbot/commit/9dc9ee4))
 * **diagnostics:** add xdsl diagnostic ([9b77d33](https://github.com/ovh-ux/ovh-chatbot/commit/9b77d))
+* **platforms:** beautify user display (slack/messenger) ([699ac60](https://github.com/ovh-ux/ovh-chatbot/commit/699ac60))

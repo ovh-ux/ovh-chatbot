@@ -9,7 +9,7 @@ const Bluebird = require("bluebird").config({
 });
 const telephonyDiag = require("../../../diagnostics/telephony");
 const responsesCst = require("../../../constants/responses").FR;
-const v = require("voca");
+const { sprintf } = require("voca");
 
 
 const parsePortability = (ovhClient, service) =>
@@ -64,7 +64,7 @@ module.exports = [
           .then((info) => new Button(BUTTON_TYPE.POSTBACK, `TELEPHONY_SELECTED_${info.billingAccount}`, info.description))
       )
       .then((buttons) => ({
-        responses: buttons.length > 0 ? [createPostBackList(v.sprintf(responsesCst.telephonySelectAccount, Math.floor(1 + (currentIndex / MAX_LIMIT)), Math.ceil(buttons.length / MAX_LIMIT)), buttons, "MORE_TELEPHONY", currentIndex, MAX_LIMIT)] :
+        responses: buttons.length > 0 ? [createPostBackList(sprintf(responsesCst.telephonySelectAccount, Math.floor(1 + (currentIndex / MAX_LIMIT)), Math.ceil(buttons.length / MAX_LIMIT)), buttons, "MORE_TELEPHONY", currentIndex, MAX_LIMIT)] :
           [new TextMessage(responsesCst.telephonyNoAccount)],
         feedback: false
       }));

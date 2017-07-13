@@ -9,7 +9,7 @@ const Bluebird = require("bluebird").config({
 const guides = require("../../../constants/guides").FR;
 const responsesCst = require("../../../constants/responses").FR;
 const hostingDiagnostics = require("../../../diagnostics/hosting");
-const v = require("voca");
+const { sprintf } = require("voca");
 
 module.exports = [
   {
@@ -26,7 +26,7 @@ module.exports = [
         })
         .then((attachedDomains) => {
           let buttons = attachedDomains.map((domain) => new Button(BUTTON_TYPE.POSTBACK, `ATTACHED_DOMAIN_SELECTED_${hosting}_${domain}`, domain));
-          return { responses: [createPostBackList(v.sprintf(responsesCst.hostingSelectSite, 1, Math.ceil(buttons.length / MAX_LIMIT)), buttons, `MORE_ATTACHED_DOMAIN_${hosting}`, 0, MAX_LIMIT)], feedback: false };
+          return { responses: [createPostBackList(sprintf(responsesCst.hostingSelectSite, 1, Math.ceil(buttons.length / MAX_LIMIT)), buttons, `MORE_ATTACHED_DOMAIN_${hosting}`, 0, MAX_LIMIT)], feedback: false };
         })
         .catch((err) => {
           res.logger.error(err);
@@ -90,7 +90,7 @@ module.exports = [
         .then((domains) => {
           let buttons = domains.map((domain) => new Button(BUTTON_TYPE.POSTBACK, `ATTACHED_DOMAIN_SELECTED_${hosting}_${domain}`, domain));
           return {
-            responses: [createPostBackList(v.sprintf(responsesCst.hostingSelectSite, Math.floor(1 + (currentIndex / MAX_LIMIT)), Math.ceil(buttons.length / MAX_LIMIT)), buttons, `MORE_ATTACHED_DOMAIN_${hosting}`, currentIndex, MAX_LIMIT)],
+            responses: [createPostBackList(sprintf(responsesCst.hostingSelectSite, Math.floor(1 + (currentIndex / MAX_LIMIT)), Math.ceil(buttons.length / MAX_LIMIT)), buttons, `MORE_ATTACHED_DOMAIN_${hosting}`, currentIndex, MAX_LIMIT)],
             feedback: false
           };
         })
@@ -110,7 +110,7 @@ module.exports = [
         .then((hostings) => {
           const eltInfos = hostings.map((hosting) => new Button(BUTTON_TYPE.POSTBACK, `HOSTING_SELECTED_${hosting}`, hosting));
 
-          return { responses: [createPostBackList(v.sprintf(responsesCst.hostingSelectHost, Math.floor(1 + (currentIndex / MAX_LIMIT)), Math.ceil(eltInfos.length / 4)), eltInfos, "MORE_HOSTING", currentIndex, MAX_LIMIT)], feedback: false };
+          return { responses: [createPostBackList(sprintf(responsesCst.hostingSelectHost, Math.floor(1 + (currentIndex / MAX_LIMIT)), Math.ceil(eltInfos.length / 4)), eltInfos, "MORE_HOSTING", currentIndex, MAX_LIMIT)], feedback: false };
         })
         .catch((err) => {
           res.logger.error(err);

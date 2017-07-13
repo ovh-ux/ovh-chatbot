@@ -3,7 +3,7 @@
 const { TextMessage, createPostBackList, Button, BUTTON_TYPE, MAX_LIMIT } = require("../../../platforms/generics");
 const utils = require("../../utils");
 const responsesCst = require("../../../constants/responses").FR;
-const v = require("voca");
+const { sprintf } = require("voca");
 
 class TelephonyBreak {
   static action (senderId) {
@@ -18,7 +18,7 @@ class TelephonyBreak {
       .then((info) => new Button(BUTTON_TYPE.POSTBACK, `TELEPHONY_SELECTED_${info.billingAccount}`, info.description))
     )
     .then((buttons) => ({
-      responses: buttons.length > 0 ? [createPostBackList(v.sprintf(responsesCst.telephonySelectAccount, 1, Math.ceil(buttons.length / MAX_LIMIT)), buttons, "MORE_TELEPHONY", 0, MAX_LIMIT)] :
+      responses: buttons.length > 0 ? [createPostBackList(sprintf(responsesCst.telephonySelectAccount, 1, Math.ceil(buttons.length / MAX_LIMIT)), buttons, "MORE_TELEPHONY", 0, MAX_LIMIT)] :
         [new TextMessage(responsesCst.telephonyNoAccount), new TextMessage(responsesCst.upsellingPhone)],
       feedback: false
     }));

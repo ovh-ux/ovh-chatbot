@@ -5,7 +5,7 @@ const utils = require("../../utils");
 const Bluebird = require("bluebird");
 const { TextMessage, Button, createPostBackList, BUTTON_TYPE, MAX_LIMIT } = require("../../../platforms/generics");
 const responsesCst = require("../../../constants/responses").FR;
-const v = require("voca");
+const { sprintf } = require("voca");
 
 class XdslBreak {
   static action (senderId) {
@@ -20,7 +20,7 @@ class XdslBreak {
           .then((xdslInfo) => new Button(BUTTON_TYPE.POSTBACK, `XDSL_SELECTED_${xdslInfo.accessName}`, xdslInfo.description))
       )
       .then((buttons) => ({
-        responses: buttons.length > 0 ? [createPostBackList(v.sprintf(responsesCst.xdslSelect, 1, Math.ceil(buttons.length / MAX_LIMIT)), buttons, "MORE_XDSL", 0, MAX_LIMIT)] :
+        responses: buttons.length > 0 ? [createPostBackList(sprintf(responsesCst.xdslSelect, 1, Math.ceil(buttons.length / MAX_LIMIT)), buttons, "MORE_XDSL", 0, MAX_LIMIT)] :
           [new TextMessage(responsesCst.xdslNone), new TextMessage(responsesCst.upsellingXDSL)],
         feedback: false
       }))

@@ -3,7 +3,7 @@
 const { TextMessage } = require("../platforms/generics");
 const MANAGER_TELECOM = "https://www.ovhtelecom.fr/manager/index.html#/telephony";
 const diagCst = require("../constants/diagnostics").telephony.FR;
-const v = require("voca");
+const { sprintf } = require("voca");
 
 const telephonyDiag = (billing, portability, serviceInfos) => {
   let responses = [];
@@ -28,7 +28,7 @@ const telephonyDiag = (billing, portability, serviceInfos) => {
     responses = [...responses, new TextMessage(diagCst.lineInCreation)];
     break;
   case "unPaid":
-    responses = [...responses, new TextMessage(v.sprintf(diagCst.lineUnPaid, `${MANAGER_TELECOM}/${billing.billingAccount}/billing`))];
+    responses = [...responses, new TextMessage(sprintf(diagCst.lineUnPaid, `${MANAGER_TELECOM}/${billing.billingAccount}/billing`))];
     break;
   case "expired":
   case "ok":
@@ -37,28 +37,28 @@ const telephonyDiag = (billing, portability, serviceInfos) => {
   }
 
   if (billing.currentOutplan.value >= billing.allowedOutplan.value) {
-    responses = [...responses, new TextMessage(v.sprintf(diagCst.overOutplan, `${MANAGER_TELECOM}/${billing.billingAccount}/creditThreshold`))];
+    responses = [...responses, new TextMessage(sprintf(diagCst.overOutplan, `${MANAGER_TELECOM}/${billing.billingAccount}/creditThreshold`))];
   }
 
   if (portability.length > 0) {
-    responses = [...responses, new TextMessage(v.sprintf(diagCst.portabilityProgress, portability.length))];
+    responses = [...responses, new TextMessage(sprintf(diagCst.portabilityProgress, portability.length))];
     for (let i = 0; i < portability.length; i++) {
       let porta = portability[i];
-      let portabilityString = v.sprintf(diagCst.portabilityLineOperator, porta.numbersList.join(", "), porta.operator);
+      let portabilityString = sprintf(diagCst.portabilityLineOperator, porta.numbersList.join(", "), porta.operator);
       for (let j = 0; j < porta.status.length; j++) {
         let step = porta.status[i];
-        portabilityString += v.sprintf(diagCst.portabilityStep, step.name, step.status, step.description || "N/A", `${step.duration.quantity} ${step.duration.unit}`);
+        portabilityString += sprintf(diagCst.portabilityStep, step.name, step.status, step.description || "N/A", `${step.duration.quantity} ${step.duration.unit}`);
       }
-      portabilityString += v.sprintf(diagCst.portabilityExecutionDate, portability.desiredExecutionDate);
+      portabilityString += sprintf(diagCst.portabilityExecutionDate, portability.desiredExecutionDate);
       responses = [...responses, new TextMessage(portabilityString)];
     }
-    responses = [...responses, new TextMessage(v.sprintf(diagCst.portabilityManager, `${MANAGER_TELECOM}/${billing.billingAccount}/alias/default/portabilities`))];
+    responses = [...responses, new TextMessage(sprintf(diagCst.portabilityManager, `${MANAGER_TELECOM}/${billing.billingAccount}/alias/default/portabilities`))];
   }
 
   if (!responses.length) {
     responses = [...responses, new TextMessage(diagCst.noIssue)];
   }
-  responses = [...responses, new TextMessage(v.sprintf(diagCst.seeManager, `${MANAGER_TELECOM}/${billing.billingAccount}`))];
+  responses = [...responses, new TextMessage(sprintf(diagCst.seeManager, `${MANAGER_TELECOM}/${billing.billingAccount}`))];
 
   return responses;
 };
