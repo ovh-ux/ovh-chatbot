@@ -3,7 +3,7 @@
 const request = require("request");
 const Bluebird = require("bluebird");
 const config = require("../../config/config-loader").load();
-const { ButtonsListMessage, ButtonsMessage, TextMessage } = require("../generics");
+const { ButtonsListMessage, ButtonsMessage, TextMessage, CardMessage } = require("../generics");
 const { textMessageAdapter, buttonsListMessageAdapter, buttonsMessageAdapter } = require("./messenger_adapters");
 
 /*
@@ -541,6 +541,11 @@ function send (recipientId, message) {
 
   if (message instanceof ButtonsMessage) {
     return sendButtonMessage(recipientId, buttonsMessageAdapter(message));
+  }
+
+  if (message instanceof CardMessage) {
+    return Bluebird.mapSeries(message.attachments.items, (item) => sendTextMessage(recipientId, `${item.title}\n${item.text}`))
+      .then(() => message.attachments.buttons ? sendButtonMessage(recipientId, buttonsMessageAdapter(message)) : null);
   }
 
   return callSendAPI(message);

@@ -1,39 +1,51 @@
-const { TextMessage, Button, ButtonsMessage } = require("../platforms/generics");
+const { TextMessage, Button, ButtonsMessage, CardMessage, ListItem } = require("../platforms/generics");
 const diagCst = require("../constants/diagnostics").xdsl.FR;
 const v = require("voca");
 
 
 const checkxDSLDiagAdvanced = (diag) => {
-  let responses = "";
   let linePb = false;
+  let items = [];
+  let modemStatus = "";
+  let lineStatus = "";
 
-  responses = v.sprintf(diagCst.diagnosticTime, new Date(diag.diagnosticTime).toUTCString());
+  items.push(new ListItem(diagCst.resultLastDiag, v.sprintf(diagCst.diagnosticTime, new Date(diag.diagnosticTime).toUTCString())));
 
   if (diag.isModemConnected != null) {
     if (!diag.isModemConnected) {
-      responses += diagCst.diagnosticModemUnplug;
+      modemStatus += diagCst.diagnosticModemUnplug;
       linePb = true;
     } else {
-      responses += diagCst.diagnosticModemPlug;
+      modemStatus += diagCst.diagnosticModemPlug;
     }
   }
 
+  if (diag.ping != null) {
+    if (!diag.ping) {
+      modemStatus += diagCst.diagnosticPing;
+      linePb = true;
+    } else {
+      modemStatus += diagCst.diagnosticNoPing;
+    }
+  }
+  items.push(new ListItem(diagCst.diagnosticModemStatus, modemStatus));
+
+
   if (diag.lineDetails != null && Array.isArray(diag.lineDetails)) {
-    responses += diagCst.diagnosticLineStatus;
     for (let i = 0; i < diag.lineDetails.length; i++) {
       // detect sync
       const lineDiag = diag.lineDetails[i];
-      responses += v.sprintf(diagCst.diagnosticLineSync, lineDiag.number, lineDiag.sync ? diagCst.sync : diagCst.unsync);
+      lineStatus += v.sprintf(diagCst.diagnosticLineSync, lineDiag.number, lineDiag.sync ? diagCst.sync : diagCst.unsync);
       if (lineDiag.lineTest != null) {
         switch (lineDiag.lineTest) {
         case "customerSideProblem":
-          responses += diagCst.diagnosticCustomerSideProblem;
+          lineStatus += diagCst.diagnosticCustomerSideProblem;
           break;
         case "ovhSideProblem":
-          responses += diagCst.diagnosticOvhSideProblem;
+          lineStatus += diagCst.diagnosticOvhSideProblem;
           break;
         case "error":
-          responses += diagCst.diagnosticError;
+          lineStatus += diagCst.diagnosticError;
           break;
         default:break;
         }
@@ -43,25 +55,16 @@ const checkxDSLDiagAdvanced = (diag) => {
       }
     }
   }
-
-  if (diag.ping != null) {
-    if (!diag.ping) {
-      responses += diagCst.diagnosticPing;
-      linePb = true;
-    } else {
-      responses += diagCst.diagnosticNoPing;
-    }
-  }
+  items.push(new ListItem(diagCst.diagnosticLineStatus, lineStatus));
 
   if (!linePb) {
-    responses += diagCst.diagnosticResultOk;
+    items.push(new ListItem(diagCst.diagnosticResultOk, diagCst.diagnosticResultMore));
   } else {
-    responses += diagCst.diagnosticResultNOk;
+    items.push(new ListItem(diagCst.diagnosticResultNOk, diagCst.diagnosticResultMore));
   }
 
-  responses += diagCst.diagnosticResultMore;
 
-  return [new TextMessage(responses)];
+  return [new CardMessage(items)];
 };
 
 const checkxDSLDiag = (xdslOffer, serviceInfos, orderFollowUp, incident, diag) => {
@@ -92,7 +95,7 @@ const checkxDSLDiag = (xdslOffer, serviceInfos, orderFollowUp, incident, diag) =
   }
 
   if (!orderOk) {
-    return [...responses, new TextMessage(v.sprintf(diagCst.orderNotReady, orderString))];
+    return [...responses, new CardMessage([new ListItem(v.sprintf(diagCst.orderNotReady, orderString))])];
   }
 
   if (xdslOffer.status === "slamming") {
@@ -110,7 +113,7 @@ const checkxDSLDiag = (xdslOffer, serviceInfos, orderFollowUp, incident, diag) =
   }
 
   if (diag) {
-    responses = [...responses, new TextMessage(diagCst.resultLastDiag), ...checkxDSLDiagAdvanced(diag)];
+    responses = [...responses, ...checkxDSLDiagAdvanced(diag)];
   }
   return responses;
 };

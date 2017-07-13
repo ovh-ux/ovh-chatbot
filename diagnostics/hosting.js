@@ -1,7 +1,7 @@
 "use strict";
 
 const utils = require("../bots/utils");
-const { Button, ButtonsMessage, TextMessage, BUTTON_TYPE } = require("../platforms/generics");
+const { Button, ButtonsMessage, TextMessage, ListItem, CardMessage, BUTTON_TYPE } = require("../platforms/generics");
 const Bluebird = require("bluebird").config({
   warnings: false
 });
@@ -52,15 +52,17 @@ module.exports = {
         case "bloqued":
           responses = [
             ...responses,
-            new TextMessage(diagCst.hostingBloqued),
-            new TextMessage(guides.help(guides.websiteHack))
+            new CardMessage([
+              new ListItem(diagCst.hostingBloqued, guides.help(guides.websiteHack))
+            ])
           ];
           break;
         case "maintenance":
           responses = [
             ...responses,
-            new TextMessage(diagCst.hostingMaintenance),
-            new TextMessage(guides.help(guides.websiteHack))
+            new CardMessage([
+              new ListItem(diagCst.hostingMaintenance, guides.help(guides.websiteHack))
+            ])
           ];
           break;
         default:
@@ -96,7 +98,10 @@ module.exports = {
           }
 
           if (!sslState.length) {
-            return [...responses, new TextMessage(diagCst.unknown), new TextMessage(guides.help(guides.errorApache))];
+            return [...responses,
+              new CardMessage([
+                new ListItem(diagCst.unknown, guides.help(guides.errorApache))
+              ])];
           }
 
           return responses;
@@ -178,8 +183,9 @@ module.exports = {
     switch (error.code) {
     case "ECONNREFUSED":
       return [
-        new TextMessage(v.sprintf(diagCst.errorConnRefused, hosting.hostingIp)),
-        new TextMessage(guides.help(guides.pointingError))
+        new CardMessage([
+          new ListItem(v.sprintf(diagCst.errorConnRefused, hosting.hostingIp), guides.help(guides.pointingError))
+        ])
       ];
     case "ENOTFOUND":
       return [new TextMessage(diagCst.errorNotFound)];
@@ -210,8 +216,9 @@ module.exports = {
 
     if (goodIp) {
       return [
-        new TextMessage(v.sprintf(diagCst.dns, ip, domain.domain, goodIp)),
-        new TextMessage(guides.help(guides.dnsConfig))
+        new CardMessage([
+          new ListItem(v.sprintf(diagCst.dns, ip, domain.domain, goodIp), guides.help(guides.dnsConfig))
+        ])
       ];
     }
 
@@ -225,13 +232,15 @@ module.exports = {
       const managerButton = new Button(BUTTON_TYPE.URL, `https://www.ovh.com/manager/web/#/configuration/hosting/${hosting.serviceName}?tab=DATABASES`, diagCst.goToManager);
 
       return [
-        new ButtonsMessage(diagCst.web500db, [managerButton]),
-        new TextMessage(guides.help(guides.dbError))
+        new CardMessage([
+          new ListItem(diagCst.web500db, guides.help(guides.dbError))
+        ], managerButton)
       ];
     }
     return [
-      new TextMessage(diagCst.web500dev),
-      new TextMessage(guides.help(guides.error500))
+      new CardMessage([
+        new ListItem(diagCst.web500dev, guides.help(guides.error500))
+      ])
     ];
   }
 };
