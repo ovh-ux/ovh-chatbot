@@ -1,4 +1,4 @@
-const { TextMessage, Button, ButtonsListMessage } = require("../platforms/generics");
+const { TextMessage, Button, ButtonsMessage } = require("../platforms/generics");
 const diagCst = require("../constants/diagnostics").xdsl.FR;
 const v = require("voca");
 
@@ -97,7 +97,7 @@ const checkxDSLDiag = (xdslOffer, serviceInfos, orderFollowUp, incident, diag) =
 
   if (xdslOffer.status === "slamming") {
     const button = new Button("web_url", "tel:1007", diagCst.callSupport);
-    responses = [...responses, new ButtonsListMessage(diagCst.lineSlamming, [button])];
+    responses = [...responses, new ButtonsMessage(diagCst.lineSlamming, [button])];
   }
 
   if (serviceInfos.status === "unPaid") {
@@ -106,7 +106,7 @@ const checkxDSLDiag = (xdslOffer, serviceInfos, orderFollowUp, incident, diag) =
 
   if (responses.length === 0) {
     const button = new Button("postback", `XDSL_DIAG_${xdslOffer.accessName}`, diagCst.launchDiag);
-    responses = [new TextMessage(diagCst.resultOk), new TextMessage(v.sprintf(diagCst.resultDiagRemaining, diag ? diag.remaining : 5)), new ButtonsListMessage(diagCst.resultAdvancedDiag, [button])];
+    responses = [new ButtonsMessage(`${diagCst.resultOk}\n${v.sprintf(diagCst.resultDiagRemaining, diag ? diag.remaining : 5)}\n${diagCst.resultAdvancedDiag}`, [button])];
   }
 
   if (diag) {

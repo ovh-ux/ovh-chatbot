@@ -88,7 +88,7 @@ module.exports = () => ({
     let needFeedback = false;
 
     // We have to respond with a 200 within 3000ms
-    Bluebird.delay(3000).then(() => res.headersSent ? null : res.status(200).end());
+    Bluebird.delay(2000).then(() => res.headersSent ? null : res.status(200).end());
 
     return Bluebird.props({
       bot: bot.ask(BUTTON_TYPE.POSTBACK, channel, value, "", {}, res),
@@ -100,7 +100,7 @@ module.exports = () => ({
 
         return sendResponses(res, channel, responses.bot.responses, slackClient, message_ts);
       })
-      .then(() => res.status(200).end())
+      .then(() => res.headersSent ? null : res.status(200).end())
       .then(() => {
         if (needFeedback) {
           return sendFeedback(res, channel, value, "message", slackClient);
@@ -111,7 +111,7 @@ module.exports = () => ({
       .catch((err) => {
         res.logger.error(err);
         slackSDK(payload.team.id).then((uSlackClient) => uSlackClient.send(channel, `Oups ! ${err.message}`));
-        return res.status(200).end();
+        return res.headersSent ? null : res.status(200).end();
       });
 
   },
