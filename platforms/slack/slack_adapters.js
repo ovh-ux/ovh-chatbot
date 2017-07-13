@@ -9,8 +9,8 @@ function textMessageAdapter (channel, message, ts = "") {
     ts,
     attachments: JSON.stringify([{
       author_name: "Assistant personnel OVH",
-      author_icon: "https://www.ovh.com/manager/web/images/logos/OVH-logo.png",
-      author_link: "https://www.ovh.com",
+      author_icon: "https://www.ovh.com/fr/images/support/livechat/chatbot_20px.png",
+      author_link: "https://www.ovh.com/manager/sunrise/uxlabs/#!/chatbot",
       fallback: responsesCst.slackFallback,
       color: "#59d2ef",
       text: message.text || message
@@ -54,8 +54,8 @@ function buttonsMessageAdapter (channel, buttonList, ts = "") {
       {
         fallback: responsesCst.slackFallback,
         author_name: "Assistant personnel OVH",
-        author_icon: "https://www.ovh.com/manager/web/images/logos/OVH-logo.png",
-        author_link: "https://www.ovh.com",
+        author_icon: "https://www.ovh.com/fr/images/support/livechat/chatbot_20px.png",
+        author_link: "https://www.ovh.com/manager/sunrise/uxlabs/#!/chatbot",
         text,
         callback_id: "button_list",
         attachment_type: "default",

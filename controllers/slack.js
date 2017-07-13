@@ -21,7 +21,7 @@ module.exports = () => ({
     }
 
     if (!req.body.event.user || req.body.event.subtype === "bot_message") {
-      return null;
+      return res.status(200).end();
     }
 
     message = req.body.event.text;
@@ -76,7 +76,7 @@ module.exports = () => ({
       })
       .catch(res.logger.error);
 
-    return res.sendStatus(200);
+    return res.status(200).end();
   },
 
   receiveActions (req, res) {
@@ -86,6 +86,9 @@ module.exports = () => ({
     const message_ts = payload.message_ts;
     let slackClient;
     let needFeedback = false;
+
+    // We have to respond with a 200 within 3000ms
+    Bluebird.delay(3000).then(() => res.headersSent ? null : res.status(200).end());
 
     return Bluebird.props({
       bot: bot.ask(BUTTON_TYPE.POSTBACK, channel, value, "", {}, res),
@@ -97,6 +100,7 @@ module.exports = () => ({
 
         return sendResponses(res, channel, responses.bot.responses, slackClient, message_ts);
       })
+      .then(() => res.status(200).end())
       .then(() => {
         if (needFeedback) {
           return sendFeedback(res, channel, value, "message", slackClient);
@@ -104,10 +108,9 @@ module.exports = () => ({
 
         return null;
       })
-      .then(() => res.status(200).end())
       .catch((err) => {
         res.logger.error(err);
-        slackSDK(payload.team.id).then((uSlackClient) => uSlackClient.sendTextMessage(channel, `Oups ! ${err.message}`));
+        slackSDK(payload.team.id).then((uSlackClient) => uSlackClient.send(channel, `Oups ! ${err.message}`));
         return res.status(200).end();
       });
 
