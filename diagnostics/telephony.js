@@ -1,12 +1,13 @@
 "use strict";
 
-const { TextMessage } = require("../platforms/generics");
+const { TextMessage, ListItem, CardMessage } = require("../platforms/generics");
 const MANAGER_TELECOM = "https://www.ovhtelecom.fr/manager/index.html#/telephony";
 const diagCst = require("../constants/diagnostics").telephony.FR;
 const { sprintf } = require("voca");
 
 const telephonyDiag = (billing, portability, serviceInfos) => {
   let responses = [];
+  let items = [];
 
   switch (billing.status) {
   case "closed":
@@ -41,18 +42,21 @@ const telephonyDiag = (billing, portability, serviceInfos) => {
   }
 
   if (portability.length > 0) {
-    responses = [...responses, new TextMessage(sprintf(diagCst.portabilityProgress, portability.length))];
     for (let i = 0; i < portability.length; i++) {
       let porta = portability[i];
-      let portabilityString = sprintf(diagCst.portabilityLineOperator, porta.numbersList.join(", "), porta.operator);
+      let portabilityString = "";
       for (let j = 0; j < porta.status.length; j++) {
         let step = porta.status[i];
         portabilityString += sprintf(diagCst.portabilityStep, step.name, step.status, step.description || "N/A", `${step.duration.quantity} ${step.duration.unit}`);
       }
       portabilityString += sprintf(diagCst.portabilityExecutionDate, portability.desiredExecutionDate);
-      responses = [...responses, new TextMessage(portabilityString)];
+      items.push(new ListItem(sprintf(diagCst.portabilityLineOperator, porta.numbersList.join(", "), porta.operator), portabilityString));
     }
-    responses = [...responses, new TextMessage(sprintf(diagCst.portabilityManager, `${MANAGER_TELECOM}/${billing.billingAccount}/alias/default/portabilities`))];
+
+    responses = [...responses, new CardMessage([
+      ...items,
+      new ListItem(sprintf(diagCst.portabilityManager, `${MANAGER_TELECOM}/${billing.billingAccount}/alias/default/portabilities`))
+    ])];
   }
 
   if (!responses.length) {
