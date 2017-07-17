@@ -1,5 +1,6 @@
 "use strict";
 
+const { emojify } = require("node-emoji");
 const { BUTTON_TYPE } = require("../generics");
 const responsesCst = require("../../constants/responses").FR;
 
@@ -8,12 +9,12 @@ function textMessageAdapter (channel, message, ts = "") {
     channel,
     ts,
     attachments: JSON.stringify([{
-      author_name: "Assistant personnel OVH",
-      author_icon: "https://www.ovh.com/fr/images/support/livechat/chatbot_20px.png",
-      author_link: "https://www.ovh.com/manager/sunrise/uxlabs/#!/chatbot",
+      author_name: responsesCst.slackAuthor,
+      author_icon: responsesCst.slackImg,
+      author_link: responsesCst.slackLink,
       fallback: responsesCst.slackFallback,
-      color: "#59d2ef",
-      text: message.text || message
+      color: responsesCst.slackColor,
+      text: emojify(message.text || message)
     }])
   };
 }
@@ -27,7 +28,7 @@ function buttonAdapter (button) {
   case BUTTON_TYPE.MORE:
     return {
       type: "button",
-      text: button.text,
+      text: emojify(button.text),
       value: button.value,
       name: button.value
     };
@@ -37,7 +38,7 @@ function buttonAdapter (button) {
 }
 
 function buttonsMessageAdapter (channel, buttonList, ts = "") {
-  let text = `${buttonList.text}\n`;
+  let text = emojify(`${buttonList.text}\n`);
   const actions = buttonList.attachments.buttons.map(buttonAdapter).filter((button) => {
     if (typeof button === "string") {
       text += button;
@@ -52,14 +53,14 @@ function buttonsMessageAdapter (channel, buttonList, ts = "") {
     ts,
     attachments: JSON.stringify([
       {
+        author_name: responsesCst.slackAuthor,
+        author_icon: responsesCst.slackImg,
+        author_link: responsesCst.slackLink,
         fallback: responsesCst.slackFallback,
-        author_name: "Assistant personnel OVH",
-        author_icon: "https://www.ovh.com/fr/images/support/livechat/chatbot_20px.png",
-        author_link: "https://www.ovh.com/manager/sunrise/uxlabs/#!/chatbot",
+        color: responsesCst.slackColor,
         text,
         callback_id: "button_list",
         attachment_type: "default",
-        color: "#59d2ef",
         actions
       }
     ])

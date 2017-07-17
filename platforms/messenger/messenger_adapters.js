@@ -1,9 +1,10 @@
 "use strict";
 
 const { BUTTON_TYPE } = require("../generics");
+const { emojify } = require("node-emoji");
 
 function textMessageAdapter (message) {
-  return message.text;
+  return emojify(message.text);
 }
 
 function buttonAdapter (button) {
@@ -12,14 +13,14 @@ function buttonAdapter (button) {
   case BUTTON_TYPE.MORE:
     return {
       type: button.type,
-      title: button.text,
+      title: emojify(button.text),
       payload: button.value
     };
   case BUTTON_TYPE.URL:
     return {
       type: button.type,
       url: button.value,
-      title: button.text
+      title: emojify(button.text)
     };
   case BUTTON_TYPE.ACCOUNT_LINKING:
     return {
@@ -34,7 +35,7 @@ function buttonAdapter (button) {
 function buttonsMessageAdapter (message) {
   return {
     template_type: "button",
-    text: message.text,
+    text: emojify(message.text),
     buttons: message.attachments.buttons.map(buttonAdapter)
   };
 }
@@ -42,7 +43,7 @@ function buttonsMessageAdapter (message) {
 function elementAdapter (button) {
   return {
     content_type: "text",
-    title: button.title,
+    title: emojify(button.title),
     payload: button.payload
   };
 }
@@ -56,7 +57,7 @@ function buttonsListMessageAdapter (message) {
   });
 
   return {
-    text: message.text,
+    text: emojify(message.text),
     quick_replies: eltButtons.map((button) => elementAdapter(buttonAdapter(button)))
   };
 }

@@ -7,9 +7,9 @@ module.exports = {
       errorConnRefused: "Il semblerait que ce soit un problème de pointage sur ton site, je te conseille de vérifier ta configuration DNS pour que ton nom de domaine pointe sur l'ip %s",
       errorNotFound: "Il semblerait que ta zone DNS soit mal configurée",
       errorEaiAgain: "Il semblerait que ta zone DNS soit mal configurée. Ton site n'est relié à aucun serveur d'hébergement web.",
-      goToManager: "Accéder à l'espace client",
-      hostingActive: "Ton site semble fonctionner correctement",
-      hostingButActive: "Par contre ton site semble fonctionner correctement",
+      goToManager: "Accéder à l'espace client :point_right:",
+      hostingActive: "Ton site semble fonctionner correctement :v:",
+      hostingButActive: "Par contre ton site semble fonctionner correctement :v:",
       hostingBloqued: "Il semblerait qu'il y ai un problème sur ton serveur mutualisé, il est bloqué pour l'instant",
       hostingMaintenance: "Il semblerait qu'il y ai un problème sur ton serveur mutualisé, il est actuellement en maintenance",
       hostingUnknown: "Ton serveur est dans un état inconnu, contacte le support pour plus d'informations",
@@ -17,7 +17,7 @@ module.exports = {
       mailKo: "Il semblerait que tes envois d'e-mails soient bloqués car ils ont dépassés 5% de retour en erreur",
       mailSpam: "Il semblerait que tes envois d'e-mails soient bloqués car ils ont envoyés des spams",
       sslRegenerate: "Tu as activé le SSL sur ton site mais ton certificat SSL ne contient pas ton domaine. Tu dois regénérer ton certificat via l'espace client",
-      sslHttpsToHttpWarning: "Attention, ton site est compris dans le certificat SSL actuel et fonctionne actuellement en https. Cependant ta configuration indique que lors de la regénération automatique du certificat SSL," +
+      sslHttpsToHttpWarning: ":warning: Attention, ton site est compris dans le certificat SSL actuel et fonctionne actuellement en https. Cependant ta configuration indique que lors de la regénération automatique du certificat SSL," +
         " ton site ne sera plus accessible en https." +
         " Si c'est le comportement voulu ou que tu n'utilises pas https sur ce site ne prend pas en compte cet avertissement.",
       web404: "Il semblerait que la page à laquelle tu souhaites accéder n'existe pas, le fichier correspondant à cette page semble introuvable. " +
@@ -26,24 +26,24 @@ module.exports = {
       web403: "Il semblerait que ton site possède des problèmes de droits. Vérifie si ton site pointe sur le bon dossier de destination dans l'espace client onglet 'multisites'.",
       web500db: "Ton site n'arrive pas à se connecter à la base de données, je te conseille de vérifier le login et mot de passe de la base de données.",
       web500dev: "Il semblerait que tu aies fait une erreur de programmation sur ton site web. Dans ce genre de situation le support OVH n'intervient pas.",
-      unknown: "Problème non diagnostiquable. "
+      unknown: "Problème non diagnostiquable. :thinking_face:"
     }
   },
   telephony: {
     FR: {
-      accountClosed: "Ton compte est cloturé",
-      accountDeleted: "Ton compte a été supprimé",
-      accountExpired: "Ton compte est expiré",
+      accountClosed: "Ton compte est cloturé :cry:",
+      accountDeleted: "Ton compte a été supprimé :cry:",
+      accountExpired: "Ton compte est expiré :cry:",
       lineInCreation: "Ta ligne est en cours de création",
-      lineUnPaid: "Il semblerait que tu as oublié de payer, rends-toi dans ton espace client pour gérer la facturation : %s",
-      overOutplan: "Tu as dépassé le montant maximal en hors-forfait, rends-toi dans ton espace client pour modifier ta limite : %s",
+      lineUnPaid: "Il semblerait que tu as oublié de payer, rends-toi dans ton espace client pour gérer la facturation :point_right: %s",
+      overOutplan: "Tu as dépassé le montant maximal en hors-forfait, rends-toi dans ton espace client pour modifier ta limite :point_right: %s",
       portabilityProgress: "Tu as %s lignes en cours de portabilité",
       portabilityLineOperator: "%1$s chez %2$s :\n",
       portabilityStep: "\t -%1$s, État: %2$s, description : %3$s, ETA: %4$s\n",
       portabilityExecutionDate: "Date d'éxécution prévu : %s",
-      portabilityManager: "`Pour modifer ta portabilité, rends-toi dans ton espace client : %s",
-      noIssue: "Nous n'avons pas trouver de problème",
-      seeManager: "Pour tout autres renseignements, rends-toi dans ton espace client : %s"
+      portabilityManager: "`Pour modifer ta portabilité, rends-toi dans ton espace client :point_right: %s",
+      noIssue: "Nous n'avons pas trouver de problème :v:",
+      seeManager: "Pour tout autres renseignements, rends-toi dans ton espace client :point_right: %s"
     }
   },
   xdsl: {
@@ -54,27 +54,27 @@ module.exports = {
       todo: "à faire",
       error: "erreur",
       diagnosticTime: "Diagnostique réalisé à %s\n",
-      callSupport: "Appeler le service client",
+      callSupport: "Appeler le service client :phone:",
       launchDiag: "Effectuer un diagnostique avancé",
-      diagnosticModemUnplug: "- Ton modem n'est pas branché, vérifier la prise électrique ainsi que la prise xdsl\n",
-      diagnosticModemPlug: "- Ton modem est connecté\n",
+      diagnosticModemUnplug: ":x: Ton modem n'est pas branché, vérifier la prise électrique ainsi que la prise xdsl :electric_plug:\n",
+      diagnosticModemPlug: ":heavy_check_mark: Ton modem est connecté\n",
       diagnosticLineStatus: "- Etat de tes lignes :\n",
       diagnosticLineSync: "\t• %1$s : %2$s\n",
       diagnosticCustomerSideProblem: "\t  Il s'agit d'un problème avec ton installation\n",
       diagnosticOvhSideProblem: "\t  Il s'agit d'un problème de notre part\n",
       diagnosticError: "\t  Il y a eu une erreur lors du diagnostique\n",
-      diagnosticPing: "- Ton modem ne répond pas aux pings\n",
-      diagnosticNoPing: "- Ton modem répond aux pings\n",
-      diagnosticResultOk: "Nous n'avons pas détecté de problème. Ton soucis provient probablement de ton installation\n",
-      diagnosticResultNOk: "Il y a effectivement un soucis sur ton installation\n",
-      diagnosticResultMore: "Si ta ligne ne fonctionne toujours pas, rends-toi sur : https://docs.ovh.com/display/public/CRXDSL/Interruption+de+service\n",
-      incident: "Il y a un incident sur la ligne : %1$s, la résolution est prévue pour : %2$s. Plus de détails : %3$s",
+      diagnosticPing: ":x: Ton modem ne répond pas aux pings\n",
+      diagnosticNoPing: ":heavy_check_mark: Ton modem répond aux pings\n",
+      diagnosticResultOk: ":heavy_check_mark: Nous n'avons pas détecté de problème. Ton soucis provient probablement de ton installation :thinking_face:\n",
+      diagnosticResultNOk: ":x: Il y a effectivement un soucis sur ton installation\n",
+      diagnosticResultMore: "Si ta ligne ne fonctionne toujours pas, rends-toi sur :point_right: https://docs.ovh.com/display/public/CRXDSL/Interruption+de+service\n",
+      incident: ":construction: Il y a un incident sur la ligne : %1$s, la résolution est prévue pour : %2$s. Plus de détails :point_right: %3$s",
       orderStepStatus: "l'étape %1$s n'est pas encore finie, elle est actuellement dans l'état : %2$s. Cette étape sera finie dans %3$s.\n",
       orderNotReady: "Ta commande n'est pas encore finalisée : %s",
       lineSlamming: "Il semblerait qu'un autre opérateur ait ouvert une ligne par dessus ta ligne actuel",
-      lineUnPaid: "Il semblerait que tu as oublié de payer, accéder à l'espace client : https://www.ovhtelecom.fr/manager/index.html#/",
-      resultOk: "Nous n'avons pas detecter de problème sur ta facturation et sur la ligne.",
-      resultAdvancedDiag: "Souhaites-tu faire un diagnostique plus precis de ton équipement ?\n\n Assures-toi d'avoir bien branché ta box",
+      lineUnPaid: "Il semblerait que tu as oublié de payer, accéder à l'espace client :point_right: https://www.ovhtelecom.fr/manager/index.html#/",
+      resultOk: "Nous n'avons pas detecter de problème sur ta facturation et sur la ligne. :v:",
+      resultAdvancedDiag: "Souhaites-tu faire un diagnostique plus precis de ton équipement :mag: ?\n\n :zap: Assures-toi d'avoir bien branché ta box :zap:",
       resultLastDiag: "Voici le résultat du dernier diagnostique réalisé.",
       resultDiagRemaining: "Tu peux encore effectuer %s diagnostique(s) aujourd'hui."
     }

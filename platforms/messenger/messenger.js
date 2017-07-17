@@ -3,6 +3,7 @@
 const request = require("request");
 const Bluebird = require("bluebird");
 const config = require("../../config/config-loader").load();
+const { emojify } = require("node-emoji");
 const { ButtonsListMessage, ButtonsMessage, TextMessage } = require("../generics");
 const { textMessageAdapter, buttonsListMessageAdapter, buttonsMessageAdapter } = require("./messenger_adapters");
 
@@ -528,7 +529,7 @@ function callSendAPI (messageData) {
 
 function send (recipientId, message) {
   if (typeof message === "string") {
-    return sendTextMessage(recipientId, message);
+    return sendTextMessage(recipientId, emojify(message));
   }
 
   if (message instanceof TextMessage) {
