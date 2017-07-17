@@ -2,7 +2,6 @@
 
 const assert = require("assert");
 const express = require("express");
-const cors = require("cors");
 const bodyParser = require("body-parser");
 const compression = require("compression");
 const http = require("http");
@@ -13,6 +12,8 @@ const verifyRequestSignature = require("./middlewares/verifyRequest");
 const requestLogger = require("../providers/logging/request");
 const utilsMiddleware = require("./middlewares/utils");
 const lusca = require("lusca");
+const cookieParser = require("cookie-parser");
+const verifyOvhUser = require("./middlewares/verifyOvhUser");
 
 module.exports = function (config) {
   assert(config, "config for mongo is required");
@@ -28,7 +29,8 @@ module.exports = function (config) {
   app.all("/*", (req, res, next) => {
     // CORS headers
     // restrict it to the required domain
-    res.header("Access-Control-Allow-Origin", "*");
+    res.header("Access-Control-Allow-Credentials", true);
+    res.header("Access-Control-Allow-Origin", config.server.corsOrigin);
     res.header("Access-Control-Allow-Methods", "GET,PUT,POST,DELETE,OPTIONS");
 
     // Set custom headers for CORS
@@ -42,11 +44,12 @@ module.exports = function (config) {
 
   app.use(requestLogger(config.server.logType));
   app.use(utilsMiddleware());
-  app.use(cors());
   app.use(compression());
   app.use(bodyParser.urlencoded({ limit: "50mb", extended: false }));
   app.use(bodyParser.json({ limit: "50mb" }));
   app.use(bodyParser.json({ verify: verifyRequestSignature(config) }));
+  app.use(cookieParser());
+  app.use(`${config.server.basePath}/web`, verifyOvhUser());
   app.set("view engine", "ejs");
 
   app.get("/mon/ping", (req, res) => res.status(200).end(null));

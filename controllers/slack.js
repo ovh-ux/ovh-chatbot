@@ -159,7 +159,7 @@ Pour l'instant je ne peux te répondre que sur des informations concernant un dy
 });
 
 function sendFeedback (res, senderId, intent, messageRaw, slack) {
-  const message = messageRaw.length >= 1000 ? "TOOLONG" : messageRaw;
+  const message = messageRaw.length >= config.maxMessageLength ? config.maxMessageLengthString : messageRaw;
 
   if (intent === "unknown") {
     return null;
