@@ -3,9 +3,12 @@
 module.exports = {
   FR: {
     connectedAs: "Tu es connecté en tant que %s :)",
+    details: "Détails",
     domainEditDns: "Tu dois modifier la zone DNS de ton domaine afin d'y ajouter le champs A avec l'ip de ton hébergement web, cette ip se trouve sur la page d'informations de ton hébergement dans l'espace client OVH.",
     disconnected: "Tu n'es pas correctement connecté à ton compte OVH :( , il te suffit de me demander 'connecte moi' pour te reconnecter.",
     dnsEditDns: "Tu peux modifier tes serveurs via l'espace client OVH",
+    eta: "Temps de fin estimé",
+    evrythingOk: "Tout est ok !",
     feedbackBadUnderstanding: "Mauvaise compréhension",
     feedbackHelp: "Est-ce que cette réponse t'as aidé ?",
     feedbackNo: "Non",
@@ -17,6 +20,7 @@ module.exports = {
     hostingNoSite: "Tu n'as pas d'hébergement web :(",
     hostingWrongSite: "Tu as du sélectionner le mauvais hébergement web associé à ce domaine.",
     hostingSuspended: "Ton service hébergement web semble être suspendu, pour le réactiver il faut le renouveler via l'espace client",
+    incident: "Incident",
     ndhGetQR: "Obtenir le QR Code",
     ndhQuestionStart: "Salut à toi 👋, tu as soif ? 🍺 Il faut la mériter si tu en veux. ",
     ndhQuestions: [
@@ -39,6 +43,7 @@ module.exports = {
     signIn: "Se connecter à son compte OVH",
     signInFirst: "Tu dois d'abord te connecter. Pour ce faire tu peux me le demander",
     slackFallback: "Tu ne peux pas utiliser cette fonctionnalité avec ce navigateur",
+    status: "Etat",
     telephonySelectAccount: "Sélectionne ton compte (%1$s/%2$s)",
     telephonyNoAccount: "Tu n'as pas d'offre télephonie.",
     thanks: "De rien avec plaisir :)",

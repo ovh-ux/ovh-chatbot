@@ -3,36 +3,33 @@
 const Bluebird = require("bluebird");
 const utils = require("../../utils");
 const { ListItem, CardMessage, TextMessage } = require("../../../platforms/generics");
-
-// const responsesCst = require("../../constants/responses").FR;
+const responsesCst = require("../../constants/responses").FR;
 
 
 class StatusUpdate {
   static action (senderId) {
     return utils.getOvhClient(senderId)
       .then((ovhClient) => Bluebird.props({
-        cloudStatus: ovhClient.requestPromised("GET", "/status/task"),
+        cloudStatus: ovhClient.requestPromised("GET", "/status/task").filter((incident) => incident.status !== "finished"),
         xdslStatus: getXdslStatus(ovhClient)
       }))
       .then(({ cloudStatus, xdslStatus }) => {
         let responses = [
           ...cloudStatus.map((cloudIncident) => new CardMessage([
-            new ListItem("Incident", cloudIncident.title),
-            new ListItem("Etat", `${cloudIncident.status} (${cloudIncident.progress}%)`),
-            new ListItem("Details", cloudIncident.details)
+            new ListItem(responsesCst.incident, cloudIncident.title),
+            new ListItem(responsesCst.status, `${cloudIncident.status} (${cloudIncident.progress}%)`),
+            new ListItem(responsesCst.details, cloudIncident.details)
           ], true)),
           ...xdslStatus.map((xdslIncident) => new CardMessage([
-            new ListItem("Incident", xdslIncident.comment),
-            new ListItem("Résolution", xdslIncident.endDate),
-            new ListItem("Details", `http://travaux.ovh.net/?do=details&id=${xdslIncident.taskId}`)
+            new ListItem(responsesCst.incident, xdslIncident.comment),
+            new ListItem(responsesCst.eta, xdslIncident.endDate),
+            new ListItem(responsesCst.details, `http://travaux.ovh.net/?do=details&id=${xdslIncident.taskId}`)
           ], true))
         ];
 
         if (!responses.length) {
-          responses = [new TextMessage("Aucun probleme, tout est ok !")];
+          responses = [new TextMessage(responsesCst.evrythingOk)];
         }
-
-        console.log(responses);
 
         return { responses, feedback: false };
       });
