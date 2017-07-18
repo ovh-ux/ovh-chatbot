@@ -56,6 +56,7 @@ Voici des exemples de questions que tu peux me poser :
   • Peux-tu m'aider à réparer mon site ?
   • Comment je fais pour changer mes serveurs dns de ma zone exemple.ovh ?
   • Comment je peux faire pointer mon domaine exemple.ovh sur mon hébergement web ?`,
+    welcomeWeb: "Bienvenue %s, en quoi puis-je être utile ?",
     xdslSelect: "Sélectionne ton offre xDSL (%1$s/%2$s)",
     xdslNone: ":satellite_antenna: Il semblerait que tu n'as pas d'offre xDSL.",
     xdslDiagInProgress: "Diagnostique en cours... Patiente quelques instants, le diagnostique peut prendre queleques minutes, merci :)",

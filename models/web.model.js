@@ -32,7 +32,8 @@ const WebSchema = new mongoose.Schema({
   },
   cookie: {
     type: String,
-    required: true
+    required: true,
+    expires: 60 * 5
   },
   userAgent: {
     type: String

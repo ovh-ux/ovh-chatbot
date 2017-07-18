@@ -1,9 +1,11 @@
 "use strict";
 
 const web = require("../platforms/web/web");
-const bot = require("../bots/hosting")();
+const bot = require("../bots/common")();
 const apiai = require("../utils/apiai");
 const Bluebird = require("bluebird");
+const { sprintf } = require("voca");
+const responsesCst = require("../constants/responses").FR;
 
 module.exports = () => {
   const sendQuickResponses = (res, nichandle, responses) =>
@@ -86,7 +88,7 @@ module.exports = () => {
       .getHistory(res, nichandle)
       .then((result) => {
         if (!result.length) {
-          web.send(null, nichandle, "Bienvenue, en quoi puis-je être utile ?");
+          web.send(null, nichandle, sprintf(responsesCst.welcomeWeb, nichandle));
         }
         return res.status(200).json(result);
       })
