@@ -90,7 +90,7 @@ module.exports = () => {
         }
         return res.status(200).json(result);
       })
-      .catch((err) => res.status(400).json(err));
+      .catch((err) => res.status(400).json({ message: err.message }));
   }
 
   function onPost (req, res) {
@@ -100,15 +100,15 @@ module.exports = () => {
 
     // check the data sent first;
     if (!nichandle) {
-      return res.status(403).json(new Error("Missing nichandle"));
+      return res.status(403).json({ message: "Missing nichandle" });
     }
 
     if (!message) {
-      return res.status(400).json(new Error("Missing message"));
+      return res.status(400).json({ message: "Missing message" });
     }
 
     if (!type || (type !== "postback" && type !== "message")) {
-      return res.status(400).json(new Error(`Unknown message type : ${type}`));
+      return res.status(400).json({ message: `Unknown message type : ${type}` });
     }
 
     // save user message to db first
