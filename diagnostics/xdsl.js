@@ -64,7 +64,7 @@ const checkxDSLDiagAdvanced = (diag) => {
   return [new TextMessage(responses)];
 };
 
-const checkxDSLDiag = (xdslOffer, serviceInfos, orderFollowUp, incident, diag) => {
+const checkxDSLDiag = (xdslOffer, serviceInfos, orderFollowUp, incident, diag, managerLink) => {
   let responses = [];
   let orderOk = false;
   let orderString = "";
@@ -92,7 +92,7 @@ const checkxDSLDiag = (xdslOffer, serviceInfos, orderFollowUp, incident, diag) =
   }
 
   if (!orderOk) {
-    return [...responses, new TextMessage(sprintf(diagCst.orderNotReady, orderString))];
+    return [...responses, new TextMessage(sprintf(diagCst.orderNotReady, orderString, `${managerLink}/order`))];
   }
 
   if (xdslOffer.status === "slamming") {
@@ -106,7 +106,7 @@ const checkxDSLDiag = (xdslOffer, serviceInfos, orderFollowUp, incident, diag) =
 
   if (responses.length === 0) {
     const button = new Button("postback", `XDSL_DIAG_${xdslOffer.accessName}`, diagCst.launchDiag);
-    responses = [new ButtonsMessage(`${diagCst.resultOk}\n${sprintf(diagCst.resultDiagRemaining, diag ? diag.remaining : 5)}\n${diagCst.resultAdvancedDiag}`, [button])];
+    responses = [new ButtonsMessage(`${sprintf(diagCst.resultOk, managerLink)}\n${sprintf(diagCst.resultDiagRemaining, diag ? diag.remaining : 5)}\n${diagCst.resultAdvancedDiag}`, [button])];
   }
 
   if (diag) {

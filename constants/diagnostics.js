@@ -10,20 +10,20 @@ module.exports = {
       goToManager: "Accéder à l'espace client :point_right:",
       hostingActive: "Ton site semble fonctionner correctement :v:",
       hostingButActive: "Par contre ton site semble fonctionner correctement :v:",
-      hostingBloqued: "Il semblerait qu'il y ai un problème sur ton serveur mutualisé, il est bloqué pour l'instant",
-      hostingMaintenance: "Il semblerait qu'il y ai un problème sur ton serveur mutualisé, il est actuellement en maintenance",
+      hostingBloqued: "Il semblerait qu'il y ai un problème sur ton serveur mutualisé, il est bloqué pour l'instant :skull:",
+      hostingMaintenance: "Il semblerait qu'il y ai un problème sur ton serveur mutualisé, il est actuellement en maintenance :wrench:",
       hostingUnknown: "Ton serveur est dans un état inconnu, contacte le support pour plus d'informations",
       mailBounce: "Il semblerait que tes envois d'e-mails soient bloqués car ils ont dépassés 50% de retour en erreur",
       mailKo: "Il semblerait que tes envois d'e-mails soient bloqués car ils ont dépassés 5% de retour en erreur",
-      mailSpam: "Il semblerait que tes envois d'e-mails soient bloqués car ils ont envoyés des spams",
+      mailSpam: ":no_entry_sign: Il semblerait que tes envois d'e-mails soient bloqués car ils ont envoyés des spams",
       sslRegenerate: "Tu as activé le SSL sur ton site mais ton certificat SSL ne contient pas ton domaine. Tu dois regénérer ton certificat via l'espace client",
       sslHttpsToHttpWarning: ":warning: Attention, ton site est compris dans le certificat SSL actuel et fonctionne actuellement en https. Cependant ta configuration indique que lors de la regénération automatique du certificat SSL," +
         " ton site ne sera plus accessible en https." +
         " Si c'est le comportement voulu ou que tu n'utilises pas https sur ce site ne prend pas en compte cet avertissement.",
       web404: "Il semblerait que la page à laquelle tu souhaites accéder n'existe pas, le fichier correspondant à cette page semble introuvable. " +
         "Vérifie aussi si ton site pointe sur le bon dossier de destination dans l'espace client onglet 'multisites'.",
-      web401: "Il semblerait que ton site essaie d'accéder à un fichier ou à un espace auquel il n'a pas les droits",
-      web403: "Il semblerait que ton site possède des problèmes de droits. Vérifie si ton site pointe sur le bon dossier de destination dans l'espace client onglet 'multisites'.",
+      web401: ":no_entry: Il semblerait que ton site essaie d'accéder à un fichier ou à un espace auquel il n'a pas les droits",
+      web403: ":no_entry: Il semblerait que ton site possède des problèmes de droits. Vérifie si ton site pointe sur le bon dossier de destination dans l'espace client onglet 'multisites'.",
       web500db: "Ton site n'arrive pas à se connecter à la base de données, je te conseille de vérifier le login et mot de passe de la base de données.",
       web500dev: "Il semblerait que tu aies fait une erreur de programmation sur ton site web. Dans ce genre de situation le support OVH n'intervient pas.",
       unknown: "Problème non diagnostiquable. :thinking_face:"
@@ -70,10 +70,10 @@ module.exports = {
       diagnosticResultMore: "Si ta ligne ne fonctionne toujours pas, rends-toi sur :point_right: https://docs.ovh.com/display/public/CRXDSL/Interruption+de+service\n",
       incident: ":construction: Il y a un incident sur la ligne : %1$s, la résolution est prévue pour : %2$s. Plus de détails :point_right: %3$s",
       orderStepStatus: "l'étape %1$s n'est pas encore finie, elle est actuellement dans l'état : %2$s. Cette étape sera finie dans %3$s.\n",
-      orderNotReady: "Ta commande n'est pas encore finalisée : %s",
+      orderNotReady: "Ta commande n'est pas encore finalisée : %1$s\nRends toi dans ton espace client pour plus de details :point_right: %2$s",
       lineSlamming: "Il semblerait qu'un autre opérateur ait ouvert une ligne par dessus ta ligne actuel",
       lineUnPaid: "Il semblerait que tu as oublié de payer, accéder à l'espace client :point_right: https://www.ovhtelecom.fr/manager/index.html#/",
-      resultOk: "Nous n'avons pas detecter de problème sur ta facturation et sur la ligne. :v:",
+      resultOk: "Nous n'avons pas detecter de problème sur ta facturation et sur la ligne. :v:\nTu peux te rendre dans ton espace clien :point_right: %s",
       resultAdvancedDiag: "Souhaites-tu faire un diagnostique plus precis de ton équipement :mag: ?\n\n :zap: Assures-toi d'avoir bien branché ta box :zap:",
       resultLastDiag: "Voici le résultat du dernier diagnostique réalisé.",
       resultDiagRemaining: "Tu peux encore effectuer %s diagnostique(s) aujourd'hui."

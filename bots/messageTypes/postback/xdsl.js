@@ -38,10 +38,11 @@ module.exports = [
                   return Bluebird.resolve(null);
                 }
                 return Bluebird.reject(err);
-              })
+              }),
+            managerLink: findManagerLink(ovhClient, xdslOffer)
           })
         )
-        .then(({ xdsl, serviceInfos, orderFollowUp, incident, diag }) => xDSLDiag.checkxDSLDiag(xdsl, serviceInfos, orderFollowUp, incident, diag))
+        .then(({ xdsl, serviceInfos, orderFollowUp, incident, diag, managerLink }) => xDSLDiag.checkxDSLDiag(xdsl, serviceInfos, orderFollowUp, incident, diag, managerLink))
         .then((responses) => Bluebird.resolve({ responses, feedback: true }))
         .catch((err) => {
           res.logger.error(err);
@@ -113,3 +114,15 @@ module.exports = [
     }
   }
 ];
+
+function findManagerLink (ovhClient, xdslOffer) {
+  return Bluebird.props({
+    pack: ovhClient.requestPromised("GET", "/pack/xdsl")
+    .filter((packName) =>
+      ovhClient.requestPromised("GET", `/pack/xdsl/${packName}/xdslAccess/services`)
+        .then((xdslOffers) => xdslOffers.includes(xdslOffer)))
+    .then((packs) => packs[0]),
+    line: ovhClient.requestPromised("GET", `/xdsl/${xdslOffer}/lines`).then((lines) => lines[0])
+  }).then(({ pack, line }) => `https://www.ovhtelecom.fr/manager/index.html#/pack/${pack}/xdsl/${xdslOffer}/lines/${line}`);
+
+}
