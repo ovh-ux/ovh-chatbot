@@ -27,14 +27,14 @@ module.exports = [
             orderFollowUp: ovhClient.requestPromised("GET", `/xdsl/${xdslOffer}/orderFollowup`),
             incident: ovhClient.requestPromised("GET", `/xdsl/${xdslOffer}/incident`)
               .catch((err) => {
-                if (err.error === 404) {
+                if (err.error === 404 || err.statusCode === 404) {
                   return Bluebird.resolve(null);
                 }
                 return Bluebird.reject(err);
               }),
             diag: ovhClient.requestPromised("GET", `/xdsl/${xdslOffer}/diagnostic`)
               .catch((err) => {
-                if (err.error === 404) {
+                if (err.error === 404 || err.statusCode === 404) {
                   return Bluebird.resolve(null);
                 }
                 return Bluebird.reject(err);

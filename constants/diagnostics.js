@@ -73,7 +73,7 @@ module.exports = {
       orderNotReady: "Ta commande n'est pas encore finalisée : %1$s\nRends toi dans ton espace client pour plus de details :point_right: %2$s",
       lineSlamming: "Il semblerait qu'un autre opérateur ait ouvert une ligne par dessus ta ligne actuel",
       lineUnPaid: "Il semblerait que tu as oublié de payer, accéder à l'espace client :point_right: https://www.ovhtelecom.fr/manager/index.html#/",
-      resultOk: "Nous n'avons pas detecter de problème sur ta facturation et sur la ligne. :v:\nTu peux te rendre dans ton espace clien :point_right: %s",
+      resultOk: "Nous n'avons pas detecter de problème sur ta facturation et sur la ligne. :v:\nTu peux te rendre dans ton espace client :point_right: %s",
       resultAdvancedDiag: "Souhaites-tu faire un diagnostique plus precis de ton équipement :mag: ?\n\n :zap: Assures-toi d'avoir bien branché ta box :zap:",
       resultLastDiag: "Voici le résultat du dernier diagnostique réalisé.",
       resultDiagRemaining: "Tu peux encore effectuer %s diagnostique(s) aujourd'hui."

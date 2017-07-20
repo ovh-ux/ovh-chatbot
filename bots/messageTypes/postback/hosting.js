@@ -58,11 +58,11 @@ module.exports = [
         .then((responses) => ({ responses, feedback: true }))
         .catch((err) => {
           res.logger.error(err);
-          if (err.error === 404) {
+          if (err.error === 404 || err.statusCode === 404) {
             return Bluebird.reject(error(404, responsesCst.hostingWrongSite));
           }
 
-          if (err.error === 460) {
+          if (err.error === 460 || err.statusCode === 460) {
             return Bluebird.resolve({ responses: [
               new TextMessage(responsesCst.hostingSuspended),
               new TextMessage(guides.help(guides.renewOvh))
@@ -122,7 +122,7 @@ module.exports = [
 
 function getSSLState (ovhClient, hosting) {
   return Bluebird.props({
-    infos: ovhClient.requestPromised("GET", `/hosting/web/${hosting}/ssl`).catch((err) => err.error === 404 ? Bluebird.resolve(null) : Bluebird.reject(err)),
-    domains: ovhClient.requestPromised("GET", `/hosting/web/${hosting}/ssl/domains`).catch((err) => err.error === 404 ? Bluebird.resolve([]) : Bluebird.reject(err))
+    infos: ovhClient.requestPromised("GET", `/hosting/web/${hosting}/ssl`).catch((err) => err.error === 404 || err.statusCode === 404 ? Bluebird.resolve(null) : Bluebird.reject(err)),
+    domains: ovhClient.requestPromised("GET", `/hosting/web/${hosting}/ssl/domains`).catch((err) => err.error === 404 || err.statusCode === 404 ? Bluebird.resolve([]) : Bluebird.reject(err))
   });
 }
