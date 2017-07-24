@@ -79,7 +79,7 @@ const checkxDSLDiag = (xdslOffer, serviceInfos, orderFollowUp, incident, diag, m
     case "doing":
     case "todo":
     case "error":
-      orderString += sprintf(diagCst.orderStepStatus, orderStep.name, diagCst[orderStep.status], `${orderStep.expectedDuration} ${orderStep.durationUnit}`);
+      orderString += sprintf(diagCst.orderStepStatus, diagCst[orderStep.name], diagCst[orderStep.status], `${orderStep.expectedDuration} ${diagCst[orderStep.durationUnit]}`);
       break;
     case "done":
       if (orderStep.name === "accessIsOperational") {
