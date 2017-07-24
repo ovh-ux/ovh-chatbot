@@ -3,8 +3,8 @@
 module.exports = {
   FR: {
     connectedAs: "Tu es connecté en tant que %s :ok_hand:",
-    domainEditDns: "Tu dois modifier la zone DNS de ton domaine afin d'y ajouter le champs A avec l'ip de ton hébergement web, cette ip se trouve sur la page d'informations de ton hébergement dans l'espace client OVH.",
-    disconnected: "Tu n'es pas correctement connecté à ton compte OVH :( , il te suffit de me demander 'connecte moi' pour te reconnecter.",
+    domainEditDns: "Tu dois modifier la zone DNS de ton domaine afin d'y ajouter le champ A avec l'IP de ton hébergement web, cette IP se trouve sur la page d'informations de ton hébergement dans l'espace client OVH.",
+    disconnected: "Tu n'es pas correctement connecté à ton compte OVH :( , il te suffit de me demander 'connecte-moi' pour te reconnecter.",
     dnsEditDns: "Tu peux modifier tes serveurs via l'espace client OVH",
     feedbackBadUnderstanding: "Mauvaise compréhension",
     feedbackHelp: "Est-ce que cette réponse t'as aidé ?",
@@ -15,8 +15,8 @@ module.exports = {
     hostingSelectSite: "Sélectionne le site concerné (%1$s/%2$s)",
     hostingSelectHost: "Sélectionne l'hébergement web sur lequel est installé ton site (%1$s/%2$s)",
     hostingNoSite: ":globe_with_meridians: Tu n'as pas d'hébergement web :(",
-    hostingWrongSite: "Tu as du sélectionner le mauvais hébergement web associé à ce domaine. :thinking_face:",
-    hostingSuspended: "Ton service hébergement web semble être suspendu, pour le réactiver il faut le renouveler via l'espace client :zzz:",
+    hostingWrongSite: "Il semble que l'hébergement web que tu as sélectionné n'est pas celui associé à ce domaine. :thinking_face:",
+    hostingSuspended: "Ton hébergement web semble être suspendu, pour le réactiver il faut le renouveler via l'espace client :zzz:",
     ndhGetQR: "Obtenir le QR Code",
     ndhQuestionStart: "Salut à toi :wave:, tu as soif ? :beer: Il faut la mériter si tu en veux. ",
     ndhQuestions: [
@@ -56,10 +56,10 @@ Voici des exemples de questions que tu peux me poser :
   • Peux-tu m'aider à réparer mon site ?
   • Comment je fais pour changer mes serveurs dns de ma zone exemple.ovh ?
   • Comment je peux faire pointer mon domaine exemple.ovh sur mon hébergement web ?`,
-    welcomeWeb: "Bienvenue %s, en quoi puis-je être utile ?",
+    welcomeWeb: "Bienvenue %s, en quoi puis-je t'être utile ?",
     xdslSelect: "Sélectionne ton offre xDSL (%1$s/%2$s)",
     xdslNone: ":satellite_antenna: Il semblerait que tu n'as pas d'offre xDSL.",
-    xdslDiagInProgress: "Diagnostique en cours... Patiente quelques instants, le diagnostique peut prendre queleques minutes, merci :)",
-    xdslQuotaReached: "Ton quota de diagnostiques a été atteint"
+    xdslDiagInProgress: "Diagnostic en cours... Patiente quelques instants, le diagnostique peut prendre queleques minutes, merci :)",
+    xdslQuotaReached: "Ton quota de diagnostic a été atteint"
   }
 };

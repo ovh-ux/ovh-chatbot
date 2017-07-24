@@ -75,19 +75,21 @@ const checkxDSLDiag = (xdslOffer, serviceInfos, orderFollowUp, incident, diag, m
 
   for (let i = 0; i < orderFollowUp.length; i++) {
     const orderStep = orderFollowUp[i];
-    switch (orderStep.status) {
-    case "doing":
-    case "todo":
-    case "error":
-      orderString += sprintf(diagCst.orderStepStatus, diagCst[orderStep.name], diagCst[orderStep.status], `${orderStep.expectedDuration} ${diagCst[orderStep.durationUnit]}`);
-      break;
-    case "done":
-      if (orderStep.name === "accessIsOperational") {
+    if (orderStep.name === "accessIsOperational") {
+      if (orderStep.status === "done") {
         orderOk = true;
       }
-      break;
-    default:
-      break;
+    } else {
+      switch (orderStep.status) {
+      case "doing":
+      case "todo":
+      case "error":
+        orderString += sprintf(diagCst.orderStepStatus, diagCst[orderStep.name], diagCst[orderStep.status], `${orderStep.expectedDuration} ${diagCst[orderStep.durationUnit]}`);
+        break;
+      case "done":
+      default:
+        break;
+      }
     }
   }
 
