@@ -5,6 +5,7 @@ const bot = require("../bots/common")();
 const apiai = require("../utils/apiai");
 const Bluebird = require("bluebird");
 const { sprintf } = require("voca");
+const { TextMessage } = require("../platforms/generics");
 const responsesCst = require("../constants/responses").FR;
 
 module.exports = () => {
@@ -39,6 +40,13 @@ module.exports = () => {
         const nichandle = resp.sessionId;
         if (resp.status && resp.status.code === 200 && resp.result) {
           // successful request
+          if (resp.result.action === "welcome") {
+            return Bluebird.resolve({ responses: [new TextMessage(responsesCst.welcome)], feedback: false });
+          }
+
+          if (resp.result.action === "connection") {
+            return Bluebird.resolve({ responses: [new TextMessage(sprintf(responsesCst.connectedAs, nichandle))], feedback: false });
+          }
 
           // if api.ai has a premade response
           if (
