@@ -46,16 +46,16 @@ module.exports = {
     telephonySelectAccount: "Sélectionne ton compte (%1$s/%2$s)",
     telephonyNoAccount: ":telephone_receiver: Tu n'as pas d'offre télephonie. ",
     thanks: "De rien avec plaisir :wink:",
-    upsellingWeb: "Tu peux te commander un hébergement web en te rendant sur https://www.ovh.com/fr/hebergement-web/",
-    upsellingXDSL: "Tu peux te commander une ligne xDSL en te rendant sur https://www.ovhtelecom.fr/offre-internet/",
-    upsellingPhone: "Tu peux te commander une ligne téléphonique sur https://www.ovhtelecom.fr/telephonie/",
-    welcome: `Bonjour, pour l'instant je ne peux te répondre que sur des informations concernant un dysfonctionnement sur ton site web.
+    upsellingWeb: "Tu peux commander un hébergement web en te rendant sur https://www.ovh.com/fr/hebergement-web/",
+    upsellingXDSL: "Tu peux commander une ligne xDSL en te rendant sur https://www.ovhtelecom.fr/offre-internet/",
+    upsellingPhone: "Tu peux commander une ligne téléphonique sur https://www.ovhtelecom.fr/telephonie/",
+    welcome: `Bonjour, pour l'instant je ne peux te répondre que sur des informations concernant un dysfonctionnement sur ton site web ou sur ta ligne xDSL/Téléphonique.
 Voici des exemples de questions que tu peux me poser :
   • Mon site ne fonctionne plus
-  • J'ai un problème sur mon site ovh.com
-  • Peux-tu m'aider à réparer mon site ?
   • Comment je fais pour changer mes serveurs dns de ma zone exemple.ovh ?
-  • Comment je peux faire pointer mon domaine exemple.ovh sur mon hébergement web ?`,
+  • Comment je peux faire pointer mon domaine exemple.ovh sur mon hébergement web ?
+  • Peut tu faire un diagnostic de ma ligne ADSL ?
+  • Pourquoi je ne peux pas téléphoner ?`,
     welcomeWeb: "Bienvenue %s, en quoi puis-je t'être utile ?",
     xdslSelect: "Sélectionne ton offre xDSL (%1$s/%2$s)",
     xdslNone: ":satellite_antenna: Il semblerait que tu n'as pas d'offre xDSL.",
