@@ -46,6 +46,7 @@
   "devDependencies": {
     "babel-eslint": "^7.2.3",
     "cz-conventional-changelog": "^2.0.0",
+    "cz-ovh-commit": "^1.0.0",
     "eslint": "^3.19.0",
     "eslint-config-ovh": "^0.1.1",
     "husky": "^0.13.1",
@@ -55,7 +56,7 @@
   },
   "config": {
     "commitizen": {
-      "path": "./node_modules/cz-conventional-changelog"
+      "path": "./node_modules/cz-ovh-commit"
     }
   },
   "aapi": {
