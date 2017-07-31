@@ -18,6 +18,7 @@ const verifyOvhUser = require("./middlewares/verifyOvhUser");
 module.exports = function (config) {
   assert(config, "config for mongo is required");
 
+  // it will try to reconnect evry 5s when it is not connected;
   mongo.connect(config.mongo);
 
   const port = config.server.port;
@@ -43,6 +44,15 @@ module.exports = function (config) {
   });
 
   app.use(requestLogger(config.server.logType));
+
+  app.get("/mon/ping", (req, res) => res.status(200).end(null));
+  app.use((req, res, next) => {
+    if (!mongo.isConnected()) {
+      return res.status(503).json({ message: "database not available" });
+    }
+    return next();
+  });
+
   app.use(utilsMiddleware());
   app.use(compression());
   app.use(bodyParser.urlencoded({ limit: "50mb", extended: false }));
@@ -51,9 +61,6 @@ module.exports = function (config) {
   app.use(cookieParser());
   app.use(`${config.server.basePath}/web`, verifyOvhUser());
   app.set("view engine", "ejs");
-
-  app.get("/mon/ping", (req, res) => res.status(200).end(null));
-
   app.use((req, res, next) => {
     if (process.env.NODE_IS_CLOSING !== "false") {
       return next();
