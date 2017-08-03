@@ -47,6 +47,7 @@
   },
   "devDependencies": {
     "babel-eslint": "^7.2.3",
+    "conventional-changelog-ovh": "^1.0.0",
     "cz-conventional-changelog": "^2.0.0",
     "cz-ovh-commit": "^1.0.0",
     "eslint": "^3.19.0",
