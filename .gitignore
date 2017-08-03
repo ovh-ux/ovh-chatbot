@@ -2,3 +2,4 @@ node_modules
 npm-debug.log
 ecosystem.json
 .DS_Store
+env.sh

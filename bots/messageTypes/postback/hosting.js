@@ -51,18 +51,19 @@ module.exports = [
             attachedDomain: ovhClient.requestPromised("GET", `/hosting/web/${hosting}/attachedDomain/${domain}`),
             hostingEmails: ovhClient.requestPromised("GET", `/hosting/web/${hosting}/email`),
             ssl: getSSLState(ovhClient, hosting),
+            dns: getDNSState(ovhClient, domain),
             statistics: ovhClient.requestPromised("GET", `/hosting/web/${hosting}/statistics`, { period: "daily", type: "in.httpMeanResponseTime" }).catch((err) => err.error === 404 ? Bluebird.resolve(null) : null)
           });
         })
-        .then(({ hosting, attachedDomain, hostingEmails, ssl, statistics }) => hostingDiagnostics.checkWebsite(res, hosting, attachedDomain, hostingEmails, ssl, statistics))
+        .then(({ hosting, attachedDomain, hostingEmails, ssl, dns, statistics }) => hostingDiagnostics.checkWebsite(res, hosting, attachedDomain, hostingEmails, ssl, dns, statistics))
         .then((responses) => ({ responses, feedback: true }))
         .catch((err) => {
           res.logger.error(err);
-          if (err.error === 404) {
+          if (err.error === 404 || err.statusCode === 404) {
             return Bluebird.reject(error(404, responsesCst.hostingWrongSite));
           }
 
-          if (err.error === 460) {
+          if (err.error === 460 || err.statusCode === 460) {
             return Bluebird.resolve({ responses: [
               new TextMessage(responsesCst.hostingSuspended),
               new TextMessage(guides.help(guides.renewOvh))
@@ -122,7 +123,15 @@ module.exports = [
 
 function getSSLState (ovhClient, hosting) {
   return Bluebird.props({
-    infos: ovhClient.requestPromised("GET", `/hosting/web/${hosting}/ssl`).catch((err) => err.error === 404 ? Bluebird.resolve(null) : Bluebird.reject(err)),
-    domains: ovhClient.requestPromised("GET", `/hosting/web/${hosting}/ssl/domains`).catch((err) => err.error === 404 ? Bluebird.resolve([]) : Bluebird.reject(err))
+    infos: ovhClient.requestPromised("GET", `/hosting/web/${hosting}/ssl`).catch((err) => err.error === 404 || err.statusCode === 404 ? Bluebird.resolve(null) : Bluebird.reject(err)),
+    domains: ovhClient.requestPromised("GET", `/hosting/web/${hosting}/ssl/domains`).catch((err) => err.error === 404 || err.statusCode === 404 ? Bluebird.resolve([]) : Bluebird.reject(err))
+  });
+}
+
+function getDNSState (ovhClient, domain) {
+  return Bluebird.props({
+    target: ovhClient.requestPromised("GET", `/domain/zone/${domain}/record`, { fieldType: "NS" })
+      .then((ids) => Bluebird.mapSeries(ids, (id) => ovhClient.requestPromised("GET", `/domain/zone/${domain}/record/${id}`))),
+    real: ovhClient.requestPromised("GET", `/domain/zone/${domain}`)
   });
 }

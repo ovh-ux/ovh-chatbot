@@ -3,7 +3,7 @@
 const Bluebird = require("bluebird");
 const utils = require("../../utils");
 const { ListItem, CardMessage, TextMessage } = require("../../../platforms/generics");
-const responsesCst = require("../../constants/responses").FR;
+const responsesCst = require("../../../constants/responses").FR;
 
 
 class StatusUpdate {

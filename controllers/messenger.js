@@ -177,8 +177,8 @@ module.exports = () => {
       .catch(res.logger.error);
   }
 
-  function sendFeedback (res, senderId, intent, messageRaw) {
-    const message = messageRaw.length >= 1000 ? "TOOLONG" : messageRaw;
+  function sendFeedback (res, senderId, intent, rawMessage) {
+    let message = rawMessage.length >= config.maxMessageLength ? config.maxMessageLengthString : rawMessage;
     if (intent === "unknown") {
       return null;
     }

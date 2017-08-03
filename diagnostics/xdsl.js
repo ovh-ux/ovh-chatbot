@@ -67,7 +67,7 @@ const checkxDSLDiagAdvanced = (diag) => {
   return [new CardMessage(items)];
 };
 
-const checkxDSLDiag = (xdslOffer, serviceInfos, orderFollowUp, incident, diag) => {
+const checkxDSLDiag = (xdslOffer, serviceInfos, orderFollowUp, incident, diag, managerLink) => {
   let responses = [];
   let orderOk = false;
   let orderString = "";
@@ -78,24 +78,26 @@ const checkxDSLDiag = (xdslOffer, serviceInfos, orderFollowUp, incident, diag) =
 
   for (let i = 0; i < orderFollowUp.length; i++) {
     const orderStep = orderFollowUp[i];
-    switch (orderStep.status) {
-    case "doing":
-    case "todo":
-    case "error":
-      orderString += sprintf(diagCst.orderStepStatus, orderStep.name, diagCst[orderStep.status], `${orderStep.expectedDuration} ${orderStep.durationUnit}`);
-      break;
-    case "done":
-      if (orderStep.name === "accessIsOperational") {
+    if (orderStep.name === "accessIsOperational") {
+      if (orderStep.status === "done") {
         orderOk = true;
       }
-      break;
-    default:
-      break;
+    } else {
+      switch (orderStep.status) {
+      case "doing":
+      case "todo":
+      case "error":
+        orderString += sprintf(diagCst.orderStepStatus, diagCst[orderStep.name], diagCst[orderStep.status], `${orderStep.expectedDuration} ${diagCst[orderStep.durationUnit]}`);
+        break;
+      case "done":
+      default:
+        break;
+      }
     }
   }
 
   if (!orderOk) {
-    return [...responses, new CardMessage([new ListItem(sprintf(diagCst.orderNotReady, orderString))])];
+    return [...responses, new CardMessage([new ListItem(sprintf(diagCst.orderNotReady, orderString, `${managerLink}/order`))])];
   }
 
   if (xdslOffer.status === "slamming") {
@@ -109,7 +111,7 @@ const checkxDSLDiag = (xdslOffer, serviceInfos, orderFollowUp, incident, diag) =
 
   if (responses.length === 0) {
     const button = new Button("postback", `XDSL_DIAG_${xdslOffer.accessName}`, diagCst.launchDiag);
-    responses = [new ButtonsMessage(`${diagCst.resultOk}\n${sprintf(diagCst.resultDiagRemaining, diag ? diag.remaining : 5)}\n${diagCst.resultAdvancedDiag}`, [button])];
+    responses = [new ButtonsMessage(`${sprintf(diagCst.resultOk, managerLink)}\n${sprintf(diagCst.resultDiagRemaining, diag ? diag.remaining : 5)}\n${diagCst.resultAdvancedDiag}`, [button])];
   }
 
   if (diag) {

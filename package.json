@@ -21,7 +21,7 @@
     "body-parser": "^1.16.0",
     "compression": "^1.6.2",
     "config": "^1.20.4",
-    "cors": "^2.8.1",
+    "cookie-parser": "^1.4.3",
     "ejs": "^2.4.2",
     "express": "^4.14.1",
     "lodash": "^4.17.4",
@@ -30,6 +30,7 @@
     "mongodb": "^2.2.11",
     "mongoose": "^4.8.1",
     "morgan": "^1.8.0",
+    "node-emoji": "^1.7.0",
     "node-wit": "^4.2.0",
     "npm": "^4.2.0",
     "ovh": "^2.0.1",
@@ -46,7 +47,9 @@
   },
   "devDependencies": {
     "babel-eslint": "^7.2.3",
+    "conventional-changelog-ovh": "^1.0.0",
     "cz-conventional-changelog": "^2.0.0",
+    "cz-ovh-commit": "^1.0.0",
     "eslint": "^3.19.0",
     "eslint-config-ovh": "^0.1.1",
     "husky": "^0.13.1",
@@ -56,7 +59,15 @@
   },
   "config": {
     "commitizen": {
-      "path": "./node_modules/cz-conventional-changelog"
+      "path": "./node_modules/cz-ovh-commit"
     }
+  },
+  "aapi": {
+    "method": "/api/v1.0/web",
+    "request": "GET",
+    "apiv7Ignored": true
+  },
+  "signature": {
+    "parameters": []
   }
 }

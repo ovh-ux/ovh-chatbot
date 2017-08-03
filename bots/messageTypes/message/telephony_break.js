@@ -15,7 +15,7 @@ class TelephonyBreak {
       return ovhClient.requestPromised("GET", "/telephony");
     })
     .map((service) => ovhClient.requestPromised("GET", `/telephony/${service}`)
-      .then((info) => new Button(BUTTON_TYPE.POSTBACK, `TELEPHONY_SELECTED_${info.billingAccount}`, info.description))
+      .then((info) => new Button(BUTTON_TYPE.POSTBACK, `TELEPHONY_SELECTED_${info.billingAccount}`, info.description || service))
     )
     .then((buttons) => ({
       responses: buttons.length > 0 ? [createPostBackList(sprintf(responsesCst.telephonySelectAccount, 1, Math.ceil(buttons.length / MAX_LIMIT)), buttons, "MORE_TELEPHONY", 0, MAX_LIMIT)] :

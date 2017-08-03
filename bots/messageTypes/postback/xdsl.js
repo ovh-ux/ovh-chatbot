@@ -27,21 +27,22 @@ module.exports = [
             orderFollowUp: ovhClient.requestPromised("GET", `/xdsl/${xdslOffer}/orderFollowup`),
             incident: ovhClient.requestPromised("GET", `/xdsl/${xdslOffer}/incident`)
               .catch((err) => {
-                if (err.error === 404) {
+                if (err.error === 404 || err.statusCode === 404) {
                   return Bluebird.resolve(null);
                 }
                 return Bluebird.reject(err);
               }),
             diag: ovhClient.requestPromised("GET", `/xdsl/${xdslOffer}/diagnostic`)
               .catch((err) => {
-                if (err.error === 404) {
+                if (err.error === 404 || err.statusCode === 404) {
                   return Bluebird.resolve(null);
                 }
                 return Bluebird.reject(err);
-              })
+              }),
+            managerLink: findManagerLink(ovhClient, xdslOffer)
           })
         )
-        .then(({ xdsl, serviceInfos, orderFollowUp, incident, diag }) => xDSLDiag.checkxDSLDiag(xdsl, serviceInfos, orderFollowUp, incident, diag))
+        .then(({ xdsl, serviceInfos, orderFollowUp, incident, diag, managerLink }) => xDSLDiag.checkxDSLDiag(xdsl, serviceInfos, orderFollowUp, incident, diag, managerLink))
         .then((responses) => Bluebird.resolve({ responses, feedback: true }))
         .catch((err) => {
           res.logger.error(err);
@@ -103,7 +104,7 @@ module.exports = [
           return ovhClient.requestPromised("GET", "/xdsl");
         })
         .map((offer) => ovhClient.requestPromised("GET", `/xdsl/${offer}`)
-          .then((xdslInfo) => new Button(BUTTON_TYPE.POSTBACK, `XDSL_SELECTED_${xdslInfo.accessName}`, xdslInfo.description))
+          .then((xdslInfo) => new Button(BUTTON_TYPE.POSTBACK, `XDSL_SELECTED_${xdslInfo.accessName}`, xdslInfo.description || offer))
         )
         .then((buttons) => ({ responses: [createPostBackList(sprintf(responsesCst.xdslSelect, Math.floor(1 + (currentIndex / MAX_LIMIT)), Math.ceil(buttons.length / MAX_LIMIT)), buttons, "MORE_XDSL", currentIndex, MAX_LIMIT)], feedback: false }))
         .catch((err) => {
@@ -113,3 +114,15 @@ module.exports = [
     }
   }
 ];
+
+function findManagerLink (ovhClient, xdslOffer) {
+  return Bluebird.props({
+    pack: ovhClient.requestPromised("GET", "/pack/xdsl")
+    .filter((packName) =>
+      ovhClient.requestPromised("GET", `/pack/xdsl/${packName}/xdslAccess/services`)
+        .then((xdslOffers) => xdslOffers.includes(xdslOffer)))
+    .then((packs) => packs[0]),
+    line: ovhClient.requestPromised("GET", `/xdsl/${xdslOffer}/lines`).then((lines) => lines[0])
+  }).then(({ pack, line }) => `https://www.ovhtelecom.fr/manager/index.html#/pack/${pack}/xdsl/${xdslOffer}/lines/${line}`);
+
+}

@@ -14,7 +14,7 @@ const diagCst = require("../constants/diagnostics").hosting.FR;
 const { sprintf } = require("voca");
 
 module.exports = {
-  checkWebsite (res, hosting, domain, hostingEmails, ssl /* , statistics*/) {
+  checkWebsite (res, hosting, domain, hostingEmails, ssl, dns /* , statistics*/) {
     res.logger.info(domain);
     const protocol = domain.ssl ? "https://" : "http://";
     let responses = this.checkEmailsState(hosting, hostingEmails);
@@ -31,7 +31,7 @@ module.exports = {
       .then((ip) => {
         res.logger.info(hosting);
         res.logger.info(ip);
-        const isDNSInvalid = this.checkDNS(ip, hosting, domain);
+        const isDNSInvalid = this.checkDNS(ip, hosting, domain, dns);
 
         res.logger.info(isDNSInvalid);
         if (isDNSInvalid) {
@@ -75,7 +75,7 @@ module.exports = {
         let managerButton;
 
         res.logger.info(err);
-        if (Array.isArray(err) && err.length && typeof err[0] === "string") {
+        if (Array.isArray(err) && err.length && (typeof err[0] === "string" || err[0] instanceof TextMessage)) {
           return err;
         }
 
@@ -196,7 +196,8 @@ module.exports = {
     }
   },
 
-  checkDNS (ip, hostingInfos, domain) {
+  checkDNS (ip, hostingInfos, domain, dnsInfo) {
+    let responses = [];
     let goodIp;
 
     if (domain.cdn === "active") {
@@ -214,6 +215,13 @@ module.exports = {
       goodIp = hostingInfos.clusterIp;
     }
 
+    if (dnsInfo.real.nameServers.length !== dnsInfo.target.length) {
+      let targets = dnsInfo.target.map((trgt) => trgt.target.slice(0, -1));
+      let wrongs = _.difference(dnsInfo.real.nameServers, targets);
+
+      responses = [new TextMessage(sprintf(diagCst.dnsWrongConfig, wrongs.join(", "), targets.join(", ")))];
+    }
+
     if (goodIp) {
       return [
         new CardMessage([
@@ -222,7 +230,7 @@ module.exports = {
       ];
     }
 
-    return [];
+    return responses;
   },
 
   error500 (err, hosting) {

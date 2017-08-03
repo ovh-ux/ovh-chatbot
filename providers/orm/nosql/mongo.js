@@ -11,8 +11,24 @@ module.exports = {
     const self = this;
     const options = {};
 
+    const connectWithRetry = (url, mongoOptions) => {
+      if (self.isConnected()) {
+        return null;
+      }
+
+      console.log("Attempting to connect to mongo");
+      return mongoose.connect(url, mongoOptions)
+        .catch((err) => {
+          console.error("Failed to connect to mongo on startup - retrying in 5 sec\n", err.message);
+          mongoose.connection.close();
+          return Bluebird.resolve();
+        })
+        .delay(5000)
+        .then(() => connectWithRetry(url, mongoOptions));
+    };
+
     if (mongoose.connection.readyState) {
-      return;
+      return Bluebird.resolve();
     }
 
     assert(config && config.url, "config.mongo.url is required");
@@ -40,15 +56,20 @@ module.exports = {
       keepAlive: 1
     };
     options.server.socketOptions.connectTimeoutMS = options.replset.socketOptions.connectTimeoutMS = 30000;
+    options.server.auto_reconnect = true;
 
-    mongoose.connect(config.url, options);
+    return connectWithRetry(config.url, options);
   },
   close (signal) {
     return () => {
       mongoose.connection.close(() => {
+        Bluebird.resolve();
         console.log("Mongoose connection closed"); // TODO Use logger
         process.kill(process.pid, signal);
       });
     };
+  },
+  isConnected () {
+    return mongoose.connection.readyState === 1;
   }
 };
