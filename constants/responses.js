@@ -7,7 +7,7 @@ module.exports = {
     disconnected: "Tu n'es pas correctement connecté à ton compte OVH :( , il te suffit de me demander 'connecte-moi' pour te reconnecter.",
     dnsEditDns: "Tu peux modifier tes serveurs via l'espace client OVH",
     feedbackBadUnderstanding: "Mauvaise compréhension",
-    feedbackHelp: "Est-ce que cette réponse t'as aidé ?",
+    feedbackHelp: "Est-ce que cette réponse t'a aidé ?",
     feedbackNo: "Non",
     feedbackThanks: "Merci pour ton avis :+1:",
     feedbackYes: "Oui",

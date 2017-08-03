@@ -19,7 +19,7 @@ module.exports = {
       sslRegenerate: "Tu as activé le SSL sur ton site mais ton certificat SSL ne contient pas ton domaine. Tu dois regénérer ton certificat via l'espace client",
       sslHttpsToHttpWarning: ":warning: Attention, ton site est compris dans le certificat SSL actuel et fonctionne actuellement en https. Cependant ta configuration indique que lors de la regénération automatique du certificat SSL," +
         " ton site ne sera plus accessible en https." +
-        " Si c'est le comportement voulu ou que tu n'utilises pas https sur ce site, ne prend pas en compte cet avertissement.",
+        " Si c'est le comportement voulu ou que tu n'utilises pas https sur ce site, ne prends pas en compte cet avertissement.",
       web404: "Il semble que la page à laquelle tu souhaites accéder n'existe pas, le fichier correspondant à celle-ci est introuvable.",
       web401: ":no_entry: Il semblerait que ton site essaie d'accéder à un fichier ou à un espace auquel il n'a pas les droits",
       web403: ":no_entry: Il semblerait que ton site ait des problèmes de droits. Vérifie si ton site pointe sur le bon dossier de destination dans l'espace client (onglet 'multisites').",
@@ -57,7 +57,7 @@ module.exports = {
       orderTreatment: "Traitement de la commande",
       sendModem: "Envoi du modem",
       sendOrderToProvider: "Transmission de la commande auprès du fournisseur d'accès",
-      setupCustomerPremisesEquipment: "Envoie de l'équipement",
+      setupCustomerPremisesEquipment: "Envoi de l'équipement",
       waitingForProviderInstallReport: "Attente du rapport du fournisseur d'accès",
       waitingForWithdrawalPeriodToBeOver: "Attente de la fin de la période de rétractation",
       sync: "synchronisé",
@@ -86,7 +86,7 @@ module.exports = {
       lineSlamming: "Il semblerait qu'un autre opérateur ait ouvert une ligne par dessus ta ligne actuelle",
       lineUnPaid: "Il semblerait que tu as oublié de payer, accéder à l'espace client :point_right: https://www.ovhtelecom.fr/manager/index.html#/",
       resultOk: "Nous n'avons détecté de problème ni sur ta facturation, ni sur ta ligne. :v:\nTu peux te rendre dans ton espace client :point_right: %s",
-      resultAdvancedDiag: "Souhaites-tu faire un diagnostic plus precis de ton équipement :mag: ?\n\n :zap: Assure-toi d'avoir bien branché ta box :zap:",
+      resultAdvancedDiag: "Souhaites-tu faire un diagnostic plus précis de ton équipement :mag: ?\n\n :zap: Assure-toi d'avoir bien branché ta box :zap:",
       resultLastDiag: "Voici le résultat du dernier diagnostic réalisé.",
       resultDiagRemaining: "Tu peux encore effectuer %s diagnostic(s) aujourd'hui."
     }

@@ -30,14 +30,6 @@ const WebSchema = new mongoose.Schema({
     required: true,
     unique: true
   },
-  cookie: {
-    type: String,
-    required: true,
-    expires: 60 * 5
-  },
-  userAgent: {
-    type: String
-  },
   history: [HistoryMessageSchema]
 });
 
@@ -50,8 +42,8 @@ WebSchema.method({});
  * Statics
  */
 WebSchema.statics = {
-  get (senderId) {
-    return this.findOne({ senderId }).exec().then((user) => {
+  get (nichandle) {
+    return this.findOne({ nichandle }).exec().then((user) => {
       if (user) {
         return user;
       }

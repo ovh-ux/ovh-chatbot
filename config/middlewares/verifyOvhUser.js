@@ -2,7 +2,7 @@
 
 const Bluebird = require("bluebird");
 const request = require("request");
-const WebUser = require("../../models/web.model");
+const WebAuth = require("../../models/webAuth.model");
 
 module.exports = () =>
   function (req, res, next) {
@@ -30,13 +30,13 @@ module.exports = () =>
     })
       .then((resp) => {
         req.user = resp;
-        return WebUser.findOne({ nichandle: req.user.nichandle });
+        return WebAuth.findOne({ _nichandle: req.user.nichandle });
       })
-      .then((rawUser) => {
-        let user = !rawUser ? new WebUser({ nichandle: req.user.nichandle, cookie: req.cookies.SESSION, userAgent: req.headers["user-agent"] }) : rawUser;
-        user.cookie = req.cookies.SESSION;
-        user.userAgent = req.headers["user-agent"];
-        return user.save();
+      .then((rawAuthUser) => {
+        let auth = !rawAuthUser ? new WebAuth({ _nichandle: req.user.nichandle, cookie: req.cookies.SESSION, userAgent: req.headers["user-agent"] }) : rawAuthUser;
+        auth.cookie = req.cookies.SESSION;
+        auth.userAgent = req.headers["user-agent"];
+        return auth.save();
       })
       .then(() => next())
       .catch((err) => {
