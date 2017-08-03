@@ -4,6 +4,7 @@ module.exports = {
   hosting: {
     FR: {
       dns: "Ton site ne pointe pas sur la bonne IP (actuellement %1$s), ton domaine \"%2$s\" devrait pointer sur l'IP %3$s",
+      dnsWrongConfig: "Tu utilises actuellement les serveurs DNS: %1$s, mais tu dois utiliser les serveurs DNS suivants : %2$s.",
       errorConnRefused: "Il semblerait que ce soit un problème de pointage sur ton site, je te conseille de vérifier ta configuration DNS pour que ton nom de domaine pointe sur l'ip %s",
       errorNotFound: "Il semblerait que ta zone DNS soit mal configurée",
       errorEaiAgain: "Il semblerait que ta zone DNS soit mal configurée. Ton site n'est relié à aucun serveur d'hébergement web.",
