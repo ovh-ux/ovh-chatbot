@@ -104,7 +104,7 @@ module.exports = [
           return ovhClient.requestPromised("GET", "/xdsl");
         })
         .map((offer) => ovhClient.requestPromised("GET", `/xdsl/${offer}`)
-          .then((xdslInfo) => new Button(BUTTON_TYPE.POSTBACK, `XDSL_SELECTED_${xdslInfo.accessName}`, xdslInfo.description))
+          .then((xdslInfo) => new Button(BUTTON_TYPE.POSTBACK, `XDSL_SELECTED_${xdslInfo.accessName}`, xdslInfo.description || offer))
         )
         .then((buttons) => ({ responses: [createPostBackList(sprintf(responsesCst.xdslSelect, Math.floor(1 + (currentIndex / MAX_LIMIT)), Math.ceil(buttons.length / MAX_LIMIT)), buttons, "MORE_XDSL", currentIndex, MAX_LIMIT)], feedback: false }))
         .catch((err) => {
