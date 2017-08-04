@@ -48,7 +48,7 @@ function welcome (senderId, meInfos, userInfos) {
   switch (userInfos.platform) {
   case "facebook_messenger": {
     messenger
-      .sendTextMessage(senderId, sprintf(responsesCst.connectedAs, meInfos.nichandle))
+      .send(senderId, sprintf(responsesCst.connectedAs, meInfos.nichandle))
       .catch(console.error);
     break;
   }

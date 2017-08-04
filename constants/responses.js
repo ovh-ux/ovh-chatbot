@@ -58,7 +58,7 @@ Voici des exemples de questions que tu peux me poser :
   • Pourquoi je ne peux pas téléphoner ?`,
     welcomeWeb: "Bienvenue %s, en quoi puis-je t'être utile ?",
     xdslSelect: "Sélectionne ton offre xDSL (%1$s/%2$s)",
-    xdslNone: ":satellite_antenna: Il semblerait que tu n'as pas d'offre xDSL.",
+    xdslNone: ":satellite: Il semblerait que tu n'as pas d'offre xDSL.",
     xdslDiagInProgress: "Diagnostic en cours... Patiente quelques instants, le diagnostique peut prendre queleques minutes, merci :)",
     xdslQuotaReached: "Ton quota de diagnostic a été atteint"
   }

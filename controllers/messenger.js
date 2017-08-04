@@ -125,7 +125,7 @@ module.exports = () => {
       }) // Ask if it was useful
       .catch((err) => {
         res.logger.error(err);
-        messenger.sendTextMessage(senderId, `Oups ! ${err.message}`);
+        messenger.send(senderId, `Oups ! ${err.message}`);
       });
   }
 
@@ -169,7 +169,7 @@ module.exports = () => {
             }) // Ask if it was useful
             .catch((err) => {
               res.logger.error(err);
-              return messenger.sendTextMessage(senderId, `Oups ! ${err.message}`);
+              return messenger.send(senderId, `Oups ! ${err.message}`);
             });
         }
         return null;
