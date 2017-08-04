@@ -16,7 +16,7 @@ module.exports = {
       hostingUnknown: "Ton serveur est dans un état inconnu, contacte le support pour plus d'informations",
       mailBounce: "Il semblerait que tes envois d'e-mails soient bloqués car ils ont dépassé 50% de retour en erreur",
       mailKo: "Il semblerait que tes envois d'e-mails soient bloqués car ils ont dépassé 5% de retour en erreur",
-      mailSpam: ":no_entry_sign: Il semblerait que tes envois d'e-mails soient bloqués car ils ont envoyés des spams",
+      mailSpam: ":no_entry_sign: Il semblerait que tes envois d'e-mails soient bloqués car ils ont envoyé des spams",
       sslRegenerate: "Tu as activé le SSL sur ton site mais ton certificat SSL ne contient pas ton domaine. Tu dois regénérer ton certificat via l'espace client",
       sslHttpsToHttpWarning: ":warning: Attention, ton site est compris dans le certificat SSL actuel et fonctionne actuellement en https. Cependant ta configuration indique que lors de la regénération automatique du certificat SSL," +
         " ton site ne sera plus accessible en https." +
@@ -40,7 +40,7 @@ module.exports = {
       portabilityProgress: "Tu as %s ligne(s) en cours de portabilité",
       portabilityLineOperator: "%1$s chez %2$s :\n",
       portabilityStep: "\t -%1$s, État: %2$s, description : %3$s, ETA: %4$s\n",
-      portabilityExecutionDate: "Date d'éxécution prévue : %s",
+      portabilityExecutionDate: "Date d'exécution prévue : %s",
       portabilityManager: "`Pour modifier ta portabilité, rends-toi dans ton espace client :point_right: %s",
       noIssue: "Nous n'avons pas trouvé de problème :v:",
       seeManager: "Pour tout autre renseignement, rends-toi dans ton espace client :point_right: %s"

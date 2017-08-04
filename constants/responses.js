@@ -54,12 +54,12 @@ Voici des exemples de questions que tu peux me poser :
   • Mon site ne fonctionne plus
   • Comment je fais pour changer mes serveurs dns de ma zone exemple.ovh ?
   • Comment je peux faire pointer mon domaine exemple.ovh sur mon hébergement web ?
-  • Peut tu faire un diagnostic de ma ligne ADSL ?
+  • Peux tu faire un diagnostic de ma ligne ADSL ?
   • Pourquoi je ne peux pas téléphoner ?`,
     welcomeWeb: "Bienvenue %s, en quoi puis-je t'être utile ?",
     xdslSelect: "Sélectionne ton offre xDSL (%1$s/%2$s)",
     xdslNone: ":satellite: Il semblerait que tu n'as pas d'offre xDSL.",
-    xdslDiagInProgress: "Diagnostic en cours... Patiente quelques instants, le diagnostique peut prendre queleques minutes, merci :)",
-    xdslQuotaReached: "Ton quota de diagnostic a été atteint"
+    xdslDiagInProgress: "Diagnostic en cours... Patiente quelques instants, le diagnostic peut prendre queleques minutes, merci :)",
+    xdslQuotaReached: "Ton quota de diagnostics a été atteint"
   }
 };
