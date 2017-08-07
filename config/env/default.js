@@ -6,8 +6,7 @@ module.exports = {
     port: process.env.APP_PORT || 8080,
     url: process.env.APP_URL || "https://bot.uxlabs.ovh",
     basePath: "/api/v1.0",
-    logType: "dev",
-    corsOrigin: process.env.CORS_ORIGIN || "*"
+    logType: "dev"
   },
   mongo: {
     url: process.env.MONGO || "mongodb://mongo:27017",
