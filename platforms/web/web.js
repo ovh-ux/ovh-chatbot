@@ -5,46 +5,27 @@ const { ButtonsListMessage, Button, TextMessage, ButtonsMessage } = require("../
 const WebMessage = require("../../models/web.model");
 const config = require("../../config/config-loader").load();
 const { camelCase } = require("lodash");
-
-function getTextMessage (message) {
-  return {
-    message,
-    buttons: []
-  };
-}
-
-function getButton (button) {
-  return {
-    message: null,
-    buttons: [button]
-  };
-}
-
-function getListButton (buttonList) {
-  return {
-    message: buttonList.text,
-    buttons: buttonList.attachments.buttons || []
-  };
-}
+const { textMessageAdapter, buttonAdapter, buttonListAdapter } = require("./web_adapters");
+const responsesCst = require("../../constants/responses").FR;
 
 function parseMsg (RawResponses) {
   const responses = RawResponses.length == null || typeof RawResponses === "string" ? [RawResponses] : RawResponses;
 
   return responses.map((uResponse) => {
     if (typeof uResponse === "string") {
-      return getTextMessage(uResponse);
+      return textMessageAdapter(uResponse);
     }
 
     if (uResponse instanceof TextMessage) {
-      return getTextMessage(uResponse.text);
+      return textMessageAdapter(uResponse.text);
     }
 
     if (uResponse instanceof Button) {
-      return getButton(uResponse);
+      return buttonAdapter(uResponse);
     }
 
     if (uResponse instanceof ButtonsListMessage || uResponse instanceof ButtonsMessage) {
-      return getListButton(uResponse);
+      return buttonListAdapter(uResponse);
     }
 
     return uResponse;
@@ -59,12 +40,12 @@ function sendFeedback (nichandle, intent, rawMessage) {
   }
 
   const buttons = [
-    new Button("postback", `FEEDBACK_MISUNDERSTOOD_${camelCase(intent)}_${message}`, "Mauvaise compréhension"),
-    new Button("postback", `FEEDBACK_BAD_${camelCase(intent)}_${message}`, "Non"),
-    new Button("postback", `FEEDBACK_GOOD_${camelCase(intent)}_${message}`, "Oui")
+    new Button("postback", `FEEDBACK_MISUNDERSTOOD_${camelCase(intent)}_${message}`, responsesCst.feedbackBadUnderstanding),
+    new Button("postback", `FEEDBACK_BAD_${camelCase(intent)}_${message}`, responsesCst.feedbackNo),
+    new Button("postback", `FEEDBACK_GOOD_${camelCase(intent)}_${message}`, responsesCst.feedbackYes)
   ];
 
-  return send(null, nichandle, new ButtonsListMessage("Est-ce que cette réponse vous a aidé ?", buttons));
+  return send(null, nichandle, new ButtonsListMessage(responsesCst.feedbackHelp, buttons));
 }
 
 function send (res, id, rawResponsesPar, opt) {

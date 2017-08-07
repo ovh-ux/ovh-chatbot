@@ -2,10 +2,11 @@
 
 const Bluebird = require("bluebird");
 const { TextMessage } = require("../../../platforms/generics");
+const responsesCst = require("../../../constants/responses").FR;
 
 class Thanks {
   static action () {
-    return Bluebird.resolve({ responses: [new TextMessage("De rien avec plaisir :)")], feedback: false });
+    return Bluebird.resolve({ responses: [new TextMessage(responsesCst.thanks)], feedback: false });
   }
 }
 

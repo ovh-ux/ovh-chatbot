@@ -1,9 +1,12 @@
 "use strict";
 
 const web = require("../platforms/web/web");
-const bot = require("../bots/hosting")();
+const bot = require("../bots/common")();
 const apiai = require("../utils/apiai");
 const Bluebird = require("bluebird");
+const { sprintf } = require("voca");
+const { TextMessage } = require("../platforms/generics");
+const responsesCst = require("../constants/responses").FR;
 
 module.exports = () => {
   const sendQuickResponses = (res, nichandle, responses) =>
@@ -37,6 +40,13 @@ module.exports = () => {
         const nichandle = resp.sessionId;
         if (resp.status && resp.status.code === 200 && resp.result) {
           // successful request
+          if (resp.result.action === "welcome") {
+            return Bluebird.resolve({ responses: [new TextMessage(responsesCst.welcome)], feedback: false });
+          }
+
+          if (resp.result.action === "connection") {
+            return Bluebird.resolve({ responses: [new TextMessage(sprintf(responsesCst.connectedAs, nichandle))], feedback: false });
+          }
 
           // if api.ai has a premade response
           if (
@@ -86,7 +96,7 @@ module.exports = () => {
       .getHistory(res, nichandle)
       .then((result) => {
         if (!result.length) {
-          web.send(null, nichandle, "Bienvenue, en quoi puis-je être utile ?");
+          web.send(null, nichandle, sprintf(responsesCst.welcomeWeb, nichandle));
         }
         return res.status(200).json(result);
       })

@@ -1,12 +1,13 @@
 "use strict";
 
 const User = require("../models/users.model");
-const Web = require("../models/web.model");
+const WebAuth = require("../models/webAuth.model");
 const config = require("../config/config-loader").load();
 const ovh = require("ovh");
 const Bluebird = require("bluebird");
 const dns = require("dns");
 const URL = require("url");
+const responsesCst = require("../constants/responses").FR;
 const request = require("request");
 
 // custom OvhClient for the web users;
@@ -49,11 +50,12 @@ module.exports = {
     User.findOne({ senderId }).exec().then((userInfos) => {
       if (!userInfos) {
         // check if web user and if so return the custom "ovhClientModule";
-        return Web.findOne({ nichandle: senderId }).exec().then((webClient) => {
-          if (!webClient) {
-            return Bluebird.reject({ statusCode: 403, message: "Tu dois d'abord te connecter. Pour ce faire tu peux me le demander" });
+        return WebAuth.findOne({ _nichandle: senderId }).exec().then((webAuth) => {
+          if (!webAuth) {
+            return Bluebird.reject({ statusCode: 403, message: responsesCst.signInFirst });
           }
-          return new OvhWebClient(webClient.cookie, webClient.userAgent);
+
+          return new OvhWebClient(webAuth.cookie, webAuth.userAgent);
         });
       }
 

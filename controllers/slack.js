@@ -4,12 +4,12 @@ const Bluebird = require("bluebird");
 const slackSDK = require("../platforms/slack/slack");
 const SlackModel = require("../models/slack.models");
 const config = require("../config/config-loader").load();
-const bot = require("../bots/hosting")();
+const bot = require("../bots/common")();
 const request = require("request-promise");
 const responsesCst = require("../constants/responses").FR;
 const apiai = require("../utils/apiai");
 const { camelCase } = require("lodash");
-const { ButtonsListMessage, Button } = require("../platforms/generics");
+const { TextMessage, ButtonsListMessage, Button, BUTTON_TYPE } = require("../platforms/generics");
 
 module.exports = () => ({
   receiveMessage (req, res) {
@@ -21,7 +21,7 @@ module.exports = () => ({
     }
 
     if (!req.body.event.user || req.body.event.subtype === "bot_message") {
-      return null;
+      return res.status(200).end();
     }
 
     message = req.body.event.text;
@@ -36,20 +36,9 @@ module.exports = () => ({
 
         if (resp.apiai.status && resp.apiai.status.code === 200 && resp.apiai.result) {
           if (resp.apiai.result.action === "connection" || resp.apiai.result.action === "welcome") {
-            return resp.slack
-              .sendTextMessage(
-                channel,
-                `Pour te connecter il te suffit de <${config.server.url}${config.server.basePath}/authorize?state=${channel}-slack-${req.body.team_id}|cliquer ici.>
-Pour l'instant je ne peux te répondre que sur des informations concernant un dysfonctionnement sur ton site web.
-  Voici des exemples de questions que tu peux me poser :
-    • Mon site ne fonctionne plus
-    • J'ai un problème sur mon site ovh.com
-    • Peux-tu m'aider à réparer mon site ?
-    • Comment je fais pour changer mes serveurs dns de ma zone exemple.ovh ?
-    • Comment je peux faire pointer mon domaine exemple.ovh sur mon hébergement web ?`
-              )
-              .then(res.logger.info)
-              .catch(res.logger.error);
+            const accountLinkButton = new Button(BUTTON_TYPE.URL, `${config.server.url}${config.server.basePath}/authorize?state=${channel}-slack-${req.body.team_id}`, responsesCst.signIn);
+            return sendResponse(res, channel, new TextMessage(responsesCst.welcome), resp.slack)
+              .then(() => sendResponse(res, channel, new ButtonsListMessage("", [accountLinkButton]), resp.slack));
           }
 
           if (resp.apiai.result.fulfillment && resp.apiai.result.fulfillment.speech && Array.isArray(resp.apiai.result.fulfillment.messages) && resp.apiai.result.fulfillment.messages.length) {
@@ -79,34 +68,39 @@ Pour l'instant je ne peux te répondre que sur des informations concernant un dy
             })
             .catch((err) => {
               res.logger.error(err);
-              resp.slack.sendTextMessage(channel, `Oups ! ${err.message}`);
+              resp.slack.send(channel, `Oups ! ${err.message}`);
             });
         }
 
-        return resp.slack.sendTextMessage(channel, responsesCst.noIntent);
+        return resp.slack.send(channel, responsesCst.noIntent);
       })
       .catch(res.logger.error);
 
-    return res.sendStatus(200);
+    return res.status(200).end();
   },
 
   receiveActions (req, res) {
     const payload = JSON.parse(req.body.payload);
     const channel = payload.channel.id;
     const value = payload.actions[0].value;
+    const message_ts = payload.message_ts;
     let slackClient;
     let needFeedback = false;
 
-    Bluebird.props({
-      bot: bot.ask("postback", channel, value, "", {}, res),
+    // We have to respond with a 200 within 3000ms
+    Bluebird.delay(2000).then(() => res.headersSent ? null : res.status(200).end());
+
+    return Bluebird.props({
+      bot: bot.ask(BUTTON_TYPE.POSTBACK, channel, value, "", {}, res),
       slack: slackSDK(payload.team.id)
     })
       .then((responses) => {
         slackClient = responses.slack;
         needFeedback = responses.bot.feedback || needFeedback;
 
-        return sendResponses(res, channel, responses.bot.responses, slackClient);
+        return sendResponses(res, channel, responses.bot.responses, slackClient, message_ts);
       })
+      .then(() => res.headersSent ? null : res.status(200).end())
       .then(() => {
         if (needFeedback) {
           return sendFeedback(res, channel, value, "message", slackClient);
@@ -116,10 +110,10 @@ Pour l'instant je ne peux te répondre que sur des informations concernant un dy
       })
       .catch((err) => {
         res.logger.error(err);
-        slackSDK(payload.team.id).then((uSlackClient) => uSlackClient.sendTextMessage(channel, `Oups ! ${err.message}`));
+        slackSDK(payload.team.id).then((uSlackClient) => uSlackClient.send(channel, `Oups ! ${err.message}`));
+        return res.headersSent ? null : res.status(200).end();
       });
 
-    return res.status(200).end();
   },
 
   authorize (req, res) {
@@ -166,11 +160,11 @@ function sendFeedback (res, senderId, intent, messageRaw, slack) {
   }
 
   const buttons = [
-    new Button("postback", `FEEDBACK_MISUNDERSTOOD_${camelCase(intent)}_${message}`, "Mauvaise compréhension"),
-    new Button("postback", `FEEDBACK_BAD_${camelCase(intent)}_${message}`, "Non"),
-    new Button("postback", `FEEDBACK_GOOD_${camelCase(intent)}_${message}`, "Oui")
+    new Button(BUTTON_TYPE.POSTBACK, `FEEDBACK_MISUNDERSTOOD_${camelCase(intent)}_${message}`, responsesCst.feedbackBadUnderstanding),
+    new Button(BUTTON_TYPE.POSTBACK, `FEEDBACK_BAD_${camelCase(intent)}_${message}`, responsesCst.feedbackNo),
+    new Button(BUTTON_TYPE.POSTBACK, `FEEDBACK_GOOD_${camelCase(intent)}_${message}`, responsesCst.feedbackYes)
   ];
-  const buttonsList = new ButtonsListMessage("Est-ce que cette réponse vous a aidé ?", buttons);
+  const buttonsList = new ButtonsListMessage(responsesCst.feedbackHelp, buttons);
   buttonsList.delete_original = true;
 
   return sendResponse(res, senderId, buttonsList, slack);
@@ -187,10 +181,13 @@ function sendQuickResponses (res, senderId, responses, slack) {
   });
 }
 
-function sendResponses (res, channel, responses, slack) {
-  return Bluebird.mapSeries(responses, (response) => sendResponse(res, channel, response, slack));
+function sendResponses (res, channel, responses, slack, message_ts) {
+  return Bluebird.mapSeries(responses, (response, index) =>
+    Bluebird.resolve(response)
+      .then((resp) => Array.isArray(resp) ? sendResponses(res, channel, resp, slack, message_ts) : sendResponse(res, channel, resp, slack, index === 0 ? message_ts : null)));
 }
 
-function sendResponse (res, channel, response, slack) {
-  return slack.send(channel, response);
+function sendResponse (res, channel, response, slack, message_ts) {
+  return slack.send(channel, response, message_ts)
+    .then((result) => !result.ok ? console.error(result.error) : console.log(`Sucessfully sent ${result.ts} to ${result.channel}`));
 }

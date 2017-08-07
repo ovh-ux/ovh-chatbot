@@ -6,6 +6,7 @@ const Bluebird = require("bluebird").config({
 });
 const Message = require("../../../models/messages.model");
 const { TextMessage } = require("../../../platforms/generics");
+const responsesCst = require("../../../constants/responses").FR;
 
 module.exports = [
   {
@@ -33,5 +34,5 @@ function saveFeedback (postback, regx, feedback) {
   const message = postback.match(new RegExp(regx))[2];
 
   new Message({ intent, text: message, feedback }).save();
-  return Bluebird.resolve({ responses: [new TextMessage("Merci pour votre avis")], feedback: false });
+  return Bluebird.resolve({ responses: [new TextMessage(responsesCst.feedbackThanks)], feedback: false });
 }

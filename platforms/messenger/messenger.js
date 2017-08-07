@@ -3,6 +3,7 @@
 const request = require("request");
 const Bluebird = require("bluebird");
 const config = require("../../config/config-loader").load();
+const { emojify } = require("node-emoji");
 const { ButtonsListMessage, ButtonsMessage, TextMessage } = require("../generics");
 const { textMessageAdapter, buttonsListMessageAdapter, buttonsMessageAdapter } = require("./messenger_adapters");
 
@@ -17,7 +18,7 @@ const PAGE_ACCESS_TOKEN = config.facebook.pageAccessToken;
 
 // URL where the app is running (include protocol). Used to point to scripts and
 // assets located at this address.
-const SERVER_URL = config.server.url;
+// const SERVER_URL = config.server.url;
 
 /*
  * Authorization Event
@@ -135,111 +136,111 @@ function receivedAccountLink (event) {
  * Send an image using the Send API.
  *
  */
-function sendImageMessage (recipientId) {
-  const messageData = {
-    recipient: {
-      id: recipientId
-    },
-    message: {
-      attachment: {
-        type: "image",
-        payload: {
-          url: `${SERVER_URL}/assets/rift.png`
-        }
-      }
-    }
-  };
-
-  callSendAPI(messageData);
-}
+// function sendImageMessage (recipientId) {
+//   const messageData = {
+//     recipient: {
+//       id: recipientId
+//     },
+//     message: {
+//       attachment: {
+//         type: "image",
+//         payload: {
+//           url: `${SERVER_URL}/assets/rift.png`
+//         }
+//       }
+//     }
+//   };
+//
+//   callSendAPI(messageData);
+// }
 
 /*
  * Send a Gif using the Send API.
  *
  */
-function sendGifMessage (recipientId) {
-  const messageData = {
-    recipient: {
-      id: recipientId
-    },
-    message: {
-      attachment: {
-        type: "image",
-        payload: {
-          url: `${SERVER_URL}/assets/instagram_logo.gif`
-        }
-      }
-    }
-  };
-
-  callSendAPI(messageData);
-}
+// function sendGifMessage (recipientId) {
+//   const messageData = {
+//     recipient: {
+//       id: recipientId
+//     },
+//     message: {
+//       attachment: {
+//         type: "image",
+//         payload: {
+//           url: `${SERVER_URL}/assets/instagram_logo.gif`
+//         }
+//       }
+//     }
+//   };
+//
+//   callSendAPI(messageData);
+// }
 
 /*
  * Send audio using the Send API.
  *
  */
-function sendAudioMessage (recipientId) {
-  const messageData = {
-    recipient: {
-      id: recipientId
-    },
-    message: {
-      attachment: {
-        type: "audio",
-        payload: {
-          url: `${SERVER_URL}/assets/sample.mp3`
-        }
-      }
-    }
-  };
-
-  callSendAPI(messageData);
-}
+// function sendAudioMessage (recipientId) {
+//   const messageData = {
+//     recipient: {
+//       id: recipientId
+//     },
+//     message: {
+//       attachment: {
+//         type: "audio",
+//         payload: {
+//           url: `${SERVER_URL}/assets/sample.mp3`
+//         }
+//       }
+//     }
+//   };
+//
+//   callSendAPI(messageData);
+// }
 
 /*
  * Send a video using the Send API.
  *
  */
-function sendVideoMessage (recipientId) {
-  const messageData = {
-    recipient: {
-      id: recipientId
-    },
-    message: {
-      attachment: {
-        type: "video",
-        payload: {
-          url: `${SERVER_URL}/assets/allofus480.mov`
-        }
-      }
-    }
-  };
-
-  callSendAPI(messageData);
-}
+// function sendVideoMessage (recipientId) {
+//   const messageData = {
+//     recipient: {
+//       id: recipientId
+//     },
+//     message: {
+//       attachment: {
+//         type: "video",
+//         payload: {
+//           url: `${SERVER_URL}/assets/allofus480.mov`
+//         }
+//       }
+//     }
+//   };
+//
+//   callSendAPI(messageData);
+// }
 
 /*
  * Send a file using the Send API.
  *
  */
-function sendFileMessage (recipientId) {
-  const messageData = {
-    recipient: {
-      id: recipientId
-    },
-    message: {
-      attachment: {
-        type: "file",
-        payload: {
-          url: `${SERVER_URL}/assets/test.txt`
-        }
-      }
-    }
-  };
-
-  callSendAPI(messageData);
-}
+// function sendFileMessage (recipientId) {
+//   const messageData = {
+//     recipient: {
+//       id: recipientId
+//     },
+//     message: {
+//       attachment: {
+//         type: "file",
+//         payload: {
+//           url: `${SERVER_URL}/assets/test.txt`
+//         }
+//       }
+//     }
+//   };
+//
+//   callSendAPI(messageData);
+// }
 
 /*
  * Send a text message using the Send API.
@@ -255,8 +256,7 @@ function sendTextMessage (recipientId, messageText) {
       id: recipientId
     },
     message: {
-      text: messageText,
-      metadata: "DEVELOPER_DEFINED_METADATA"
+      text: messageText
     }
   };
 
@@ -267,7 +267,7 @@ function sendTextMessage (recipientId, messageText) {
  * Send a button message using the Send API.
  *
  */
-function sendButtonMessage (recipientId, text, title, url) {
+function sendButtonMessage (recipientId, buttonMessage) {
   const messageData = {
     recipient: {
       id: recipientId
@@ -275,17 +275,7 @@ function sendButtonMessage (recipientId, text, title, url) {
     message: {
       attachment: {
         type: "template",
-        payload: {
-          template_type: "button",
-          text,
-          buttons: [
-            {
-              type: "web_url",
-              url,
-              title
-            }
-          ]
-        }
+        payload: buttonMessage
       }
     }
   };
@@ -297,146 +287,128 @@ function sendButtonMessage (recipientId, text, title, url) {
  * Send a Structured Message (Generic Message type) using the Send API.
  *
  */
-function sendListMessage (recipientId, list) {
-  const messageData = {
-    recipient: {
-      id: recipientId
-    },
-    message: {
-      attachment: {
-        type: "template",
-        payload: list
-      }
-    }
-  };
-
-  return callSendAPI(messageData);
-}
+// function sendListMessage (recipientId, list) {
+//   const messageData = {
+//     recipient: {
+//       id: recipientId
+//     },
+//
+//     message: {
+//       attachment: {
+//         type: "template",
+//         payload: list
+//       }
+//     }
+//   };
+//
+//   return callSendAPI(messageData);
+// }
 
 /*
  * Send a Structured Message (Generic Message type) using the Send API.
  *
  */
-function sendGenericMessage (recipientId, elements) {
-  const messageData = {
-    recipient: {
-      id: recipientId
-    },
-    message: {
-      attachment: {
-        type: "template",
-        payload: {
-          template_type: "generic",
-          elements
-        }
-      }
-    }
-  };
-
-  callSendAPI(messageData);
-}
+// function sendGenericMessage (recipientId, elements) {
+//   const messageData = {
+//     recipient: {
+//       id: recipientId
+//     },
+//     message: {
+//       attachment: {
+//         type: "template",
+//         payload: {
+//           template_type: "generic",
+//           elements
+//         }
+//       }
+//     }
+//   };
+//
+//   callSendAPI(messageData);
+// }
 
 /*
  * Send a receipt message using the Send API.
  *
  */
-function sendReceiptMessage (recipientId) {
-  // Generate a random receipt ID as the API requires a unique ID
-  const receiptId = `order${Math.floor(Math.random() * 1000)}`;
-
-  const messageData = {
-    recipient: {
-      id: recipientId
-    },
-    message: {
-      attachment: {
-        type: "template",
-        payload: {
-          template_type: "receipt",
-          recipient_name: "Peter Chang",
-          order_number: receiptId,
-          currency: "USD",
-          payment_method: "Visa 1234",
-          timestamp: "1428444852",
-          elements: [
-            {
-              title: "Oculus Rift",
-              subtitle: "Includes: headset, sensor, remote",
-              quantity: 1,
-              price: 599.00,
-              currency: "USD",
-              image_url: `${SERVER_URL}/assets/riftsq.png`
-            },
-            {
-              title: "Samsung Gear VR",
-              subtitle: "Frost White",
-              quantity: 1,
-              price: 99.99,
-              currency: "USD",
-              image_url: `${SERVER_URL}/assets/gearvrsq.png`
-            }
-          ],
-          address: {
-            street_1: "1 Hacker Way",
-            street_2: "",
-            city: "Menlo Park",
-            postal_code: "94025",
-            state: "CA",
-            country: "US"
-          },
-          summary: {
-            subtotal: 698.99,
-            shipping_cost: 20.00,
-            total_tax: 57.67,
-            total_cost: 626.66
-          },
-          adjustments: [
-            {
-              name: "New Customer Discount",
-              amount: -50
-            },
-            {
-              name: "$100 Off Coupon",
-              amount: -100
-            }
-          ]
-        }
-      }
-    }
-  };
-
-  callSendAPI(messageData);
-}
+// function sendReceiptMessage (recipientId) {
+//   // Generate a random receipt ID as the API requires a unique ID
+//   const receiptId = `order${Math.floor(Math.random() * 1000)}`;
+//
+//   const messageData = {
+//     recipient: {
+//       id: recipientId
+//     },
+//     message: {
+//       attachment: {
+//         type: "template",
+//         payload: {
+//           template_type: "receipt",
+//           recipient_name: "Peter Chang",
+//           order_number: receiptId,
+//           currency: "USD",
+//           payment_method: "Visa 1234",
+//           timestamp: "1428444852",
+//           elements: [
+//             {
+//               title: "Oculus Rift",
+//               subtitle: "Includes: headset, sensor, remote",
+//               quantity: 1,
+//               price: 599.00,
+//               currency: "USD",
+//               image_url: `${SERVER_URL}/assets/riftsq.png`
+//             },
+//             {
+//               title: "Samsung Gear VR",
+//               subtitle: "Frost White",
+//               quantity: 1,
+//               price: 99.99,
+//               currency: "USD",
+//               image_url: `${SERVER_URL}/assets/gearvrsq.png`
+//             }
+//           ],
+//           address: {
+//             street_1: "1 Hacker Way",
+//             street_2: "",
+//             city: "Menlo Park",
+//             postal_code: "94025",
+//             state: "CA",
+//             country: "US"
+//           },
+//           summary: {
+//             subtotal: 698.99,
+//             shipping_cost: 20.00,
+//             total_tax: 57.67,
+//             total_cost: 626.66
+//           },
+//           adjustments: [
+//             {
+//               name: "New Customer Discount",
+//               amount: -50
+//             },
+//             {
+//               name: "$100 Off Coupon",
+//               amount: -100
+//             }
+//           ]
+//         }
+//       }
+//     }
+//   };
+//
+//   callSendAPI(messageData);
+// }
 
 /*
  * Send a message with Quick Reply buttons.
  *
  */
-function sendQuickReply (recipientId) {
+function sendQuickReply (recipientId, message) {
   const messageData = {
     recipient: {
       id: recipientId
     },
-    message: {
-      text: "What's your favorite movie genre?",
-      quick_replies: [
-        {
-          content_type: "text",
-          title: "Action",
-          payload: "DEVELOPER_DEFINED_PAYLOAD_FOR_PICKING_ACTION"
-        },
-        {
-          content_type: "text",
-          title: "Comedy",
-          payload: "DEVELOPER_DEFINED_PAYLOAD_FOR_PICKING_COMEDY"
-        },
-        {
-          content_type: "text",
-          title: "Drama",
-          payload: "DEVELOPER_DEFINED_PAYLOAD_FOR_PICKING_DRAMA"
-        }
-      ]
-    }
+    message
   };
 
   callSendAPI(messageData);
@@ -446,80 +418,80 @@ function sendQuickReply (recipientId) {
  * Send a read receipt to indicate the message has been read
  *
  */
-function sendReadReceipt (recipientId) {
-  console.log("Sending a read receipt to mark message as seen");
-
-  const messageData = {
-    recipient: {
-      id: recipientId
-    },
-    sender_action: "mark_seen"
-  };
-
-  callSendAPI(messageData);
-}
+// function sendReadReceipt (recipientId) {
+//   console.log("Sending a read receipt to mark message as seen");
+//
+//   const messageData = {
+//     recipient: {
+//       id: recipientId
+//     },
+//     sender_action: "mark_seen"
+//   };
+//
+//   callSendAPI(messageData);
+// }
 
 /*
  * Turn typing indicator on
  *
  */
-function sendTypingOn (recipientId) {
-  console.log("Turning typing indicator on");
-
-  const messageData = {
-    recipient: {
-      id: recipientId
-    },
-    sender_action: "typing_on"
-  };
-
-  callSendAPI(messageData);
-}
+// function sendTypingOn (recipientId) {
+//   console.log("Turning typing indicator on");
+//
+//   const messageData = {
+//     recipient: {
+//       id: recipientId
+//     },
+//     sender_action: "typing_on"
+//   };
+//
+//   callSendAPI(messageData);
+// }
 
 /*
  * Turn typing indicator off
  *
  */
-function sendTypingOff (recipientId) {
-  console.log("Turning typing indicator off");
-
-  const messageData = {
-    recipient: {
-      id: recipientId
-    },
-    sender_action: "typing_off"
-  };
-
-  callSendAPI(messageData);
-}
+// function sendTypingOff (recipientId) {
+//   console.log("Turning typing indicator off");
+//
+//   const messageData = {
+//     recipient: {
+//       id: recipientId
+//     },
+//     sender_action: "typing_off"
+//   };
+//
+//   callSendAPI(messageData);
+// }
 
 /*
  * Send a message with the account linking call-to-action
  */
-function sendAccountLinking (recipientId, url) {
-  const messageData = {
-    recipient: {
-      id: recipientId
-    },
-    message: {
-      attachment: {
-        type: "template",
-        payload: {
-          template_type: "button",
-          text: "Bonjour, connectez vous à votre compte OVH afin de commencer :)",
-          buttons: [
-            {
-              type: "account_link",
-              url
-            }
-          ]
-        }
-      }
-    }
-  };
-
-  callSendAPI(messageData);
-}
+// function sendAccountLinking (recipientId, url) {
+//   const messageData = {
+//     recipient: {
+//       id: recipientId
+//     },
+//     message: {
+//       attachment: {
+//         type: "template",
+//         payload: {
+//           template_type: "button",
+//           text: "",
+//           buttons: [
+//             {
+//               type: "account_link",
+//               url
+//             }
+//           ]
+//         }
+//       }
+//     }
+//   };
+//
+//   callSendAPI(messageData);
+// }
 
 /*
  * Call the Send API. The message data goes in the body. If successful, we"ll
@@ -557,7 +529,7 @@ function callSendAPI (messageData) {
 
 function send (recipientId, message) {
   if (typeof message === "string") {
-    return sendTextMessage(recipientId, message);
+    return sendTextMessage(recipientId, emojify(message));
   }
 
   if (message instanceof TextMessage) {
@@ -565,11 +537,11 @@ function send (recipientId, message) {
   }
 
   if (message instanceof ButtonsListMessage) {
-    return sendTextMessage(recipientId, message.text).then(() => sendListMessage(recipientId, buttonsListMessageAdapter(message)));
+    return sendQuickReply(recipientId, buttonsListMessageAdapter(message));
   }
 
   if (message instanceof ButtonsMessage) {
-    return sendListMessage(recipientId, buttonsMessageAdapter(message));
+    return sendButtonMessage(recipientId, buttonsMessageAdapter(message));
   }
 
   return callSendAPI(message);
@@ -581,21 +553,5 @@ module.exports = {
   receivedPostback,
   receivedMessageRead,
   receivedAccountLink,
-  sendImageMessage,
-  sendGifMessage,
-  sendAudioMessage,
-  sendVideoMessage,
-  sendFileMessage,
-  sendTextMessage,
-  sendButtonMessage,
-  sendGenericMessage,
-  sendListMessage,
-  sendReceiptMessage,
-  sendQuickReply,
-  sendReadReceipt,
-  sendTypingOn,
-  sendTypingOff,
-  sendAccountLinking,
-  callSendAPI,
   send
 };

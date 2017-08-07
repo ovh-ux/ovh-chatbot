@@ -1,13 +1,15 @@
 "use strict";
 
 const error = require("../../../providers/errors/apiError");
-const { ButtonsListMessage, Button, createPostBackList, TextMessage } = require("../../../platforms/generics");
+const { Button, createPostBackList, TextMessage, BUTTON_TYPE, MAX_LIMIT } = require("../../../platforms/generics");
 const utils = require("../../utils");
 const Bluebird = require("bluebird").config({
   warnings: false
 });
 const guides = require("../../../constants/guides").FR;
+const responsesCst = require("../../../constants/responses").FR;
 const hostingDiagnostics = require("../../../diagnostics/hosting");
+const { sprintf } = require("voca");
 
 module.exports = [
   {
@@ -22,7 +24,10 @@ module.exports = [
 
           return ovhClient.requestPromised("GET", `/hosting/web/${hosting}/attachedDomain`);
         })
-        .then((attachedDomains) => ({ responses: [new TextMessage("Sélectionne le site concerné"), createWebsiteList(hosting, attachedDomains, 0, 4)], feedback: false }))
+        .then((attachedDomains) => {
+          let buttons = attachedDomains.map((domain) => new Button(BUTTON_TYPE.POSTBACK, `ATTACHED_DOMAIN_SELECTED_${hosting}_${domain}`, domain));
+          return { responses: [createPostBackList(sprintf(responsesCst.hostingSelectSite, 1, Math.ceil(buttons.length / MAX_LIMIT)), buttons, `MORE_ATTACHED_DOMAIN_${hosting}`, 0, MAX_LIMIT)], feedback: false };
+        })
         .catch((err) => {
           res.logger.error(err);
 
@@ -46,20 +51,22 @@ module.exports = [
             attachedDomain: ovhClient.requestPromised("GET", `/hosting/web/${hosting}/attachedDomain/${domain}`),
             hostingEmails: ovhClient.requestPromised("GET", `/hosting/web/${hosting}/email`),
             ssl: getSSLState(ovhClient, hosting),
+            dns: getDNSState(ovhClient, domain),
             statistics: ovhClient.requestPromised("GET", `/hosting/web/${hosting}/statistics`, { period: "daily", type: "in.httpMeanResponseTime" }).catch((err) => err.error === 404 ? Bluebird.resolve(null) : null)
           });
         })
-        .then(({ hosting, attachedDomain, hostingEmails, ssl, statistics }) => hostingDiagnostics.checkWebsite(res, hosting, attachedDomain, hostingEmails, ssl, statistics))
+        .then(({ hosting, attachedDomain, hostingEmails, ssl, dns, statistics }) => hostingDiagnostics.checkWebsite(res, hosting, attachedDomain, hostingEmails, ssl, dns, statistics))
         .then((responses) => ({ responses, feedback: true }))
         .catch((err) => {
           res.logger.error(err);
-          if (err.error === 404) {
-            return Bluebird.reject(error(404, "Tu as du sélectionner le mauvais hébergement web associé à ce domaine."));
+          if (err.error === 404 || err.statusCode === 404) {
+            return Bluebird.reject(error(404, responsesCst.hostingWrongSite));
           }
 
-          if (err.error === 460) {
+          if (err.error === 460 || err.statusCode === 460) {
             return Bluebird.resolve({ responses: [
-              new TextMessage("Ton service hébergement web semble être suspendu, pour le réactiver il faut le renouveler via le manager", `Voici un guide qui va te permettre de renouveler ton hébergement web : ${guides.renewOvh}`)
+              new TextMessage(responsesCst.hostingSuspended),
+              new TextMessage(guides.help(guides.renewOvh))
             ],
               feedback: false });
           }
@@ -71,6 +78,7 @@ module.exports = [
   {
     regx: "MORE_ATTACHED_DOMAIN_(.*)_([0-9]+)",
     action (senderId, postback, regx, entities, res) {
+      let currentIndex = parseInt(postback.match(new RegExp(regx))[2], 10);
       let hosting;
 
       return utils
@@ -80,7 +88,13 @@ module.exports = [
 
           return ovhClient.requestPromised("GET", `/hosting/web/${hosting}/attachedDomain`);
         })
-        .then((domains) => ({ responses: [createWebsiteList(hosting, domains, parseInt(postback.match(new RegExp(regx))[2], 10), 4)], feedback: false }))
+        .then((domains) => {
+          let buttons = domains.map((domain) => new Button(BUTTON_TYPE.POSTBACK, `ATTACHED_DOMAIN_SELECTED_${hosting}_${domain}`, domain));
+          return {
+            responses: [createPostBackList(sprintf(responsesCst.hostingSelectSite, Math.floor(1 + (currentIndex / MAX_LIMIT)), Math.ceil(buttons.length / MAX_LIMIT)), buttons, `MORE_ATTACHED_DOMAIN_${hosting}`, currentIndex, MAX_LIMIT)],
+            feedback: false
+          };
+        })
         .catch((err) => {
           res.logger.error(err);
           return Bluebird.reject(error(err.error || err.statusCode || 400, err));
@@ -90,13 +104,14 @@ module.exports = [
   {
     regx: "MORE_HOSTING_([0-9]+)",
     action (senderId, postback, regx, entities, res) {
+      let currentIndex = parseInt(postback.match(new RegExp(regx))[1], 10);
       return utils
         .getOvhClient(senderId)
         .then((ovhClient) => ovhClient.requestPromised("GET", "/hosting/web"))
         .then((hostings) => {
-          const eltInfos = hostings.map((hosting) => new Button("postback", `HOSTING_SELECTED_${hosting}`, hosting));
+          const eltInfos = hostings.map((hosting) => new Button(BUTTON_TYPE.POSTBACK, `HOSTING_SELECTED_${hosting}`, hosting));
 
-          return { responses: [createPostBackList("Sélectionne l'hébergement web sur lequel est installé ton site", eltInfos, "MORE_HOSTING", parseInt(postback.match(new RegExp(regx))[1], 10), 4)], feedback: false };
+          return { responses: [createPostBackList(sprintf(responsesCst.hostingSelectHost, Math.floor(1 + (currentIndex / MAX_LIMIT)), Math.ceil(eltInfos.length / 4)), eltInfos, "MORE_HOSTING", currentIndex, MAX_LIMIT)], feedback: false };
         })
         .catch((err) => {
           res.logger.error(err);
@@ -108,23 +123,15 @@ module.exports = [
 
 function getSSLState (ovhClient, hosting) {
   return Bluebird.props({
-    infos: ovhClient.requestPromised("GET", `/hosting/web/${hosting}/ssl`).catch((err) => err.error === 404 ? Bluebird.resolve(null) : Bluebird.reject(err)),
-    domains: ovhClient.requestPromised("GET", `/hosting/web/${hosting}/ssl/domains`).catch((err) => err.error === 404 ? Bluebird.resolve([]) : Bluebird.reject(err))
+    infos: ovhClient.requestPromised("GET", `/hosting/web/${hosting}/ssl`).catch((err) => err.error === 404 || err.statusCode === 404 ? Bluebird.resolve(null) : Bluebird.reject(err)),
+    domains: ovhClient.requestPromised("GET", `/hosting/web/${hosting}/ssl/domains`).catch((err) => err.error === 404 || err.statusCode === 404 ? Bluebird.resolve([]) : Bluebird.reject(err))
   });
 }
 
-function createWebsiteList (hosting, domains, offset, limit) {
-  const elements = [];
-
-  for (let i = offset; i < limit + offset && i < domains.length; i++) {
-    elements.push(new Button("postback", `ATTACHED_DOMAIN_SELECTED_${hosting}_${domains[i]}`, domains[i]));
-  }
-
-  const moreButton = offset + limit >= domains.length ? null : new Button("postback_more", `MORE_ATTACHED_DOMAIN_${hosting}_${offset + limit}`, "Voir plus");
-
-  if (moreButton) {
-    elements.push(moreButton);
-  }
-
-  return new ButtonsListMessage("", elements);
+function getDNSState (ovhClient, domain) {
+  return Bluebird.props({
+    target: ovhClient.requestPromised("GET", `/domain/zone/${domain}/record`, { fieldType: "NS" })
+      .then((ids) => Bluebird.mapSeries(ids, (id) => ovhClient.requestPromised("GET", `/domain/zone/${domain}/record/${id}`))),
+    real: ovhClient.requestPromised("GET", `/domain/zone/${domain}`)
+  });
 }

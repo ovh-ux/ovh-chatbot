@@ -3,7 +3,8 @@
 const Bluebird = require("bluebird");
 const request = require("request");
 const config = require("../../../config/config-loader.js").load();
-const { ButtonsMessage, Button } = require("../../../platforms/generics");
+const { ButtonsMessage, Button, BUTTON_TYPE } = require("../../../platforms/generics");
+const responsesCst = require("../../../constants/responses").FR;
 
 class GoodAnswer {
   static action () {
@@ -19,8 +20,8 @@ class GoodAnswer {
           if (err) {
             return reject(err);
           } else if (response && response.statusCode === 200) {
-            const button = new Button("web_url", JSON.parse(body).url, "Obtenir le QR Code");
-            return resolve({ responses: [new ButtonsMessage("Bravo tu as trouvé, voici ta récompense :)", [button])], feedback: false });
+            const button = new Button(BUTTON_TYPE.URL, JSON.parse(body).url, responsesCst.ndhGetQR);
+            return resolve({ responses: [new ButtonsMessage(responsesCst.ndhWin, [button])], feedback: false });
           }
           return reject(new Error(`invalid statusCode : ${response.statusCode}`));
 

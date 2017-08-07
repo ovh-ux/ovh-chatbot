@@ -1,12 +1,12 @@
 "use strict";
 
 const messenger = require("../platforms/messenger/messenger");
-const bot = require("../bots/hosting")();
+const bot = require("../bots/common")();
 const config = require("../config/config-loader").load();
 const apiai = require("../utils/apiai");
 const Bluebird = require("bluebird");
 const responsesCst = require("../constants/responses").FR;
-const { ButtonsListMessage, Button } = require("../platforms/generics");
+const { Button, ButtonsMessage, BUTTON_TYPE } = require("../platforms/generics");
 const { camelCase } = require("lodash");
 
 function getWebhook (req, res) {
@@ -36,7 +36,12 @@ module.exports = () => {
           if (messagingEvent.optin) {
             messenger.receivedAuthentication(messagingEvent);
           } else if (messagingEvent.message) {
-            receivedMessage(res, messagingEvent);
+            // checks for quick_replies => use postback handler
+            if (messagingEvent.message.quick_reply) {
+              receivedPostback(res, Object.assign(messagingEvent, { postback: messagingEvent.message.quick_reply }));
+            } else {
+              receivedMessage(res, messagingEvent);
+            }
           } else if (messagingEvent.delivery) {
             messenger.receivedDeliveryConfirmation(messagingEvent);
           } else if (messagingEvent.postback) {
@@ -120,7 +125,7 @@ module.exports = () => {
       }) // Ask if it was useful
       .catch((err) => {
         res.logger.error(err);
-        messenger.sendTextMessage(senderId, `Oups ! ${err.message}`);
+        messenger.send(senderId, `Oups ! ${err.message}`);
       });
   }
 
@@ -134,8 +139,8 @@ module.exports = () => {
       .then((resp) => {
         if (resp.status && resp.status.code === 200 && resp.result) {
           if (resp.result.action === "connection" || resp.result.action === "welcome") {
-            messenger.sendTextMessage(senderId, responsesCst.welcome);
-            return messenger.sendAccountLinking(senderId, `${config.server.url}${config.server.basePath}/authorize?state=${senderId}-facebook_messenger`);
+            const accountLinkButton = new Button(BUTTON_TYPE.ACCOUNT_LINKING, `${config.server.url}${config.server.basePath}/authorize?state=${senderId}-facebook_messenger`, "");
+            return sendResponse(res, senderId, new ButtonsMessage(responsesCst.welcome, [accountLinkButton]));
           }
 
           if (resp.result.fulfillment && resp.result.fulfillment.speech && Array.isArray(resp.result.fulfillment.messages) && resp.result.fulfillment.messages.length) {
@@ -164,7 +169,7 @@ module.exports = () => {
             }) // Ask if it was useful
             .catch((err) => {
               res.logger.error(err);
-              return messenger.sendTextMessage(senderId, `Oups ! ${err.message}`);
+              return messenger.send(senderId, `Oups ! ${err.message}`);
             });
         }
         return null;
@@ -179,12 +184,12 @@ module.exports = () => {
     }
 
     const buttons = [
-      new Button("postback", `FEEDBACK_MISUNDERSTOOD_${camelCase(intent)}_${message}`, "Mauvaise compréhension"),
-      new Button("postback", `FEEDBACK_BAD_${camelCase(intent)}_${message}`, "Non"),
-      new Button("postback", `FEEDBACK_GOOD_${camelCase(intent)}_${message}`, "Oui")
+      new Button(BUTTON_TYPE.POSTBACK, `FEEDBACK_MISUNDERSTOOD_${camelCase(intent)}_${message}`, responsesCst.feedbackBadUnderstanding),
+      new Button(BUTTON_TYPE.POSTBACK, `FEEDBACK_BAD_${camelCase(intent)}_${message}`, responsesCst.feedbackNo),
+      new Button(BUTTON_TYPE.POSTBACK, `FEEDBACK_GOOD_${camelCase(intent)}_${message}`, responsesCst.feedbackYes)
     ];
 
-    return sendResponse(res, senderId, new ButtonsListMessage("Est-ce que cette réponse vous a aidé ?", buttons));
+    return sendResponse(res, senderId, new ButtonsMessage(responsesCst.feedbackHelp, buttons));
   }
 
   function sendQuickResponses (res, senderId, responses) {
@@ -199,7 +204,9 @@ module.exports = () => {
   }
 
   function sendResponses (res, senderId, responses) {
-    return Bluebird.mapSeries(responses, (response) => sendResponse(res, senderId, response));
+    return Bluebird.mapSeries(responses, (response) =>
+      Bluebird.resolve(response)
+        .then((resp) => Array.isArray(resp) ? sendResponses(res, senderId, resp) : sendResponse(res, senderId, resp)));
   }
 
   function sendResponse (res, senderId, response) {

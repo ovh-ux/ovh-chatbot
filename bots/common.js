@@ -5,6 +5,7 @@ const messageActions = require("./messageTypes/message");
 const Bluebird = require("bluebird");
 const Users = require("../models/users.model");
 const { TextMessage } = require("../platforms/generics");
+const responsesCst = require("../constants/responses").FR;
 
 module.exports = () => ({
   ask (type, senderId, message, intent, entities, res) {
@@ -26,7 +27,7 @@ module.exports = () => ({
     }
     case "message": {
       if (!messageActions[intent] || !messageActions[intent].action) {
-        return Bluebird.resolve({ responses: [new TextMessage("Je ne peux pas encore répondre à cette question")], feedback: false });
+        return Bluebird.resolve({ responses: [new TextMessage(responsesCst.noAnswer)], feedback: false });
       }
 
       return messageActions[intent].action(senderId, message, entities, res).catch(isDisconnected);
@@ -40,7 +41,7 @@ module.exports = () => ({
 function isDisconnected (err) {
   let error;
   if (err.statusCode === 403 || err.statusCode === 401) {
-    error = Object.assign({}, err, { message: "Tu n'es pas correctement connecté à ton compte OVH :( , il te suffit de me demander 'connecte moi' pour te reconnecter." });
+    error = Object.assign({}, err, { message: responsesCst.disconnected });
   } else {
     error = err;
   }

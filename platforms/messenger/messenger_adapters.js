@@ -1,9 +1,10 @@
 "use strict";
 
 const { BUTTON_TYPE } = require("../generics");
+const { emojify } = require("node-emoji");
 
 function textMessageAdapter (message) {
-  return message.text;
+  return emojify(message.text);
 }
 
 function buttonAdapter (button) {
@@ -12,14 +13,19 @@ function buttonAdapter (button) {
   case BUTTON_TYPE.MORE:
     return {
       type: button.type,
-      title: button.text,
+      title: emojify(button.text),
       payload: button.value
     };
   case BUTTON_TYPE.URL:
     return {
       type: button.type,
       url: button.value,
-      title: button.text
+      title: emojify(button.text)
+    };
+  case BUTTON_TYPE.ACCOUNT_LINKING:
+    return {
+      type: button.type,
+      url: button.value
     };
   default:
     return button;
@@ -29,35 +35,30 @@ function buttonAdapter (button) {
 function buttonsMessageAdapter (message) {
   return {
     template_type: "button",
-    text: message.text,
+    text: emojify(message.text),
     buttons: message.attachments.buttons.map(buttonAdapter)
   };
 }
 
 function elementAdapter (button) {
   return {
-    title: button.title,
-    buttons: [button]
+    content_type: "text",
+    title: emojify(button.title),
+    payload: button.payload
   };
 }
 
 function buttonsListMessageAdapter (message) {
-  const moreButtons = [];
   const eltButtons = message.attachments.buttons.filter((button) => {
-    if (button.type !== BUTTON_TYPE.MORE) {
-      return true;
+    if (button.text === "" || button.value === "") {
+      return false;
     }
-
-    button.type = BUTTON_TYPE.POSTBACK;
-    moreButtons.push(buttonAdapter(button));
-    return false;
+    return true;
   });
 
   return {
-    template_type: "list",
-    top_element_style: "compact",
-    elements: eltButtons.map((button) => elementAdapter(buttonAdapter(button))),
-    buttons: moreButtons
+    text: emojify(message.text),
+    quick_replies: eltButtons.map((button) => elementAdapter(buttonAdapter(button)))
   };
 }
 
