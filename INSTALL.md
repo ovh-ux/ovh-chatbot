@@ -44,6 +44,16 @@ $ sudo docker-compose up
 + Follow the four first steps [described here](https://developers.facebook.com/docs/messenger-platform/guides/quick-start), but don't take care about the sample app that Facebook give.
 + Save the correspondant informations in env variable (`FB_APP_SECRET` --> in section `dashboard`, `FB_APP_ACCESS_TOKEN` --> in section `messenger`)
 
++ (Optional) you can add a welcome text:
+```shell
+$ curl -X POST -H "Content-Type: application/json" -d '{
+    "setting_type":"greeting",
+    "greeting":{
+      "text":"Your welcome text here"
+    }
+  }' "https://graph.facebook.com/v2.6/me/thread_settings?access_token=$FB_APP_ACCESS_TOKEN"   
+```
+
 ### Create Slack Developer app for chatbot
 
 + Go on [this page](https://api.slack.com/apps?new_app=1) and create a new app
