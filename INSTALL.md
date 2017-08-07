@@ -3,10 +3,11 @@
 ### Requirements
 
 + Node.Js >= 6.0
-+ MongoDB (URL connection string in environment variable MONGO, example: `export MONGO="mongodb://username:password@host1:27017/ovhchatbot"`)
++ MongoDB (URL connection string in environment variable **MONGO**, example: `export MONGO="mongodb://username:password@host1:27017/ovhchatbot"`)
 + Facebook developer account with Facebook developer app created (more explanations below)
 + Slack developer account with Slack developer app created (more explanations below)
 + Api.ai account
++ OVH account
 + Public ip with domain linked in HTTPS
 
 **For each environment variable, if you want to use docker and docker-compose you can put the value in the `Dockerfile` of this project.**
@@ -25,7 +26,6 @@
 + Save your domain name into env variable **APP_URL** (for example: `export APP_URL=https://myCustomDomain.com`)
 
 ### Run the API on your server or with docker-compose
-Requirements --> environment variable: **APIAI_TOKEN**, **MONGO** and **APP_URL**
 
 **Without docker**
 ```shell
@@ -44,6 +44,16 @@ $ sudo docker-compose up
 + Follow the four first steps [described here](https://developers.facebook.com/docs/messenger-platform/guides/quick-start), but don't take care about the sample app that Facebook give.
 + Save the correspondant informations in env variable (`FB_APP_SECRET` --> in section `dashboard`, `FB_APP_ACCESS_TOKEN` --> in section `messenger`)
 
++ (Optional) you can add a welcome text:
+```shell
+$ curl -X POST -H "Content-Type: application/json" -d '{
+    "setting_type":"greeting",
+    "greeting":{
+      "text":"Your welcome text here"
+    }
+  }' "https://graph.facebook.com/v2.6/me/thread_settings?access_token=$FB_APP_ACCESS_TOKEN"   
+```
+
 ### Create Slack Developer app for chatbot
 
 + Go on [this page](https://api.slack.com/apps?new_app=1) and create a new app
@@ -59,6 +69,24 @@ $ sudo docker-compose up
 
 ### Create your api.ovh.com application
 
-+ Go on [this page](https://api.ovh.com) and click on **First steps ...** to create an application et save the application key and secret in env variable `OVH_KEY` and `OVH_SECRET`
++ Go on [this page](https://api.ovh.com) and click on [**First steps with the OVH API**](https://api.ovh.com/g934.first_step_with_api) to create an application and save the application key and secret in env variable `OVH_KEY` and `OVH_SECRET`
+
+
+### List of all the Enviroment Variables used:
+
+    APIAI_TOKEN
+    APP_PORT (optional, default is 8080)
+    APP_URL
+    FB_APP_ACCESS_TOKEN
+    FB_APP_SECRET
+    FB_VALIDATION_TOKEN
+    OVH_BASE_PATH
+    OVH_KEY
+    OVH_SECRET
+    MONGO (optional, default is `mongodb://mongo:27017`)
+    SLACK_BOT_ACCESS_TOKEN
+    SLACK_ID
+    SLACK_SECRET
+    SLACK_TOKEN
 
 If you need more informations you can [join us on Gitter](https://gitter.im/ovh/ux)
