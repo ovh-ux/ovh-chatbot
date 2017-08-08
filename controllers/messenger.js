@@ -110,8 +110,7 @@ module.exports = () => {
     return ovh.getOvhClient(senderId)
       .then((client) => client.requestPromised("GET", "/me"))
       .then((meInfos) => meInfos.language)
-      .catch(() => messenger.getUserProfile(senderId))
-      .then((body) => body.locale)
+      .catch(() => messenger.getUserProfile(senderId).then((body) => JSON.parse(body).locale))
       .catch((err) => {
         console.error(err);
         return "en_US";

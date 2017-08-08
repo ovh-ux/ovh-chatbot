@@ -31,7 +31,7 @@ function callFacebookAPI (requestObject) {
         if (messageId) {
           console.log("Successfully sent message with id %s to recipient %s", messageId, recipientId);
         } else {
-          console.log("Successfully called Send API for recipient %s", recipientId);
+          console.log("Successfully called FB API");
         }
       } else {
         console.error("Failed calling Send API", response.statusCode, response.statusMessage, body.error);
