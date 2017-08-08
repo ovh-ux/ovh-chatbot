@@ -1,22 +1,21 @@
 "use strict";
 
 const { ButtonsMessage, Button, TextMessage, BUTTON_TYPE } = require("../../../platforms/generics");
-const guides = require("../../../constants/guides").FR;
-const responsesCst = require("../../../constants/responses").FR;
-const utils = require("../../utils");
+const translator = require("../../../utils/translator");
+const utils = require("../../../utils/ovh");
 
 class DnsServerConfig {
-  static action (senderId, message, entities) {
-    const responses = [new TextMessage(guides.help(guides.modifDnsServer))];
+  static action (senderId, message, entities, res, locale) {
+    const responses = [new TextMessage(translator("guides.help", locale, translator("guides.modifDnsServer", locale)))];
 
     return utils.getOvhClient(senderId).then((ovhClient) => ovhClient.requestPromised("GET", "/domain")).then((domains) => {
       if (entities.url) {
         const url = encodeURIComponent(entities.url.replace(/https?:\/\//gi, ""));
 
         if (domains.indexOf(url) !== -1) {
-          const buttons = [new Button(BUTTON_TYPE.URL, `https://www.ovh.com/manager/web/#/configuration/domain/${url}?tab=DNS`, responsesCst.goToManager)];
+          const buttons = [new Button(BUTTON_TYPE.URL, `https://www.ovh.com/manager/web/#/configuration/domain/${url}?tab=DNS`, translator("goToManager", locale))];
 
-          responses.push(new ButtonsMessage(responsesCst.dnsEditDns, buttons));
+          responses.push(new ButtonsMessage(translator("dnsEditDns", locale), buttons));
         }
       }
 

@@ -1,12 +1,11 @@
 "use strict";
 
 const { TextMessage, createPostBackList, Button, BUTTON_TYPE, MAX_LIMIT } = require("../../../platforms/generics");
-const utils = require("../../utils");
-const responsesCst = require("../../../constants/responses").FR;
-const { sprintf } = require("voca");
+const utils = require("../../../utils/ovh");
+const translator = require("../../../utils/translator");
 
 class TelephonyBreak {
-  static action (senderId) {
+  static action (senderId, message, entities, res, locale) {
     let ovhClient;
 
     return utils.getOvhClient(senderId)
@@ -18,8 +17,8 @@ class TelephonyBreak {
       .then((info) => new Button(BUTTON_TYPE.POSTBACK, `TELEPHONY_SELECTED_${info.billingAccount}`, info.description || service))
     )
     .then((buttons) => ({
-      responses: buttons.length > 0 ? [createPostBackList(sprintf(responsesCst.telephonySelectAccount, 1, Math.ceil(buttons.length / MAX_LIMIT)), buttons, "MORE_TELEPHONY", 0, MAX_LIMIT)] :
-        [new TextMessage(responsesCst.telephonyNoAccount), new TextMessage(responsesCst.upsellingPhone)],
+      responses: buttons.length > 0 ? [createPostBackList(translator("telephonySelectAccount", locale, 1, Math.ceil(buttons.length / MAX_LIMIT)), buttons, "MORE_TELEPHONY", 0, MAX_LIMIT)] :
+        [new TextMessage(translator("telephonyNoAccount", locale)), new TextMessage(translator("upsellingPhone", locale))],
       feedback: false
     }));
   }

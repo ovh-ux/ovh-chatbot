@@ -1,12 +1,10 @@
 "use strict";
 
 const Bluebird = require("bluebird");
-const { ButtonsListMessage, Button, TextMessage, ButtonsMessage } = require("../generics");
+const { ButtonsListMessage, Button, TextMessage, ButtonsMessage, createFeedback } = require("../generics");
 const WebMessage = require("../../models/web.model");
 const config = require("../../config/config-loader").load();
-const { camelCase } = require("lodash");
 const { textMessageAdapter, buttonAdapter, buttonListAdapter } = require("./web_adapters");
-const responsesCst = require("../../constants/responses").FR;
 
 function parseMsg (RawResponses) {
   const responses = RawResponses.length == null || typeof RawResponses === "string" ? [RawResponses] : RawResponses;
@@ -32,23 +30,11 @@ function parseMsg (RawResponses) {
   });
 }
 
-function sendFeedback (nichandle, intent, rawMessage) {
-  const message = rawMessage.length >= config.maxMessageLength ? config.maxMessageLengthString : rawMessage;
-
-  if (intent === "unknown") {
-    return null;
-  }
-
-  const buttons = [
-    new Button("postback", `FEEDBACK_MISUNDERSTOOD_${camelCase(intent)}_${message}`, responsesCst.feedbackBadUnderstanding),
-    new Button("postback", `FEEDBACK_BAD_${camelCase(intent)}_${message}`, responsesCst.feedbackNo),
-    new Button("postback", `FEEDBACK_GOOD_${camelCase(intent)}_${message}`, responsesCst.feedbackYes)
-  ];
-
-  return send(null, nichandle, new ButtonsListMessage(responsesCst.feedbackHelp, buttons));
+function sendFeedback (nichandle, intent, rawMessage, locale) {
+  return send(null, nichandle, createFeedback(intent, rawMessage, locale));
 }
 
-function send (res, id, rawResponsesPar, opt) {
+function send (res, id, rawResponsesPar, opt, locale) {
   let flagUseRes = true;
   let nichandle = id;
   let rawResponses = rawResponsesPar;
@@ -89,7 +75,7 @@ function send (res, id, rawResponsesPar, opt) {
       if (flagUseRes) {
         return Bluebird.resolve(responses).then((result) => {
           if (opt && opt.feedback) {
-            sendFeedback(nichandle, opt.intent, opt.message);
+            sendFeedback(nichandle, opt.intent, opt.message, locale);
           }
           return result;
         });

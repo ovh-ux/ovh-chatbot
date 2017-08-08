@@ -5,9 +5,9 @@ const bot = require("../bots/common")();
 const config = require("../config/config-loader").load();
 const apiai = require("../utils/apiai");
 const Bluebird = require("bluebird");
-const responsesCst = require("../constants/responses").FR;
-const { Button, ButtonsMessage, BUTTON_TYPE } = require("../platforms/generics");
-const { camelCase } = require("lodash");
+const { Button, ButtonsMessage, BUTTON_TYPE, createFeedback } = require("../platforms/generics");
+const ovh = require("../utils/ovh");
+const translator = require("../utils/translator");
 
 function getWebhook (req, res) {
   if (req.query["hub.mode"] === "subscribe" && req.query["hub.verify_token"] === config.facebook.validationToken) {
@@ -102,21 +102,33 @@ module.exports = () => {
     }
 
     if (messageText) {
-      sendCustomMessage(res, senderID, messageText);
+      getSenderLocale(senderID).then((local) => sendCustomMessage(res, senderID, messageText, local));
     }
+  }
+
+  function getSenderLocale (senderId) {
+    return ovh.getOvhClient(senderId)
+      .then((client) => client.requestPromised("GET", "/me"))
+      .then((meInfos) => meInfos.language)
+      .catch(() => messenger.getUserProfile(senderId))
+      .then((body) => body.locale)
+      .catch((err) => {
+        console.error(err);
+        return "en_US";
+      });
   }
 
   function receivedPostback (res, event) {
     let needFeedback = false;
     const senderId = event.sender.id;
     const payload = event.postback.payload;
-
-    bot
-      .ask("postback", senderId, payload, null, null, res)
-      .then((answer) => {
-        needFeedback = answer.feedback || needFeedback;
-        return sendResponses(res, senderId, answer.responses);
-      })
+    getSenderLocale(senderId)
+      .then((locale) => bot
+        .ask("postback", senderId, payload, null, null, res, locale)
+        .then((answer) => {
+          needFeedback = answer.feedback || needFeedback;
+          return sendResponses(res, senderId, answer.responses);
+        }))
       .then(() => {
         if (needFeedback) {
           return sendFeedback(res, senderId, payload, "message");
@@ -129,18 +141,18 @@ module.exports = () => {
       });
   }
 
-  function sendCustomMessage (res, senderId, message) {
+  function sendCustomMessage (res, senderId, message, locale) {
     let needFeedback = false;
 
     apiai
       .textRequestAsync(message, {
         sessionId: senderId
-      })
+      }, locale)
       .then((resp) => {
         if (resp.status && resp.status.code === 200 && resp.result) {
           if (resp.result.action === "connection" || resp.result.action === "welcome") {
             const accountLinkButton = new Button(BUTTON_TYPE.ACCOUNT_LINKING, `${config.server.url}${config.server.basePath}/authorize?state=${senderId}-facebook_messenger`, "");
-            return sendResponse(res, senderId, new ButtonsMessage(responsesCst.welcome, [accountLinkButton]));
+            return sendResponse(res, senderId, new ButtonsMessage(translator("welcome", locale), [accountLinkButton]));
           }
 
           if (resp.result.fulfillment && resp.result.fulfillment.speech && Array.isArray(resp.result.fulfillment.messages) && resp.result.fulfillment.messages.length) {
@@ -152,11 +164,11 @@ module.exports = () => {
               quickResponses = [{ speech: resp.result.fulfillment.speech, type: 0 }];
             }
 
-            return sendQuickResponses(res, senderId, quickResponses).then(() => sendFeedback(res, senderId, resp.result.action, message)); // Ask if it was useful
+            return sendQuickResponses(res, senderId, quickResponses).then(() => sendFeedback(res, senderId, resp.result.action, message, locale)); // Ask if it was useful
           }
 
           return bot
-            .ask("message", senderId, message, resp.result.action, resp.result.parameters, res)
+            .ask("message", senderId, message, resp.result.action, resp.result.parameters, res, locale)
             .then((answer) => {
               needFeedback = answer.feedback || needFeedback;
 
@@ -164,7 +176,7 @@ module.exports = () => {
             })
             .then(() => {
               if (needFeedback) {
-                sendFeedback(res, senderId, resp.result.action, message);
+                sendFeedback(res, senderId, resp.result.action, message, locale);
               }
             }) // Ask if it was useful
             .catch((err) => {
@@ -177,19 +189,8 @@ module.exports = () => {
       .catch(res.logger.error);
   }
 
-  function sendFeedback (res, senderId, intent, rawMessage) {
-    let message = rawMessage.length >= config.maxMessageLength ? config.maxMessageLengthString : rawMessage;
-    if (intent === "unknown") {
-      return null;
-    }
-
-    const buttons = [
-      new Button(BUTTON_TYPE.POSTBACK, `FEEDBACK_MISUNDERSTOOD_${camelCase(intent)}_${message}`, responsesCst.feedbackBadUnderstanding),
-      new Button(BUTTON_TYPE.POSTBACK, `FEEDBACK_BAD_${camelCase(intent)}_${message}`, responsesCst.feedbackNo),
-      new Button(BUTTON_TYPE.POSTBACK, `FEEDBACK_GOOD_${camelCase(intent)}_${message}`, responsesCst.feedbackYes)
-    ];
-
-    return sendResponse(res, senderId, new ButtonsMessage(responsesCst.feedbackHelp, buttons));
+  function sendFeedback (res, senderId, intent, rawMessage, locale) {
+    return sendResponse(res, senderId, createFeedback(intent, rawMessage, locale));
   }
 
   function sendQuickResponses (res, senderId, responses) {

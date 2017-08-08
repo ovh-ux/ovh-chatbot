@@ -2,19 +2,17 @@
 
 const error = require("../../../providers/errors/apiError");
 const { Button, createPostBackList, TextMessage, BUTTON_TYPE, MAX_LIMIT } = require("../../../platforms/generics");
-const utils = require("../../utils");
+const utils = require("../../../utils/ovh");
 const Bluebird = require("bluebird").config({
   warnings: false
 });
-const guides = require("../../../constants/guides").FR;
-const responsesCst = require("../../../constants/responses").FR;
+const translator = require("../../../utils/translator");
 const hostingDiagnostics = require("../../../diagnostics/hosting");
-const { sprintf } = require("voca");
 
 module.exports = [
   {
     regx: "HOSTING_SELECTED_(.*)",
-    action (senderId, postback, regx, entities, res) {
+    action (senderId, postback, regx, entities, res, locale) {
       let hosting;
 
       return utils
@@ -26,7 +24,7 @@ module.exports = [
         })
         .then((attachedDomains) => {
           let buttons = attachedDomains.map((domain) => new Button(BUTTON_TYPE.POSTBACK, `ATTACHED_DOMAIN_SELECTED_${hosting}_${domain}`, domain));
-          return { responses: [createPostBackList(sprintf(responsesCst.hostingSelectSite, 1, Math.ceil(buttons.length / MAX_LIMIT)), buttons, `MORE_ATTACHED_DOMAIN_${hosting}`, 0, MAX_LIMIT)], feedback: false };
+          return { responses: [createPostBackList(translator("hostingSelectSite", locale, 1, Math.ceil(buttons.length / MAX_LIMIT)), buttons, `MORE_ATTACHED_DOMAIN_${hosting}`, 0, MAX_LIMIT)], feedback: false };
         })
         .catch((err) => {
           res.logger.error(err);
@@ -37,7 +35,7 @@ module.exports = [
   },
   {
     regx: "ATTACHED_DOMAIN_SELECTED_(.*)_(.*)",
-    action (senderId, postback, regx, entities, res) {
+    action (senderId, postback, regx, entities, res, locale) {
       let domain;
 
       return utils
@@ -51,22 +49,21 @@ module.exports = [
             attachedDomain: ovhClient.requestPromised("GET", `/hosting/web/${hosting}/attachedDomain/${domain}`),
             hostingEmails: ovhClient.requestPromised("GET", `/hosting/web/${hosting}/email`),
             ssl: getSSLState(ovhClient, hosting),
-            dns: getDNSState(ovhClient, domain),
-            statistics: ovhClient.requestPromised("GET", `/hosting/web/${hosting}/statistics`, { period: "daily", type: "in.httpMeanResponseTime" }).catch((err) => err.error === 404 ? Bluebird.resolve(null) : null)
+            dns: getDNSState(ovhClient, domain)
           });
         })
-        .then(({ hosting, attachedDomain, hostingEmails, ssl, dns, statistics }) => hostingDiagnostics.checkWebsite(res, hosting, attachedDomain, hostingEmails, ssl, dns, statistics))
+        .then(({ hosting, attachedDomain, hostingEmails, ssl, dns }) => hostingDiagnostics.checkWebsite(res, hosting, attachedDomain, hostingEmails, ssl, dns, locale))
         .then((responses) => ({ responses, feedback: true }))
         .catch((err) => {
           res.logger.error(err);
           if (err.error === 404 || err.statusCode === 404) {
-            return Bluebird.reject(error(404, responsesCst.hostingWrongSite));
+            return Bluebird.reject(error(404, translator("hostingWrongSite", locale)));
           }
 
           if (err.error === 460 || err.statusCode === 460) {
             return Bluebird.resolve({ responses: [
-              new TextMessage(responsesCst.hostingSuspended),
-              new TextMessage(guides.help(guides.renewOvh))
+              new TextMessage(translator("hostingSuspended", locale)),
+              new TextMessage(translator("guides.help", locale, translator("guides.renewOvh", locale)))
             ],
               feedback: false });
           }
@@ -77,7 +74,7 @@ module.exports = [
   },
   {
     regx: "MORE_ATTACHED_DOMAIN_(.*)_([0-9]+)",
-    action (senderId, postback, regx, entities, res) {
+    action (senderId, postback, regx, entities, res, locale) {
       let currentIndex = parseInt(postback.match(new RegExp(regx))[2], 10);
       let hosting;
 
@@ -91,7 +88,7 @@ module.exports = [
         .then((domains) => {
           let buttons = domains.map((domain) => new Button(BUTTON_TYPE.POSTBACK, `ATTACHED_DOMAIN_SELECTED_${hosting}_${domain}`, domain));
           return {
-            responses: [createPostBackList(sprintf(responsesCst.hostingSelectSite, Math.floor(1 + (currentIndex / MAX_LIMIT)), Math.ceil(buttons.length / MAX_LIMIT)), buttons, `MORE_ATTACHED_DOMAIN_${hosting}`, currentIndex, MAX_LIMIT)],
+            responses: [createPostBackList(translator("hostingSelectSite", locale, Math.floor(1 + (currentIndex / MAX_LIMIT)), Math.ceil(buttons.length / MAX_LIMIT)), buttons, `MORE_ATTACHED_DOMAIN_${hosting}`, currentIndex, MAX_LIMIT)],
             feedback: false
           };
         })
@@ -103,7 +100,7 @@ module.exports = [
   },
   {
     regx: "MORE_HOSTING_([0-9]+)",
-    action (senderId, postback, regx, entities, res) {
+    action (senderId, postback, regx, entities, res, locale) {
       let currentIndex = parseInt(postback.match(new RegExp(regx))[1], 10);
       return utils
         .getOvhClient(senderId)
@@ -111,7 +108,7 @@ module.exports = [
         .then((hostings) => {
           const eltInfos = hostings.map((hosting) => new Button(BUTTON_TYPE.POSTBACK, `HOSTING_SELECTED_${hosting}`, hosting));
 
-          return { responses: [createPostBackList(sprintf(responsesCst.hostingSelectHost, Math.floor(1 + (currentIndex / MAX_LIMIT)), Math.ceil(eltInfos.length / 4)), eltInfos, "MORE_HOSTING", currentIndex, MAX_LIMIT)], feedback: false };
+          return { responses: [createPostBackList(translator("hostingSelectHost", locale, Math.floor(1 + (currentIndex / MAX_LIMIT)), Math.ceil(eltInfos.length / 4)), eltInfos, "MORE_HOSTING", currentIndex, MAX_LIMIT)], feedback: false };
         })
         .catch((err) => {
           res.logger.error(err);

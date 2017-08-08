@@ -5,10 +5,8 @@ const WebAuth = require("../models/webAuth.model");
 const config = require("../config/config-loader").load();
 const ovh = require("ovh");
 const Bluebird = require("bluebird");
-const dns = require("dns");
-const URL = require("url");
-const responsesCst = require("../constants/responses").FR;
 const request = require("request");
+const translator = require("./translator");
 
 // custom OvhClient for the web users;
 class OvhWebClient {
@@ -52,7 +50,7 @@ module.exports = {
         // check if web user and if so return the custom "ovhClientModule";
         return WebAuth.findOne({ _nichandle: senderId }).exec().then((webAuth) => {
           if (!webAuth) {
-            return Bluebird.reject({ statusCode: 403, message: responsesCst.signInFirst });
+            return Bluebird.reject({ statusCode: 403, message: translator("signInFirst") });
           }
 
           return new OvhWebClient(webAuth.cookie, webAuth.userAgent);
@@ -64,19 +62,5 @@ module.exports = {
         appSecret: config.ovh.appSecret,
         consumerKey: userInfos.consumerKey
       });
-    }),
-
-  dig (hostnameRaw) {
-    const hostname = hostnameRaw.match(/https?:\/\//) ? URL.parse(hostnameRaw).hostname : hostnameRaw;
-
-    return new Bluebird((resolve, reject) => {
-      dns.lookup(hostname, (err, address) => {
-        if (err) {
-          return reject(err);
-        }
-
-        return resolve(address);
-      });
-    });
-  }
+    })
 };

@@ -20,6 +20,47 @@ const PAGE_ACCESS_TOKEN = config.facebook.pageAccessToken;
 // assets located at this address.
 // const SERVER_URL = config.server.url;
 
+
+function callFacebookAPI (requestObject) {
+  return new Bluebird((resolve) => {
+    request(requestObject, (error, response, body) => {
+      if (!error && response.statusCode === 200) {
+        const recipientId = body.recipient_id;
+        const messageId = body.message_id;
+
+        if (messageId) {
+          console.log("Successfully sent message with id %s to recipient %s", messageId, recipientId);
+        } else {
+          console.log("Successfully called Send API for recipient %s", recipientId);
+        }
+      } else {
+        console.error("Failed calling Send API", response.statusCode, response.statusMessage, body.error);
+      }
+
+      return resolve(body);
+    });
+  });
+}
+
+const getUserProfile = (userid) => callFacebookAPI({
+  uri: `https://graph.facebook.com/v2.6/${userid}`,
+  qs: { access_token: PAGE_ACCESS_TOKEN },
+  method: "GET"
+});
+
+
+/*
+ * Call the Send API. The message data goes in the body. If successful, we"ll
+ * get the message id in a response
+ *
+ */
+const sendMessageToAPI = (messageData) => callFacebookAPI({
+  uri: "https://graph.facebook.com/v2.6/me/messages",
+  qs: { access_token: PAGE_ACCESS_TOKEN },
+  method: "POST",
+  json: messageData
+});
+
 /*
  * Authorization Event
  *
@@ -151,7 +192,7 @@ function receivedAccountLink (event) {
 //     }
 //   };
 //
-//   callSendAPI(messageData);
+//   sendMessageToAPI(messageData);
 // }
 
 /*
@@ -173,7 +214,7 @@ function receivedAccountLink (event) {
 //     }
 //   };
 //
-//   callSendAPI(messageData);
+//   sendMessageToAPI(messageData);
 // }
 
 /*
@@ -195,7 +236,7 @@ function receivedAccountLink (event) {
 //     }
 //   };
 //
-//   callSendAPI(messageData);
+//   sendMessageToAPI(messageData);
 // }
 
 /*
@@ -217,7 +258,7 @@ function receivedAccountLink (event) {
 //     }
 //   };
 //
-//   callSendAPI(messageData);
+//   sendMessageToAPI(messageData);
 // }
 
 /*
@@ -239,7 +280,7 @@ function receivedAccountLink (event) {
 //     }
 //   };
 //
-//   callSendAPI(messageData);
+//   sendMessageToAPI(messageData);
 // }
 
 /*
@@ -260,7 +301,7 @@ function sendTextMessage (recipientId, messageText) {
     }
   };
 
-  return callSendAPI(messageData);
+  return sendMessageToAPI(messageData);
 }
 
 /*
@@ -280,7 +321,7 @@ function sendButtonMessage (recipientId, buttonMessage) {
     }
   };
 
-  callSendAPI(messageData);
+  sendMessageToAPI(messageData);
 }
 
 /*
@@ -301,7 +342,7 @@ function sendButtonMessage (recipientId, buttonMessage) {
 //     }
 //   };
 //
-//   return callSendAPI(messageData);
+//   return sendMessageToAPI(messageData);
 // }
 
 /*
@@ -324,7 +365,7 @@ function sendButtonMessage (recipientId, buttonMessage) {
 //     }
 //   };
 //
-//   callSendAPI(messageData);
+//   sendMessageToAPI(messageData);
 // }
 
 /*
@@ -396,7 +437,7 @@ function sendButtonMessage (recipientId, buttonMessage) {
 //     }
 //   };
 //
-//   callSendAPI(messageData);
+//   sendMessageToAPI(messageData);
 // }
 
 /*
@@ -411,7 +452,7 @@ function sendQuickReply (recipientId, message) {
     message
   };
 
-  callSendAPI(messageData);
+  sendMessageToAPI(messageData);
 }
 
 /*
@@ -428,7 +469,7 @@ function sendQuickReply (recipientId, message) {
 //     sender_action: "mark_seen"
 //   };
 //
-//   callSendAPI(messageData);
+//   sendMessageToAPI(messageData);
 // }
 
 /*
@@ -445,7 +486,7 @@ function sendQuickReply (recipientId, message) {
 //     sender_action: "typing_on"
 //   };
 //
-//   callSendAPI(messageData);
+//   sendMessageToAPI(messageData);
 // }
 
 /*
@@ -462,7 +503,7 @@ function sendQuickReply (recipientId, message) {
 //     sender_action: "typing_off"
 //   };
 //
-//   callSendAPI(messageData);
+//   sendMessageToAPI(messageData);
 // }
 
 /*
@@ -490,42 +531,9 @@ function sendQuickReply (recipientId, message) {
 //     }
 //   };
 //
-//   callSendAPI(messageData);
+//   sendMessageToAPI(messageData);
 // }
 
-/*
- * Call the Send API. The message data goes in the body. If successful, we"ll
- * get the message id in a response
- *
- */
-function callSendAPI (messageData) {
-  return new Bluebird((resolve) => {
-    request(
-      {
-        uri: "https://graph.facebook.com/v2.6/me/messages",
-        qs: { access_token: PAGE_ACCESS_TOKEN },
-        method: "POST",
-        json: messageData
-      },
-      (error, response, body) => {
-        if (!error && response.statusCode === 200) {
-          const recipientId = body.recipient_id;
-          const messageId = body.message_id;
-
-          if (messageId) {
-            console.log("Successfully sent message with id %s to recipient %s", messageId, recipientId);
-          } else {
-            console.log("Successfully called Send API for recipient %s", recipientId);
-          }
-        } else {
-          console.error("Failed calling Send API", response.statusCode, response.statusMessage, body.error);
-        }
-
-        return resolve({ body, message: messageData.message });
-      }
-    );
-  });
-}
 
 function send (recipientId, message) {
   if (typeof message === "string") {
@@ -544,7 +552,7 @@ function send (recipientId, message) {
     return sendButtonMessage(recipientId, buttonsMessageAdapter(message));
   }
 
-  return callSendAPI(message);
+  return sendMessageToAPI(message);
 }
 
 module.exports = {
@@ -553,5 +561,6 @@ module.exports = {
   receivedPostback,
   receivedMessageRead,
   receivedAccountLink,
-  send
+  send,
+  getUserProfile
 };
