@@ -56,8 +56,7 @@ module.exports = function (config) {
   app.use(utilsMiddleware());
   app.use(compression());
   app.use(bodyParser.urlencoded({ limit: "50mb", extended: false }));
-  app.use(bodyParser.json({ limit: "50mb" }));
-  app.use(bodyParser.json({ verify: verifyRequestSignature(config) }));
+  app.use(bodyParser.json({ limit: "50mb", verify: verifyRequestSignature(config) }));
   app.use(cookieParser());
   app.use(`${config.server.basePath}/web`, verifyOvhUser());
   app.set("view engine", "ejs");
