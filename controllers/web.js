@@ -5,7 +5,6 @@ const bot = require("../bots/common")();
 const apiai = require("../utils/apiai");
 const Bluebird = require("bluebird");
 const { TextMessage } = require("../platforms/generics");
-const ovh = require("../utils/ovh");
 const translator = require("../utils/translator");
 
 module.exports = () => {
@@ -91,14 +90,8 @@ module.exports = () => {
 
   function onGet (req, res) {
     const nichandle = req.user.nichandle;
-    let locale;
-    return ovh.getOvhClient(nichandle)
-      .then((ovhClient) => ovhClient.requestPromised("GET", "/me"))
-      .then((meInfos) => meInfos.language)
-      .then((localeLocal) => {
-        locale = localeLocal;
-      })
-      .then(() => web.getHistory(res, nichandle))
+    let locale = req.user.language;
+    return web.getHistory(res, nichandle)
       .then((result) => {
         if (!result.length) {
           web.send(null, nichandle, translator("welcomeWeb", locale, nichandle));
@@ -111,6 +104,7 @@ module.exports = () => {
   function onPost (req, res) {
     const message = req.body.message;
     const nichandle = req.user.nichandle;
+    const locale = req.use.language;
     const type = req.body.type;
 
     // check the data sent first;
@@ -138,10 +132,7 @@ module.exports = () => {
 
     return web
       .pushToHistory(nichandle, userMsg)
-      .then(() => ovh.getOvhClient(nichandle))
-      .then((ovhClient) => ovhClient.requestPromised("GET", "/me"))
-      .then((meInfos) => meInfos.language)
-      .then((locale) => {
+      .then(() => {
         if (type === "message") {
           return messageReceived(res, nichandle, message, locale);
         } else if (type === "postback") {
@@ -152,9 +143,9 @@ module.exports = () => {
       .then((result) => {
         // if result.responses then the origin is the bot, ie there might be a feedback request
         if (result.responses) {
-          return web.send(res, nichandle, result.responses, result);
+          return web.send(res, nichandle, result.responses, result, locale);
         }
-        return web.send(res, nichandle, result);
+        return web.send(res, nichandle, result, locale);
       })
       .then((result) => res.status(200).json(result))
       .catch((err) => {

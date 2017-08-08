@@ -14,12 +14,12 @@ module.exports = function translator (key, locale, ...replacements) {
     translation = _.get(require(`../translations/translation_${locale}.json`), key);
   } catch (err) {
     // The file doesnt exist
-    console.error(`err: ${err},\n failed translating to ${locale}, resolving to default: "fr_FR"`);
+    console.error(`err: ${err},\n failed translating to ${locale}, resolving to default: "en_US"`);
   }
 
   if (!translation) {
     // if no translation is provided, we resolved to the default.
-    translation = _.get(require("../translations/translation_fr_FR.json"), key);
+    translation = _.get(require("../translations/translation_en_US.json"), key);
   }
   return vprintf(translation, replacements);
 };
