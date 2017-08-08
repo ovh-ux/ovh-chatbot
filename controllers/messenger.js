@@ -8,13 +8,13 @@ const Bluebird = require("bluebird");
 const { Button, ButtonsMessage, BUTTON_TYPE, createFeedback } = require("../platforms/generics");
 const ovh = require("../utils/ovh");
 const translator = require("../utils/translator");
+const logger = require("../providers/logging/logger");
 
 function getWebhook (req, res) {
   if (req.query["hub.mode"] === "subscribe" && req.query["hub.verify_token"] === config.facebook.validationToken) {
-    console.log("Validating webhook");
     res.status(200).send(req.query["hub.challenge"]);
   } else {
-    console.error("Failed validation. Make sure the validation tokens match.");
+    logger.error("Failed validation. Make sure the validation tokens match.");
     res.sendStatus(403);
   }
 }
@@ -28,30 +28,18 @@ module.exports = () => {
       // Iterate over each entry
       // There may be multiple if batched
       data.entry.forEach((pageEntry) => {
-        // var pageID = pageEntry.id;
-        // let timeOfEvent = pageEntry.time;
 
         // Iterate over each messaging event
         pageEntry.messaging.forEach((messagingEvent) => {
-          if (messagingEvent.optin) {
-            messenger.receivedAuthentication(messagingEvent);
-          } else if (messagingEvent.message) {
+          if (messagingEvent.message) {
             // checks for quick_replies => use postback handler
             if (messagingEvent.message.quick_reply) {
               receivedPostback(res, Object.assign(messagingEvent, { postback: messagingEvent.message.quick_reply }));
             } else {
               receivedMessage(res, messagingEvent);
             }
-          } else if (messagingEvent.delivery) {
-            messenger.receivedDeliveryConfirmation(messagingEvent);
           } else if (messagingEvent.postback) {
             receivedPostback(res, messagingEvent);
-          } else if (messagingEvent.read) {
-            messenger.receivedMessageRead(messagingEvent);
-          } else if (messagingEvent.account_linking) {
-            messenger.receivedAccountLink(messagingEvent);
-          } else {
-            console.log("Webhook received unknown messagingEvent: ", messagingEvent);
           }
         });
       });
@@ -73,31 +61,15 @@ module.exports = () => {
    * object format can vary depending on the kind of message that was received.
    * Read more at https://developers.facebook.com/docs/messenger-platform/webhook-reference/message-received
    *
-   * For this example, we"re going to echo any text that we get. If we get some
-   * special keywords ("button", "generic", "receipt"), then we"ll send back
-   * examples of those bubbles to illustrate the special message bubbles we"ve
-   * created. If we receive a message with an attachment (image, video, audio),
-   * then we"ll simply confirm that we"ve received the attachment.
-   *
    */
   function receivedMessage (res, event) {
     const senderID = event.sender.id;
-    const recipientID = event.recipient.id;
-    const timeOfMessage = event.timestamp;
     const message = event.message;
+
     const isEcho = message.is_echo;
-    const messageId = message.mid;
-    const appId = message.app_id;
-    const metadata = message.metadata;
-
-    console.log("Received message for user %d and page %d at %d with message:", senderID, recipientID, timeOfMessage);
-
-    // You may get a text or attachment but not both
     const messageText = message.text;
 
     if (isEcho) {
-      // Just logging message echoes to console
-      console.log("Received echo for message %s and app %d with metadata %s", messageId, appId, metadata);
       return;
     }
 
@@ -112,7 +84,7 @@ module.exports = () => {
       .then((meInfos) => meInfos.language)
       .catch(() => messenger.getUserProfile(senderId).then((body) => JSON.parse(body).locale))
       .catch((err) => {
-        console.error(err);
+        logger.error(err);
         return "en_US";
       });
   }

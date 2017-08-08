@@ -2,6 +2,7 @@
 
 const { vprintf } = require("voca");
 const _ = require("lodash");
+const logger = require("../providers/logging/logger");
 
 module.exports = function translator (key, locale, ...replacements) {
   let translation;
@@ -14,7 +15,7 @@ module.exports = function translator (key, locale, ...replacements) {
     translation = _.get(require(`../translations/translation_${locale}.json`), key);
   } catch (err) {
     // The file doesnt exist
-    console.error(`err: ${err},\n failed translating to ${locale}, resolving to default: "en_US"`);
+    logger.error(`err: ${err},\n failed translating to ${locale}, resolving to default: "en_US"`);
   }
 
   if (!translation) {

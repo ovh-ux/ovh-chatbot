@@ -104,7 +104,7 @@ module.exports = () => {
   function onPost (req, res) {
     const message = req.body.message;
     const nichandle = req.user.nichandle;
-    const locale = req.use.language;
+    const locale = req.user.language;
     const type = req.body.type;
 
     // check the data sent first;

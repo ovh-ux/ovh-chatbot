@@ -5,9 +5,16 @@ const config = require("../config/config-loader").load();
 const apiaiSDK = require("apiai");
 const ApiAiTokens = require("../models/apiai.model");
 const DEFAULT_TOKEN = config.apiai.token;
+const logger = require("../providers/logging/logger");
 
-apiaiSDK.textRequestAsync = (message, opts, locale) => ApiAiTokens.findOne({ locale })
-    .then((token) => apiaiSDK(token || DEFAULT_TOKEN))
+apiaiSDK.textRequestAsync = (message, opts, locale) => {
+  logger.debug(`Apiai request for locale: ${locale}`);
+
+  return ApiAiTokens.findOne({ locale })
+    .then((token) => {
+      logger.debug(`Apiai token for ${locale}:${token ? "FOUND" : "DEFAULT"}`);
+      return apiaiSDK(token || DEFAULT_TOKEN);
+    })
     .then((apiai) => new Bluebird((resolve, reject) => {
       const request = apiai.textRequest(message, opts);
 
@@ -17,4 +24,5 @@ apiaiSDK.textRequestAsync = (message, opts, locale) => ApiAiTokens.findOne({ loc
 
       request.end();
     }));
+};
 module.exports = apiaiSDK;

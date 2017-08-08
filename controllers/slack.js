@@ -10,15 +10,13 @@ const apiai = require("../utils/apiai");
 const { TextMessage, ButtonsListMessage, Button, createFeedback, BUTTON_TYPE } = require("../platforms/generics");
 const ovh = require("../utils/ovh");
 const translator = require("../utils/translator");
+const logger = require("../providers/logging/logger");
 
 function getUserLocale (senderId) {
   return ovh.getOvhClient(senderId)
     .then((ovhClient) => ovhClient.requestPromised("GET", "/me"))
     .then((meInfos) => meInfos.language)
-    .catch((err) => {
-      console.error(err);
-      return "en_US";
-    });
+    .catch(() => "en_US");
 }
 
 
@@ -191,5 +189,5 @@ function sendResponses (res, channel, responses, slack, message_ts) {
 
 function sendResponse (res, channel, response, slack, message_ts) {
   return slack.send(channel, response, message_ts)
-    .then((result) => !result.ok ? console.error(result.error) : console.log(`Sucessfully sent ${result.ts} to ${result.channel}`));
+    .then((result) => !result.ok ? logger.error(result.error) : logger.debug(`Sucessfully sent ${result.ts} to ${result.channel}`));
 }

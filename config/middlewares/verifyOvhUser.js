@@ -3,6 +3,7 @@
 const Bluebird = require("bluebird");
 const request = require("request");
 const WebAuth = require("../../models/webAuth.model");
+const logger = require("../../providers/logging/logger");
 
 module.exports = () =>
   function (req, res, next) {
@@ -40,7 +41,7 @@ module.exports = () =>
       })
       .then(() => next())
       .catch((err) => {
-        console.log(err);
+        logger.error(err);
         const errorApi = res.error(err.statusCode, err.data ? err.data.message : err);
         return res.status(errorApi.statusCode).json(errorApi);
       });

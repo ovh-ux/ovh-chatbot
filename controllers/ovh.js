@@ -6,6 +6,7 @@ const messenger = require("../platforms/messenger/messenger");
 const User = require("../models/users.model");
 const slackSDK = require("../platforms/slack/slack");
 const translator = require("../utils/translator");
+const logger = require("../providers/logging/logger");
 
 module.exports = () => ({
   getAuth (req, res) {
@@ -48,13 +49,13 @@ function welcome (senderId, meInfos, userInfos) {
   case "facebook_messenger": {
     messenger
       .send(senderId, translator("connectedAs", meInfos.language, meInfos.nichandle))
-      .catch(console.error);
+      .catch(logger.error);
     break;
   }
   case "slack": {
     slackSDK(userInfos.team_id)
     .then((slack) => slack.send(senderId, translator("connectedAs", meInfos.language, meInfos.nichandle)))
-    .catch(console.error);
+    .catch(logger.error);
     break;
   }
   default: break;
