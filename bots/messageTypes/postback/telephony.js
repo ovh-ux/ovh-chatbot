@@ -62,7 +62,8 @@ module.exports = [
           .then((info) => new Button(BUTTON_TYPE.POSTBACK, `TELEPHONY_SELECTED_${info.billingAccount}`, info.description || service))
       )
       .then((buttons) => ({
-        responses: buttons.length > 0 ? [createPostBackList(translator("telephonySelectAccount", locale, Math.floor(1 + (currentIndex / MAX_LIMIT)), Math.ceil(buttons.length / MAX_LIMIT)), buttons, "MORE_TELEPHONY", currentIndex, MAX_LIMIT)] :
+        responses: buttons.length > 0 ? [createPostBackList(
+          translator("telephonySelectAccount", locale, Math.floor(1 + (currentIndex / MAX_LIMIT)), Math.ceil(buttons.length / MAX_LIMIT)), buttons, "MORE_TELEPHONY", currentIndex, MAX_LIMIT, locale)] :
           [new TextMessage(translator("telephonyNoAccount", locale))],
         feedback: false
       }));

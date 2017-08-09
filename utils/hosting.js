@@ -4,7 +4,7 @@ const dns = require("dns");
 const URL = require("url");
 const Bluebird = require("bluebird");
 
-module.export = {
+module.exports = {
   dig (hostnameRaw) {
     const hostname = hostnameRaw.match(/https?:\/\//) ? URL.parse(hostnameRaw).hostname : hostnameRaw;
 

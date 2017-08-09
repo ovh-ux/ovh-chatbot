@@ -106,7 +106,10 @@ module.exports = [
         .map((offer) => ovhClient.requestPromised("GET", `/xdsl/${offer}`)
           .then((xdslInfo) => new Button(BUTTON_TYPE.POSTBACK, `XDSL_SELECTED_${xdslInfo.accessName}`, xdslInfo.description || offer))
         )
-        .then((buttons) => ({ responses: [createPostBackList(translator("xdslSelect", locale, Math.floor(1 + (currentIndex / MAX_LIMIT)), Math.ceil(buttons.length / MAX_LIMIT)), buttons, "MORE_XDSL", currentIndex, MAX_LIMIT)], feedback: false }))
+        .then((buttons) => ({
+          responses: [createPostBackList(translator("xdslSelect", locale, Math.floor(1 + (currentIndex / MAX_LIMIT)), Math.ceil(buttons.length / MAX_LIMIT)), buttons, "MORE_XDSL", currentIndex, MAX_LIMIT, locale)],
+          feedback: false
+        }))
         .catch((err) => {
           res.logger.error(err);
           return Bluebird.reject(error(err));

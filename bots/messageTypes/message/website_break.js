@@ -30,7 +30,7 @@ class WebsiteBreak {
           eltInfos = hostings.map((hosting) => new Button(BUTTON_TYPE.POSTBACK, `ATTACHED_DOMAIN_SELECTED_${hosting}_${URL.parse(website).hostname}`, hosting));
 
           return {
-            responses: [createPostBackList(translator("hostingSelectHost", locale, 1, Math.ceil(eltInfos.length / MAX_LIMIT)), eltInfos, "MORE_HOSTING", 0, MAX_LIMIT)],
+            responses: [createPostBackList(translator("hostingSelectHost", locale, 1, Math.ceil(eltInfos.length / MAX_LIMIT)), eltInfos, "MORE_HOSTING", 0, MAX_LIMIT, locale)],
             feedback: false
           };
         }
@@ -43,7 +43,7 @@ class WebsiteBreak {
 
         eltInfos = hostings.map((hosting) => new Button(BUTTON_TYPE.POSTBACK, `HOSTING_SELECTED_${hosting}`, hosting));
 
-        return { responses: [createPostBackList(translator("hostingSelectHost", locale, 1, Math.ceil(eltInfos.length / MAX_LIMIT)), eltInfos, "MORE_HOSTING", 0, MAX_LIMIT)], feedback: false };
+        return { responses: [createPostBackList(translator("hostingSelectHost", locale, 1, Math.ceil(eltInfos.length / MAX_LIMIT)), eltInfos, "MORE_HOSTING", 0, MAX_LIMIT, locale)], feedback: false };
       })
       .catch((err) => {
         res.logger.error(err);

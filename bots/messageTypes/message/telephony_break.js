@@ -17,7 +17,7 @@ class TelephonyBreak {
       .then((info) => new Button(BUTTON_TYPE.POSTBACK, `TELEPHONY_SELECTED_${info.billingAccount}`, info.description || service))
     )
     .then((buttons) => ({
-      responses: buttons.length > 0 ? [createPostBackList(translator("telephonySelectAccount", locale, 1, Math.ceil(buttons.length / MAX_LIMIT)), buttons, "MORE_TELEPHONY", 0, MAX_LIMIT)] :
+      responses: buttons.length > 0 ? [createPostBackList(translator("telephonySelectAccount", locale, 1, Math.ceil(buttons.length / MAX_LIMIT)), buttons, "MORE_TELEPHONY", 0, MAX_LIMIT, locale)] :
         [new TextMessage(translator("telephonyNoAccount", locale)), new TextMessage(translator("upsellingPhone", locale))],
       feedback: false
     }));

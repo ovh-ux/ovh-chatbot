@@ -62,7 +62,7 @@ class ButtonsListMessage {
   }
 }
 
-function createPostBackList (text, listInfos, morePayload, offset, limit, locale) {
+function createPostBackList (text, listInfos, morePayload, offset, limit, locale = "en_US") {
   const buttons = listInfos.slice(offset, limit + offset);
   const moreButton = offset + limit >= listInfos.length ? null : new Button(BUTTON_TYPE.MORE, `${morePayload}_${offset + limit}`, translator("moreButton", locale, listInfos.length - (offset + limit)));
 

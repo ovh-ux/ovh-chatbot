@@ -14,8 +14,8 @@ module.exports = {
   checkWebsite (res, hosting, domain, hostingEmails, ssl, dns, locale) {
     res.logger.info(domain);
     const protocol = domain.ssl ? "https://" : "http://";
-    let responses = this.checkEmailsState(hosting, hostingEmails);
-    const sslState = this.checkSSL(hosting, domain, ssl);
+    let responses = this.checkEmailsState(hosting, hostingEmails, locale);
+    const sslState = this.checkSSL(hosting, domain, ssl, locale);
 
     responses = responses.concat(sslState);
 

@@ -76,7 +76,8 @@ module.exports = () => {
               message,
               resp.result.action,
               resp.result.parameters,
-              res
+              res,
+              locale
             )
             .then((result) => {
               result.intent = resp.result.action;

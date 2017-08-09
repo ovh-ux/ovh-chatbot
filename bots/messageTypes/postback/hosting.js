@@ -24,7 +24,7 @@ module.exports = [
         })
         .then((attachedDomains) => {
           let buttons = attachedDomains.map((domain) => new Button(BUTTON_TYPE.POSTBACK, `ATTACHED_DOMAIN_SELECTED_${hosting}_${domain}`, domain));
-          return { responses: [createPostBackList(translator("hostingSelectSite", locale, 1, Math.ceil(buttons.length / MAX_LIMIT)), buttons, `MORE_ATTACHED_DOMAIN_${hosting}`, 0, MAX_LIMIT)], feedback: false };
+          return { responses: [createPostBackList(translator("hostingSelectSite", locale, 1, Math.ceil(buttons.length / MAX_LIMIT)), buttons, `MORE_ATTACHED_DOMAIN_${hosting}`, 0, MAX_LIMIT, locale)], feedback: false };
         })
         .catch((err) => {
           res.logger.error(err);
@@ -88,7 +88,7 @@ module.exports = [
         .then((domains) => {
           let buttons = domains.map((domain) => new Button(BUTTON_TYPE.POSTBACK, `ATTACHED_DOMAIN_SELECTED_${hosting}_${domain}`, domain));
           return {
-            responses: [createPostBackList(translator("hostingSelectSite", locale, Math.floor(1 + (currentIndex / MAX_LIMIT)), Math.ceil(buttons.length / MAX_LIMIT)), buttons, `MORE_ATTACHED_DOMAIN_${hosting}`, currentIndex, MAX_LIMIT)],
+            responses: [createPostBackList(translator("hostingSelectSite", locale, Math.floor(1 + (currentIndex / MAX_LIMIT)), Math.ceil(buttons.length / MAX_LIMIT)), buttons, `MORE_ATTACHED_DOMAIN_${hosting}`, currentIndex, MAX_LIMIT, locale)],
             feedback: false
           };
         })
@@ -108,7 +108,7 @@ module.exports = [
         .then((hostings) => {
           const eltInfos = hostings.map((hosting) => new Button(BUTTON_TYPE.POSTBACK, `HOSTING_SELECTED_${hosting}`, hosting));
 
-          return { responses: [createPostBackList(translator("hostingSelectHost", locale, Math.floor(1 + (currentIndex / MAX_LIMIT)), Math.ceil(eltInfos.length / 4)), eltInfos, "MORE_HOSTING", currentIndex, MAX_LIMIT)], feedback: false };
+          return { responses: [createPostBackList(translator("hostingSelectHost", locale, Math.floor(1 + (currentIndex / MAX_LIMIT)), Math.ceil(eltInfos.length / 4)), eltInfos, "MORE_HOSTING", currentIndex, MAX_LIMIT, locale)], feedback: false };
         })
         .catch((err) => {
           res.logger.error(err);

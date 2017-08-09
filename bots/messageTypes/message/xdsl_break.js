@@ -20,7 +20,7 @@ class XdslBreak {
           .then((xdslInfo) => new Button(BUTTON_TYPE.POSTBACK, `XDSL_SELECTED_${xdslInfo.accessName}`, xdslInfo.description || offer))
       )
       .then((buttons) => ({
-        responses: buttons.length > 0 ? [createPostBackList(translator("xdslSelect", locale, 1, Math.ceil(buttons.length / MAX_LIMIT)), buttons, "MORE_XDSL", 0, MAX_LIMIT)] :
+        responses: buttons.length > 0 ? [createPostBackList(translator("xdslSelect", locale, 1, Math.ceil(buttons.length / MAX_LIMIT)), buttons, "MORE_XDSL", 0, MAX_LIMIT, locale)] :
           [new TextMessage(translator("xdslNone", locale)), new TextMessage(translator("upsellingXDSL", locale))],
         feedback: false
       }))
