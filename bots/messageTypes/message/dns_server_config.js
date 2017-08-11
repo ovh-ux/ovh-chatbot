@@ -6,7 +6,7 @@ const utils = require("../../../utils/ovh");
 
 class DnsServerConfig {
   static action (senderId, message, entities, res, locale) {
-    const responses = [new TextMessage(translator("guides.help", locale, translator("guides.modifDnsServer", locale)))];
+    const responses = [new TextMessage(translator("guides-help", locale, translator("guides-modifDnsServer", locale)))];
 
     return utils.getOvhClient(senderId).then((ovhClient) => ovhClient.requestPromised("GET", "/domain")).then((domains) => {
       if (entities.url) {

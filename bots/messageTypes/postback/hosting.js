@@ -63,7 +63,7 @@ module.exports = [
           if (err.error === 460 || err.statusCode === 460) {
             return Bluebird.resolve({ responses: [
               new TextMessage(translator("hostingSuspended", locale)),
-              new TextMessage(translator("guides.help", locale, translator("guides.renewOvh", locale)))
+              new TextMessage(translator("guides-help", locale, translator("guides-renewOvh", locale)))
             ],
               feedback: false });
           }

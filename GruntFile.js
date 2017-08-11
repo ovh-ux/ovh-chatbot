@@ -11,12 +11,13 @@ module.exports = function (grunt) {
     importDir: "<%= workDir%>/import",
     unzipDir: "<%= workDir%>/extract",
     outputDir: "<%= workDir%>/output",
+    apiaiDir: "apiai",
 
     unzip: {
       "<%= unzipDir %>": "archives/ovh-chatbot.zip"
     },
 
-    extractJSON: {
+    zip2json: {
       main: {
         files: [{
           src: ["<%= unzipDir %>/**/*.json"],
@@ -25,7 +26,28 @@ module.exports = function (grunt) {
       }
     },
 
-    compileJSON: {
+    apiai2json: {
+      main: {
+        files: [{
+          src: ["<%= exportDir %>/**/*.json"],
+          dest: "<%= apiaiDir %>"
+        }]
+      }
+    },
+
+    json2apiai: {
+      options: {
+        template: "<%= apiaiDir %>/template.json"
+      },
+      main: {
+        files: [{
+          src: ["<%= apiaiDir %>/translations/**/apiai_*.json"],
+          dest: "<%= importDir %>"
+        }]
+      }
+    },
+
+    json2zip: {
       options: {
         original: "<%= unzipDir %>"
       },
@@ -63,6 +85,31 @@ module.exports = function (grunt) {
             expand: true
           }
         ]
+      },
+      es: {
+        options: {
+          archive: "<%= outputDir %>/es.zip",
+          mode: "zip"
+        },
+        files: [
+          {
+            cwd: "<%= workDir %>/es/",
+            src: ["**/*.json"],
+            expand: true
+          }
+        ]
+      }
+    },
+
+    upload: {
+      options: {
+        filter: (agent) => agent.name.indexOf("-prod") === -1, // Filter function: doesn't upload for production yet
+        reset: false
+      },
+      main: {
+        files: {
+          src: "<%= outputDir %>"
+        }
       }
     },
 
@@ -74,27 +121,15 @@ module.exports = function (grunt) {
         "!<%= importDir %>",
         "!<%= outputDir %>"
       ]
-    },
-
-    // used for developpement purposes
-    copy: {
-      main: {
-        files: [{
-          expand: true,
-          cwd: "<%= exportDir %>/",
-          src: ["**"],
-          dest: "<%= importDir %>/"
-        }]
-      }
     }
   });
 
   // Default task(s).
   grunt.registerTask("default", ["clean:reset", "export", "copy", "import"]);
 
-  grunt.registerTask("export", ["clean:all", "unzip", "extractJSON", "clean:all"]);
-  grunt.registerTask("import", ["clean:all", "compileJSON", "compress", "clean:all"]);
+  grunt.registerTask("export", ["clean:all", "unzip", "zip2json", "apiai2json", "clean:all"]);
+  grunt.registerTask("import", ["clean:all", "json2apiai", "json2zip", "compress", "upload", "clean:all"]);
 
-  grunt.registerTask("dev", ["clean:reset", "unzip", "extractJSON", "copy", "compileJSON", "compress"]);
+  grunt.registerTask("dev", ["clean:reset", "unzip", "zip2json", "apiai2json", "json2apiai", "json2zip", "compress"]);
 
 };

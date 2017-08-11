@@ -6,7 +6,7 @@ const translator = require("../../../utils/translator");
 
 class DomainToHosting {
   static action (senderId, message, entities, res, locale) {
-    const responses = [new TextMessage(translator("domainEditDns", locale)), new TextMessage(translator("guides.help", locale, translator("guides.modifDns", locale)))];
+    const responses = [new TextMessage(translator("domainEditDns", locale)), new TextMessage(translator("guides-help", locale, translator("guides-modifDns", locale)))];
 
     if (entities.url) {
       const url = encodeURIComponent(entities.url.replace(/https?:\/\//gi, ""));
