@@ -101,7 +101,7 @@ function pushToHistory (nichandle, msg) {
       $push: {
         history: {
           $each: [msg],
-          $slice: -config.historyLength // last X element
+          $slice: -config.web.historyLength // last X element
         }
       }
     },

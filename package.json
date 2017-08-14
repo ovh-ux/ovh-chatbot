@@ -17,6 +17,7 @@
   "license": "BSD-3-Clause",
   "dependencies": {
     "apiai": "^4.0.2",
+    "apicache": "^0.8.7",
     "bluebird": "^3.4.7",
     "body-parser": "^1.16.0",
     "compression": "^1.6.2",
@@ -26,6 +27,7 @@
     "express": "^4.14.1",
     "lodash": "^4.17.4",
     "mathjs": "^3.9.3",
+    "memory-cache": "^0.2.0",
     "mongodb": "^2.2.11",
     "mongoose": "^4.8.1",
     "morgan": "^1.8.0",
