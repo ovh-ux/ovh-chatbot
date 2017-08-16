@@ -3,14 +3,12 @@
 
 const error = require("../../../providers/errors/apiError");
 const { Button, createPostBackList, TextMessage, BUTTON_TYPE, MAX_LIMIT } = require("../../../platforms/generics");
-const utils = require("../../utils");
+const utils = require("../../../utils/ovh");
 const Bluebird = require("bluebird").config({
   warnings: false
 });
+const translator = require("../../../utils/translator");
 const telephonyDiag = require("../../../diagnostics/telephony");
-const responsesCst = require("../../../constants/responses").FR;
-const { sprintf } = require("voca");
-
 
 const parsePortability = (ovhClient, service) =>
   ovhClient.requestPromised("GET", `/telephony/${service}/portability`)
@@ -33,7 +31,7 @@ const parsePortability = (ovhClient, service) =>
 module.exports = [
   {
     regx: "TELEPHONY_SELECTED_(.*)",
-    action (senderId, postback, regx, entites, res) {
+    action (senderId, postback, regx, entities, res, locale) {
       let service = postback.match(new RegExp(regx))[1];
 
       return utils.getOvhClient(senderId)
@@ -42,7 +40,7 @@ module.exports = [
         portability: parsePortability(ovhClient, service),
         serviceInfos: ovhClient.requestPromised("GET", `/telephony/${service}/serviceInfos`)
       }))
-      .then(({ billing, portability, serviceInfos }) => ({ responses: telephonyDiag.telephonyDiag(billing, portability, serviceInfos), feedback: true }))
+      .then(({ billing, portability, serviceInfos }) => ({ responses: telephonyDiag.telephonyDiag(billing, portability, serviceInfos, locale), feedback: true }))
       .catch((err) => {
         res.logger.error(err);
         return Bluebird.reject(error(err));
@@ -51,7 +49,7 @@ module.exports = [
   },
   {
     regx: "MORE_TELEPHONY_([0-9]+)",
-    action (senderId, postback, regx) {
+    action (senderId, postback, regx, entities, res, locale) {
       let currentIndex = parseInt(postback.match(new RegExp(regx))[1], 10);
       let ovhClient;
 
@@ -64,8 +62,9 @@ module.exports = [
           .then((info) => new Button(BUTTON_TYPE.POSTBACK, `TELEPHONY_SELECTED_${info.billingAccount}`, info.description || service))
       )
       .then((buttons) => ({
-        responses: buttons.length > 0 ? [createPostBackList(sprintf(responsesCst.telephonySelectAccount, Math.floor(1 + (currentIndex / MAX_LIMIT)), Math.ceil(buttons.length / MAX_LIMIT)), buttons, "MORE_TELEPHONY", currentIndex, MAX_LIMIT)] :
-          [new TextMessage(responsesCst.telephonyNoAccount)],
+        responses: buttons.length > 0 ? [createPostBackList(
+          translator("telephonySelectAccount", locale, Math.floor(1 + (currentIndex / MAX_LIMIT)), Math.ceil(buttons.length / MAX_LIMIT)), buttons, "MORE_TELEPHONY", currentIndex, MAX_LIMIT, locale)] :
+          [new TextMessage(translator("telephonyNoAccount", locale))],
         feedback: false
       }));
     }

@@ -3,3 +3,7 @@ npm-debug.log
 ecosystem.json
 .DS_Store
 env.sh
+<<<<<<< HEAD
+=======
+.wrk/
+>>>>>>> feat_i18n

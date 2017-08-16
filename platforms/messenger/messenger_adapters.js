@@ -35,7 +35,7 @@ function buttonAdapter (button) {
 function buttonsMessageAdapter (message) {
   return {
     template_type: "button",
-    text: emojify(message.text || ""),
+    text: emojify(message.text),
     buttons: message.attachments.buttons.map(buttonAdapter)
   };
 }
@@ -47,7 +47,6 @@ function elementAdapter (button) {
     payload: button.payload
   };
 }
-
 
 function buttonsListMessageAdapter (message) {
   const eltButtons = message.attachments.buttons.filter((button) => {

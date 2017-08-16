@@ -4,9 +4,9 @@ const ovh = require("ovh");
 const config = require("../config/config-loader").load();
 const messenger = require("../platforms/messenger/messenger");
 const User = require("../models/users.model");
-const responsesCst = require("../constants/responses").FR;
 const slackSDK = require("../platforms/slack/slack");
-const { sprintf } = require("voca");
+const translator = require("../utils/translator");
+const logger = require("../providers/logging/logger");
 
 module.exports = () => ({
   getAuth (req, res) {
@@ -48,14 +48,14 @@ function welcome (senderId, meInfos, userInfos) {
   switch (userInfos.platform) {
   case "facebook_messenger": {
     messenger
-      .sendTextMessage(senderId, sprintf(responsesCst.connectedAs, meInfos.nichandle))
-      .catch(console.error);
+      .send(senderId, translator("connectedAs", meInfos.language, meInfos.nichandle))
+      .catch(logger.error);
     break;
   }
   case "slack": {
     slackSDK(userInfos.team_id)
-    .then((slack) => slack.send(senderId, sprintf(responsesCst.connectedAs, meInfos.nichandle)))
-    .catch(console.error);
+    .then((slack) => slack.send(senderId, translator("connectedAs", meInfos.language, meInfos.nichandle)))
+    .catch(logger.error);
     break;
   }
   default: break;

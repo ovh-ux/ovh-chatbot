@@ -1,30 +1,23 @@
 "use strict";
 
-const utils = require("../bots/utils");
-const { Button, ButtonsMessage, TextMessage, ListItem, CardMessage, BUTTON_TYPE } = require("../platforms/generics");
+const utils = require("../utils/hosting");
+const { Button, ButtonsMessage, TextMessage, BUTTON_TYPE } = require("../platforms/generics");
 const Bluebird = require("bluebird").config({
   warnings: false
 });
 const _ = require("lodash");
 const request = require("request-promise");
 
-// const mathjs = require("mathjs");
-const guides = require("../constants/guides").FR;
-const diagCst = require("../constants/diagnostics").hosting.FR;
-const { sprintf } = require("voca");
+const translator = require("../utils/translator");
 
 module.exports = {
-  checkWebsite (res, hosting, domain, hostingEmails, ssl, dns /* , statistics*/) {
+  checkWebsite (res, hosting, domain, hostingEmails, ssl, dns, locale) {
     res.logger.info(domain);
     const protocol = domain.ssl ? "https://" : "http://";
-    let responses = this.checkEmailsState(hosting, hostingEmails);
-    const sslState = this.checkSSL(hosting, domain, ssl);
+    let responses = this.checkEmailsState(hosting, hostingEmails, locale);
+    const sslState = this.checkSSL(hosting, domain, ssl, locale);
 
     responses = responses.concat(sslState);
-
-    // if (statistics) {
-    //   this.monitore(hosting, statistics);
-    // }
 
     return utils
       .dig(domain.domain)
@@ -44,29 +37,27 @@ module.exports = {
         switch (hosting.state) {
         case "active":
           if (responses.length) {
-            responses.push(new TextMessage(diagCst.hostingButActive));
+            responses.push(new TextMessage(translator("hosting.hostingButActive", locale)));
           } else {
-            responses.push(new TextMessage(diagCst.hostingActive));
+            responses.push(new TextMessage(translator("hosting-hostingActive", locale)));
           }
           break;
         case "bloqued":
           responses = [
             ...responses,
-            new CardMessage([
-              new ListItem(diagCst.hostingBloqued, guides.help(guides.websiteHack))
-            ])
+            new TextMessage(translator("hosting-hostingBloqued", locale)),
+            new TextMessage(translator("guides-help", locale, translator("guides-websiteHack", locale)))
           ];
           break;
         case "maintenance":
           responses = [
             ...responses,
-            new CardMessage([
-              new ListItem(diagCst.hostingMaintenance, guides.help(guides.websiteHack))
-            ])
+            new TextMessage(translator("hosting-hostingMaintenance", locale)),
+            new TextMessage(translator("guides-help", locale, translator("guides-websiteHack", locale)))
           ];
           break;
         default:
-          responses.push(new TextMessage(diagCst.hostingUnknown));
+          responses.push(new TextMessage(translator("hosting-hostingUnknown", locale)));
         }
 
         return responses;
@@ -83,25 +74,22 @@ module.exports = {
         case 500:
           return responses.concat(this.error500(err, hosting));
         case 404:
-          managerButton = new Button(BUTTON_TYPE.URL, `https://www.ovh.com/manager/web/#/configuration/hosting/${hosting.serviceName}?tab=DOMAINS`, diagCst.goToManager);
-          return [...responses, new ButtonsMessage(diagCst.web404, [managerButton])];
+          managerButton = new Button(BUTTON_TYPE.URL, `https://www.ovh.com/manager/web/#/configuration/hosting/${hosting.serviceName}?tab=DOMAINS`, translator("hosting-goToManager", locale));
+          return [...responses, new ButtonsMessage(translator("hosting-web404", locale), [managerButton])];
         case 401:
-          return [...responses, new TextMessage(diagCst.web401)];
+          return [...responses, new TextMessage(translator("hosting-web401", locale))];
         case 403:
-          managerButton = new Button(BUTTON_TYPE.URL, `https://www.ovh.com/manager/web/#/configuration/hosting/${hosting.serviceName}?tab=DOMAINS`, diagCst.goToManager);
-          return [...responses, new ButtonsMessage(diagCst.web403, [managerButton])];
+          managerButton = new Button(BUTTON_TYPE.URL, `https://www.ovh.com/manager/web/#/configuration/hosting/${hosting.serviceName}?tab=DOMAINS`, translator("hosting-goToManager", locale));
+          return [...responses, new ButtonsMessage(translator("hosting-web403", locale), [managerButton])];
         case 429:
-          return [...responses, new TextMessage(guides.help(guides.blankPage))];
+          return [...responses, new TextMessage(translator("guides-help", locale, translator("guides-blankPage", locale)))];
         default:
           if (err.code) {
-            return responses.concat(this.explainError(err, hosting));
+            return responses.concat(this.explainError(err, hosting, locale));
           }
 
           if (!sslState.length) {
-            return [...responses,
-              new CardMessage([
-                new ListItem(diagCst.unknown, guides.help(guides.errorApache))
-              ])];
+            return [...responses, new TextMessage(translator("hosting-unknown", locale)), new TextMessage(translator("guides-help", locale, translator("guides-errorApache", locale)))];
           }
 
           return responses;
@@ -109,94 +97,71 @@ module.exports = {
       });
   },
 
-  // monitore(hosting, statistics) {
-  //   let responses = [];
-  //   let { dynamicStats, staticStats } = getStatsArray(statistics);
-  //   let dynamicMean = mathjs.mean(dynamicStats);
-  //   // let staticMean;
-
-  //   // if (staticStats) {
-  //   //   staticMean = mathjs.mean(staticStats);
-  //   // }
-
-  //   console.log("dynamicStats", dynamicStats);
-  //   console.log("staticStats", staticStats);
-
-  //   if (dynamicMean >= 2000) {
-  //     responses.push("Votre site semble assez lent pour les contenus dynamiques, je te conseille de consulter ce guide afin d'optimiser votre site : " + guides.perfImprovements);
-  //   }
-
-  //   console.log("mean dynamic", mathjs.mean(dynamicStats));
-  //   console.log("mode dynamic", mathjs.mode(dynamicStats));
-  //   console.log("median dynamic", mathjs.median(dynamicStats));
-  // },
-
-  checkSSL (hosting, domain, ssl) {
+  checkSSL (hosting, domain, ssl, locale) {
     const responses = [];
-    const managerButton = new Button(BUTTON_TYPE.URL, `https://www.ovh.com/manager/web/#/configuration/hosting/${hosting.serviceName}?tab=DOMAINS`, diagCst.goToManager);
+    const managerButton = new Button(BUTTON_TYPE.URL, `https://www.ovh.com/manager/web/#/configuration/hosting/${hosting.serviceName}?tab=DOMAINS`, translator("hosting-goToManager", locale));
 
     if ((domain.ssl && !ssl.infos) || (domain.ssl && ssl.infos && ssl.domains.indexOf(domain.domain) === -1)) {
-      responses.push(new ButtonsMessage(diagCst.sslRegenerate, [managerButton]));
+      responses.push(new ButtonsMessage(translator("hosting-sslRegenerate", locale), [managerButton]));
     } else if (!domain.ssl && ssl.infos && ssl.infos.provider === "LETSENCRYPT" && ssl.domains.indexOf(domain.domain) !== -1) {
-      responses.push(new ButtonsMessage(diagCst.sslHttpsToHttpWarning, [managerButton]));
+      responses.push(new ButtonsMessage(translator("hosting-sslHttpsToHttpWarning", locale), [managerButton]));
     }
 
     if (responses.length) {
-      responses.push(new TextMessage(guides.help(guides.leError)));
+      responses.push(new TextMessage(translator("guides-help", locale, translator("guides-leError", locale))));
     }
 
     return responses;
   },
 
-  checkEmailsState (hosting, hostingEmails) {
+  checkEmailsState (hosting, hostingEmails, locale) {
     const responses = [];
-    const managerButton = new Button(BUTTON_TYPE.URL, `https://www.ovh.com/manager/web/#/configuration/hosting/${hosting.serviceName}?tab=AUTOMATED_EMAILS`, diagCst.goToManager);
+    const managerButton = new Button(BUTTON_TYPE.URL, `https://www.ovh.com/manager/web/#/configuration/hosting/${hosting.serviceName}?tab=AUTOMATED_EMAILS`, translator("hosting-goToManager", locale));
 
     switch (hostingEmails.state) {
     case "bounce":
-      responses.push(new ButtonsMessage(diagCst.mailBounce, [managerButton]));
+      responses.push(new ButtonsMessage(translator("hosting-mailBounce", locale), [managerButton]));
       break;
     case "force":
       break;
     case "ko":
-      responses.push(new ButtonsMessage(diagCst.mailKo, [managerButton]));
+      responses.push(new ButtonsMessage(translator("hosting-mailKo", locale), [managerButton]));
       break;
     case "ok":
       break;
     case "purging":
       break;
     case "spam":
-      responses.push(new ButtonsMessage(diagCst.mailSpam, [managerButton]));
+      responses.push(new ButtonsMessage(translator("hosting-mailSpam", locale), [managerButton]));
       break;
     default:
       break;
     }
 
     if (responses.length) {
-      responses.push(new TextMessage(guides.help(guides.mailBlock)));
+      responses.push(new TextMessage(translator("guides-help", locale, translator("guides-mailBlock", locale))));
     }
 
     return responses;
   },
 
-  explainError (error, hosting) {
+  explainError (error, hosting, locale) {
     switch (error.code) {
     case "ECONNREFUSED":
       return [
-        new CardMessage([
-          new ListItem(sprintf(diagCst.errorConnRefused, hosting.hostingIp), guides.help(guides.pointingError))
-        ])
+        new TextMessage(translator("hosting-errorConnRefused", locale, hosting.hostingIp)),
+        new TextMessage(translator("guides-help", locale, translator("guides-pointingError", locale)))
       ];
     case "ENOTFOUND":
-      return [new TextMessage(diagCst.errorNotFound)];
+      return [new TextMessage(translator("hosting-errorNotFound", locale))];
     case "EAI_AGAIN":
-      return [new TextMessage(diagCst.errorEaiAgain)];
+      return [new TextMessage(translator("hosting-errorEaiAgain", locale))];
     default:
-      return [new TextMessage(diagCst.unknown)];
+      return [new TextMessage(translator("hosting-unknown", locale))];
     }
   },
 
-  checkDNS (ip, hostingInfos, domain, dnsInfo) {
+  checkDNS (ip, hostingInfos, domain, dnsInfo, locale) {
     let responses = [];
     let goodIp;
 
@@ -219,47 +184,34 @@ module.exports = {
       let targets = dnsInfo.target.map((trgt) => trgt.target.slice(0, -1));
       let wrongs = _.difference(dnsInfo.real.nameServers, targets);
 
-      responses = [new TextMessage(sprintf(diagCst.dnsWrongConfig, wrongs.join(", "), targets.join(", ")))];
+      responses = [new TextMessage(translator("hosting-dnsWrongConfig", locale, wrongs.join(", "), targets.join(", ")))];
     }
 
     if (goodIp) {
-      return [
-        new CardMessage([
-          new ListItem(sprintf(diagCst.dns, ip, domain.domain, goodIp), guides.help(guides.dnsConfig))
-        ])
+      responses = [
+        ...responses,
+        new TextMessage(translator("hosting-dns", locale, ip, domain.domain, goodIp)),
+        new TextMessage(translator("guides-help", locale, translator("guides-dnsConfig", locale)))
       ];
     }
 
     return responses;
   },
 
-  error500 (err, hosting) {
+  error500 (err, hosting, locale) {
     const rxDatababse = /(database.*connection)|(base.*donn[ée])/gi;
 
     if ((err.body && err.body.match(rxDatababse)) || (err.message && err.message.match(rxDatababse))) {
-      const managerButton = new Button(BUTTON_TYPE.URL, `https://www.ovh.com/manager/web/#/configuration/hosting/${hosting.serviceName}?tab=DATABASES`, diagCst.goToManager);
+      const managerButton = new Button(BUTTON_TYPE.URL, `https://www.ovh.com/manager/web/#/configuration/hosting/${hosting.serviceName}?tab=DATABASES`, translator("goToManager", locale));
 
       return [
-        new CardMessage([
-          new ListItem(diagCst.web500db, guides.help(guides.dbError))
-        ], managerButton)
+        new ButtonsMessage(translator("hosting-web500db", locale), [managerButton]),
+        new TextMessage(translator("guides-help", locale, translator("guides-dbError", locale)))
       ];
     }
     return [
-      new CardMessage([
-        new ListItem(diagCst.web500dev, guides.help(guides.error500))
-      ])
+      new TextMessage(translator("hosting-web500dev", locale)),
+      new TextMessage(translator("guides-help", locale, translator("guides-error500", locale)))
     ];
   }
 };
-
-// function getStatsArray(statistics) {
-//   let globalStats = {};
-
-//   statistics.forEach((stats) => {
-//     globalStats[stats.serieName + "Stats"] = [];
-//     stats.values.forEach((value) => value.value != null ? globalStats[stats.serieName + "Stats"].push(value.value) : null);
-//   });
-
-//   return globalStats;
-// }

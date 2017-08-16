@@ -1,51 +1,37 @@
-const { TextMessage, Button, ButtonsMessage, CardMessage, ListItem } = require("../platforms/generics");
-const diagCst = require("../constants/diagnostics").xdsl.FR;
-const { sprintf } = require("voca");
+const { TextMessage, Button, ButtonsMessage } = require("../platforms/generics");
+const translator = require("../utils/translator");
 
-
-const checkxDSLDiagAdvanced = (diag) => {
+const checkxDSLDiagAdvanced = (diag, locale) => {
+  let responses = "";
   let linePb = false;
-  let items = [];
-  let modemStatus = "";
-  let lineStatus = "";
 
-  items.push(new ListItem(diagCst.resultLastDiag, sprintf(diagCst.diagnosticTime, new Date(diag.diagnosticTime).toUTCString())));
+  responses = translator("xdsl-diagnosticTime", locale, new Date(diag.diagnosticTime).toUTCString());
 
   if (diag.isModemConnected != null) {
     if (!diag.isModemConnected) {
-      modemStatus += diagCst.diagnosticModemUnplug;
+      responses += translator("xdsl-diagnosticModemUnplug", locale);
       linePb = true;
     } else {
-      modemStatus += diagCst.diagnosticModemPlug;
+      responses += translator("xdsl-diagnosticModemPlug", locale);
     }
   }
-
-  if (diag.ping != null) {
-    if (!diag.ping) {
-      modemStatus += diagCst.diagnosticPing;
-      linePb = true;
-    } else {
-      modemStatus += diagCst.diagnosticNoPing;
-    }
-  }
-  items.push(new ListItem(diagCst.diagnosticModemStatus, modemStatus));
-
 
   if (diag.lineDetails != null && Array.isArray(diag.lineDetails)) {
+    responses += translator("xdsl-diagnosticLineStatus", locale);
     for (let i = 0; i < diag.lineDetails.length; i++) {
       // detect sync
       const lineDiag = diag.lineDetails[i];
-      lineStatus += sprintf(diagCst.diagnosticLineSync, lineDiag.number, lineDiag.sync ? diagCst.sync : diagCst.unsync);
+      responses += translator("xdsl-diagnosticLineSync", locale, lineDiag.number, lineDiag.sync ? translator("xdsl-sync", locale) : translator("xdsl-unsync", locale));
       if (lineDiag.lineTest != null) {
         switch (lineDiag.lineTest) {
         case "customerSideProblem":
-          lineStatus += diagCst.diagnosticCustomerSideProblem;
+          responses += translator("xdsl-diagnosticCustomerSideProblem", locale);
           break;
         case "ovhSideProblem":
-          lineStatus += diagCst.diagnosticOvhSideProblem;
+          responses += translator("xdsl-diagnosticOvhSideProblem", locale);
           break;
         case "error":
-          lineStatus += diagCst.diagnosticError;
+          responses += translator("xdsl-diagnosticError", locale);
           break;
         default:break;
         }
@@ -55,25 +41,34 @@ const checkxDSLDiagAdvanced = (diag) => {
       }
     }
   }
-  items.push(new ListItem(diagCst.diagnosticLineStatus, lineStatus));
 
-  if (!linePb) {
-    items.push(new ListItem(diagCst.diagnosticResultOk, diagCst.diagnosticResultMore));
-  } else {
-    items.push(new ListItem(diagCst.diagnosticResultNOk, diagCst.diagnosticResultMore));
+  if (diag.ping != null) {
+    if (!diag.ping) {
+      responses += translator("xdsl-diagnosticPing", locale);
+      linePb = true;
+    } else {
+      responses += translator("xdsl-diagnosticNoPing", locale);
+    }
   }
 
+  if (!linePb) {
+    responses += translator("xdsl-diagnosticResultOk", locale);
+  } else {
+    responses += translator("xdsl-diagnosticResultNOk", locale);
+  }
 
-  return [new CardMessage(items)];
+  responses += translator("xdsl-diagnosticResultMore", locale);
+
+  return [new TextMessage(responses)];
 };
 
-const checkxDSLDiag = (xdslOffer, serviceInfos, orderFollowUp, incident, diag, managerLink) => {
+const checkxDSLDiag = (xdslOffer, serviceInfos, orderFollowUp, incident, diag, managerLink, locale) => {
   let responses = [];
   let orderOk = false;
   let orderString = "";
 
   if (incident != null) {
-    responses = [new TextMessage(sprintf(diagCst.incident, incident.comment || "N/A", incident.endDate || "N/A", `http://travaux.ovh.net/?do=details&id=${incident.taskId}`))];
+    responses = [new TextMessage(translator("xdsl-incident", locale, incident.comment || "N/A", incident.endDate || "N/A", `http://travaux.ovh.net/?do=details&id=${incident.taskId}`))];
   }
 
   for (let i = 0; i < orderFollowUp.length; i++) {
@@ -87,7 +82,7 @@ const checkxDSLDiag = (xdslOffer, serviceInfos, orderFollowUp, incident, diag, m
       case "doing":
       case "todo":
       case "error":
-        orderString += sprintf(diagCst.orderStepStatus, diagCst[orderStep.name], diagCst[orderStep.status], `${orderStep.expectedDuration} ${diagCst[orderStep.durationUnit]}`);
+        orderString += translator("xdsl-orderStepStatus", locale, translator(`xdsl-${orderStep.name}`, locale), translator(`xdsl-${orderStep.status}`, locale), orderStep.expectedDuration, translator(`xdsl-${orderStep.durationUnit}`, locale));
         break;
       case "done":
       default:
@@ -97,25 +92,28 @@ const checkxDSLDiag = (xdslOffer, serviceInfos, orderFollowUp, incident, diag, m
   }
 
   if (!orderOk) {
-    return [...responses, new CardMessage([new ListItem(sprintf(diagCst.orderNotReady, orderString, `${managerLink}/order`))])];
+    return [...responses, new TextMessage(translator("xdsl-orderNotReady", locale, orderString, `${managerLink}/order`))];
   }
 
   if (xdslOffer.status === "slamming") {
-    const button = new Button("web_url", "tel:1007", diagCst.callSupport);
-    responses = [...responses, new ButtonsMessage(diagCst.lineSlamming, [button])];
+    const button = new Button("web_url", "tel:1007", translator("xdsl-callSupport", locale));
+    responses = [...responses, new ButtonsMessage(translator("xdsl-lineSlamming", locale), [button])];
   }
 
   if (serviceInfos.status === "unPaid") {
-    responses = [...responses, new TextMessage(diagCst.lineUnPaid)];
+    responses = [...responses, new TextMessage(translator("xdsl-lineUnPaid", locale))];
   }
 
   if (responses.length === 0) {
-    const button = new Button("postback", `XDSL_DIAG_${xdslOffer.accessName}`, diagCst.launchDiag);
-    responses = [new ButtonsMessage(`${sprintf(diagCst.resultOk, managerLink)}\n${sprintf(diagCst.resultDiagRemaining, diag ? diag.remaining : 5)}\n${diagCst.resultAdvancedDiag}`, [button])];
+    const button = new Button("postback", `XDSL_DIAG_${xdslOffer.accessName}`, translator("xdsl-launchDiag", locale));
+    let resultOk = translator("xdsl-resultOk", locale, managerLink);
+    let diagRemaing = translator("xdsl-resultDiagRemaining", locale, diag ? diag.remaining : 5);
+    let advanceDiag = translator("xdsl-resultAdvancedDiag", locale);
+    responses = [new ButtonsMessage(`${resultOk}\n${diagRemaing}\n${advanceDiag}`, [button])];
   }
 
   if (diag) {
-    responses = [...responses, ...checkxDSLDiagAdvanced(diag)];
+    responses = [...responses, new TextMessage(translator("xdsl-resultLastDiag", locale)), ...checkxDSLDiagAdvanced(diag, locale)];
   }
   return responses;
 };

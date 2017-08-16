@@ -1,7 +1,8 @@
 "use strict";
 
-const responsesCst = require("../constants/responses").FR;
-const v = require("voca");
+const { camelCase } = require("lodash");
+const translator = require("../utils/translator");
+const config = require("../config/config-loader").load();
 
 const BUTTON_TYPE = {
   URL: "web_url",
@@ -17,10 +18,6 @@ const MAX_LIMIT = 4;
 class TextMessage {
   constructor (text) {
     this.text = text;
-
-    if (typeof text !== "string" || text === "") {
-      throw new Error("Text should be a non-empty string");
-    }
   }
 }
 
@@ -28,24 +25,13 @@ class Button {
   constructor (type, value, text) {
     this.type = type;
     this.value = value;
-    this.text = text || value;
-
-    if (typeof type !== "string") {
-      throw new Error("Type should be a value of BUTTON_TYPE");
-    }
-    if (typeof value !== "string" || value === "") {
-      throw new Error("Value should be a non-empty string");
-    }
+    this.text = text;
   }
 }
 
 class ButtonsMessage {
   constructor (text, buttons) {
     this.text = text;
-
-    if (typeof text !== "string") {
-      throw new Error("Text should be a string");
-    }
 
     if (!Array.isArray(buttons) || buttons.length <= 0 || !(buttons[0] instanceof Button)) {
       throw new Error("Buttons isn't correctly formated");
@@ -62,22 +48,12 @@ class ButtonsMessage {
   }
 }
 
-// used for navigating in a menu
 class ButtonsListMessage {
   constructor (text, buttons) {
     this.text = text;
 
-    if (typeof text !== "string") {
-      throw new Error("Text should be a string");
-    }
-
     if (!Array.isArray(buttons) || buttons.length <= 0 || !(buttons[0] instanceof Button)) {
       throw new Error("Buttons isn't correctly formated");
-    }
-
-
-    if (buttons.length > MAX_LIMIT + 1) {
-      throw new Error("Buttons.length cant be greater than %d", MAX_LIMIT);
     }
 
     this.attachments = {
@@ -86,44 +62,14 @@ class ButtonsListMessage {
   }
 }
 
-class ListItem {
-  constructor (title, text) {
-    this.title = title;
-    this.text = text;
-
-    if (typeof text !== "string") {
-      throw new Error("Text should be a string");
-    }
-
-    if (typeof title !== "string") {
-      throw new Error("title should be a string");
-    }
-  }
-}
-
-class CardMessage {
-  constructor (items, header = false, footerButton = null) {
-    this.header = !!header; // is the first item an header ?
-
-    if (!Array.isArray(items) || items.length <= 0 || !(items[0] instanceof ListItem)) {
-      throw new Error("items isn't correctly formated");
-    }
-
-    // We dont support fb for now
-    // if (items.length > 4) {
-    //   throw new Error("Items shouldn't be longer than 4");
-    // }
-
-    this.attachments = {
-      items,
-      buttons: footerButton ? [footerButton] : []
-    };
-  }
-}
-
-function createPostBackList (text, listInfos, morePayload, offset, limit) {
+function createPostBackList (text, listInfos, morePayload, offset, limit, locale = "en_US") {
   const buttons = listInfos.slice(offset, limit + offset);
-  const moreButton = offset + limit >= listInfos.length ? null : new Button(BUTTON_TYPE.MORE, `${morePayload}_${offset + limit}`, v.sprintf(responsesCst.moreButton, listInfos.length - (offset + limit)));
+  const moreButton = offset + limit >= listInfos.length ? null : new Button(BUTTON_TYPE.MORE, `${morePayload}_${offset + limit}`, translator("moreButton", locale, listInfos.length - (offset + limit)));
+
+
+  if (limit > MAX_LIMIT) {
+    throw new Error("Limit cant be greater than %d", MAX_LIMIT);
+  }
 
   if (moreButton) {
     buttons.push(moreButton);
@@ -132,14 +78,28 @@ function createPostBackList (text, listInfos, morePayload, offset, limit) {
   return new ButtonsListMessage(text, buttons);
 }
 
+function createFeedback (intent, messageRaw, locale) {
+  const message = messageRaw.length >= config.maxMessageLength ? config.maxMessageLengthString : messageRaw;
+
+  if (intent === "unknown") {
+    return null;
+  }
+
+  const buttons = [
+    new Button(BUTTON_TYPE.POSTBACK, `FEEDBACK_MISUNDERSTOOD_${camelCase(intent)}_${message}`, translator("feedbackBadUnderstanding", locale)),
+    new Button(BUTTON_TYPE.POSTBACK, `FEEDBACK_BAD_${camelCase(intent)}_${message}`, translator("feedbackNo", locale)),
+    new Button(BUTTON_TYPE.POSTBACK, `FEEDBACK_GOOD_${camelCase(intent)}_${message}`, translator("feedbackYes", locale))
+  ];
+  return new ButtonsListMessage(translator("feedbackHelp", locale), buttons);
+}
+
 module.exports = {
   TextMessage,
   Button,
   ButtonsMessage,
   ButtonsListMessage,
-  ListItem,
-  CardMessage,
   createPostBackList,
+  createFeedback,
   BUTTON_TYPE,
   MAX_LIMIT
 };

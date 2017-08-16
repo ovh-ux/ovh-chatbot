@@ -2,18 +2,18 @@
 
 const { emojify } = require("node-emoji");
 const { BUTTON_TYPE } = require("../generics");
-const responsesCst = require("../../constants/responses").FR;
+const translator = require("../../utils/translator");
 
-function textMessageAdapter (channel, message, ts = "") {
+function textMessageAdapter (channel, message, ts = "", locale = "en_US") {
   return {
     channel,
     ts,
     attachments: JSON.stringify([{
-      author_name: responsesCst.slackAuthor,
-      author_icon: responsesCst.slackImg,
-      author_link: responsesCst.slackLink,
-      fallback: responsesCst.slackFallback,
-      color: responsesCst.slackColor,
+      author_name: translator("slackAuthor", locale),
+      author_icon: translator("slackImg", locale),
+      author_link: translator("slackLink", locale),
+      fallback: translator("slackFallback", locale),
+      color: translator("slackColor", locale),
       text: emojify(message.text || message)
     }])
   };
@@ -37,15 +37,7 @@ function buttonAdapter (button) {
   }
 }
 
-function listItemAdapter (item) {
-  return {
-    title: item.title,
-    value: item.text,
-    "short": item.text.length <= 27 // slack limit, tested empirically
-  };
-}
-
-function buttonsMessageAdapter (channel, buttonList, ts = "") {
+function buttonsMessageAdapter (channel, buttonList, ts = "", locale = "en_US") {
   let text = emojify(`${buttonList.text}\n`);
   const actions = buttonList.attachments.buttons.map(buttonAdapter).filter((button) => {
     if (typeof button === "string") {
@@ -61,11 +53,11 @@ function buttonsMessageAdapter (channel, buttonList, ts = "") {
     ts,
     attachments: JSON.stringify([
       {
-        author_name: responsesCst.slackAuthor,
-        author_icon: responsesCst.slackImg,
-        author_link: responsesCst.slackLink,
-        fallback: responsesCst.slackFallback,
-        color: responsesCst.slackColor,
+        author_name: translator("slackAuthor", locale),
+        author_icon: translator("slackImg", locale),
+        author_link: translator("slackLink", locale),
+        fallback: translator("slackFallback", locale),
+        color: translator("slackColor", locale),
         text,
         callback_id: "button_list",
         attachment_type: "default",
@@ -75,40 +67,8 @@ function buttonsMessageAdapter (channel, buttonList, ts = "") {
   };
 }
 
-function cardMessageAdapter (channel, card, ts = "") {
-  let fields = card.attachments.items.map(listItemAdapter).filter((_, index) => !(card.header && index === 0));
-  let actions = card.attachments.buttons.map(buttonAdapter).filter((button) => {
-    if (typeof button === "string") {
-      fields.push({ title: "", text: button, "short": true });
-      return false;
-    }
-
-    return true;
-  });
-
-  return {
-    channel,
-    ts,
-    attachments: JSON.stringify([
-      {
-        fallback: responsesCst.slackFallback,
-        author_name: "Assistant personnel OVH",
-        author_icon: "https://www.ovh.com/fr/images/support/livechat/chatbot_20px.png",
-        author_link: "https://www.ovh.com/manager/sunrise/uxlabs/#!/chatbot",
-        title: card.header ? card.attachments.items[0].title : "",
-        text: card.header ? card.attachments.items[0].text : "",
-        attachment_type: "default",
-        color: "#59d2ef",
-        actions,
-        fields
-      }
-    ])
-  };
-}
-
 module.exports = {
   textMessageAdapter,
   buttonAdapter,
-  buttonsMessageAdapter,
-  cardMessageAdapter
+  buttonsMessageAdapter
 };

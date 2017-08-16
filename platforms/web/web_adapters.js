@@ -21,17 +21,8 @@ function buttonListAdapter (buttonList) {
   };
 }
 
-function cardMessageAdapter (cardMessage) {
-  return {
-    message: "",
-    buttons: cardMessage.attachments.buttons || [],
-    items: cardMessage.attachments.items || []
-  };
-}
-
 module.exports = {
   textMessageAdapter,
   buttonAdapter,
-  buttonListAdapter,
-  cardMessageAdapter
+  buttonListAdapter
 };

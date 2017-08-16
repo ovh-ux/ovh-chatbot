@@ -3,9 +3,10 @@
 const request = require("request");
 const Bluebird = require("bluebird");
 const config = require("../../config/config-loader").load();
-const { ButtonsListMessage, ButtonsMessage, TextMessage, CardMessage } = require("../generics");
 const { emojify } = require("node-emoji");
+const { ButtonsListMessage, ButtonsMessage, TextMessage } = require("../generics");
 const { textMessageAdapter, buttonsListMessageAdapter, buttonsMessageAdapter } = require("./messenger_adapters");
+const logger = require("../../providers/logging/logger");
 
 /*
  * Be sure to setup your config values before running this code. You can
@@ -18,7 +19,48 @@ const PAGE_ACCESS_TOKEN = config.facebook.pageAccessToken;
 
 // URL where the app is running (include protocol). Used to point to scripts and
 // assets located at this address.
-const SERVER_URL = config.server.url;
+// const SERVER_URL = config.server.url;
+
+
+function callFacebookAPI (requestObject) {
+  return new Bluebird((resolve) => {
+    request(requestObject, (error, response, body) => {
+      if (!error && response.statusCode === 200) {
+        const recipientId = body.recipient_id;
+        const messageId = body.message_id;
+
+        if (messageId) {
+          logger.debug("Successfully sent message %s to recipient %s", messageId, recipientId);
+        } else {
+          logger.debug("Successfully called FB API at: %s", requestObject.uri);
+        }
+      } else {
+        logger.error("Failed calling Send API", response.statusCode, response.statusMessage, body.error);
+      }
+
+      return resolve(body);
+    });
+  });
+}
+
+const getUserProfile = (userid) => callFacebookAPI({
+  uri: `https://graph.facebook.com/v2.6/${userid}`,
+  qs: { access_token: PAGE_ACCESS_TOKEN },
+  method: "GET"
+});
+
+
+/*
+ * Call the Send API. The message data goes in the body. If successful, we"ll
+ * get the message id in a response
+ *
+ */
+const sendMessageToAPI = (messageData) => callFacebookAPI({
+  uri: "https://graph.facebook.com/v2.6/me/messages",
+  qs: { access_token: PAGE_ACCESS_TOKEN },
+  method: "POST",
+  json: messageData
+});
 
 /*
  * Authorization Event
@@ -40,7 +82,7 @@ function receivedAuthentication (event) {
   // plugin.
   const passThroughParam = event.optin.ref;
 
-  console.log("Received authentication for user %d and page %d with pass through param '%s' at %d", senderID, recipientID, passThroughParam, timeOfAuth);
+  logger.debug("Received authentication for user %d and page %d with pass through param '%s' at %d", senderID, recipientID, passThroughParam, timeOfAuth);
 
   // When an authentication is received, we"ll send a message back to the sender
   // to let them know it was successful.
@@ -65,11 +107,11 @@ function receivedDeliveryConfirmation (event) {
 
   if (messageIDs) {
     messageIDs.forEach((messageID) => {
-      console.log("Received delivery confirmation for message ID: %s", messageID);
+      logger.debug("Received delivery confirmation for message ID: %s", messageID);
     });
   }
 
-  console.log("All message before %d were delivered.", watermark);
+  logger.debug("All message before %d were delivered.", watermark);
 }
 
 /*
@@ -88,7 +130,7 @@ function receivedPostback (event) {
   // button for Structured Messages.
   const payload = event.postback.payload;
 
-  console.log("Received postback for user %d and page %d with payload '%s' at %d", senderID, recipientID, payload, timeOfPostback);
+  logger.debug("Received postback for user %d and page %d with payload '%s' at %d", senderID, recipientID, payload, timeOfPostback);
 
   // When a postback is called, we"ll send a message back to the sender to
   // let them know it was successful
@@ -110,7 +152,7 @@ function receivedMessageRead (event) {
   const watermark = event.read.watermark;
   const sequenceNumber = event.read.seq;
 
-  console.log("Received message read event for watermark %d and sequence number %d", watermark, sequenceNumber);
+  logger.debug("Received message read event for watermark %d and sequence number %d", watermark, sequenceNumber);
 }
 
 /*
@@ -129,118 +171,118 @@ function receivedAccountLink (event) {
   const status = event.account_linking.status;
   const authCode = event.account_linking.authorization_code;
 
-  console.log("Received account link event with for user %d with status %s and auth code %s ", senderID, status, authCode);
+  logger.debug("Received account link event with for user %d with status %s and auth code %s ", senderID, status, authCode);
 }
 
 /*
  * Send an image using the Send API.
  *
  */
-function sendImageMessage (recipientId) {
-  const messageData = {
-    recipient: {
-      id: recipientId
-    },
-    message: {
-      attachment: {
-        type: "image",
-        payload: {
-          url: `${SERVER_URL}/assets/rift.png`
-        }
-      }
-    }
-  };
-
-  callSendAPI(messageData);
-}
+// function sendImageMessage (recipientId) {
+//   const messageData = {
+//     recipient: {
+//       id: recipientId
+//     },
+//     message: {
+//       attachment: {
+//         type: "image",
+//         payload: {
+//           url: `${SERVER_URL}/assets/rift.png`
+//         }
+//       }
+//     }
+//   };
+//
+//   sendMessageToAPI(messageData);
+// }
 
 /*
  * Send a Gif using the Send API.
  *
  */
-function sendGifMessage (recipientId) {
-  const messageData = {
-    recipient: {
-      id: recipientId
-    },
-    message: {
-      attachment: {
-        type: "image",
-        payload: {
-          url: `${SERVER_URL}/assets/instagram_logo.gif`
-        }
-      }
-    }
-  };
-
-  callSendAPI(messageData);
-}
+// function sendGifMessage (recipientId) {
+//   const messageData = {
+//     recipient: {
+//       id: recipientId
+//     },
+//     message: {
+//       attachment: {
+//         type: "image",
+//         payload: {
+//           url: `${SERVER_URL}/assets/instagram_logo.gif`
+//         }
+//       }
+//     }
+//   };
+//
+//   sendMessageToAPI(messageData);
+// }
 
 /*
  * Send audio using the Send API.
  *
  */
-function sendAudioMessage (recipientId) {
-  const messageData = {
-    recipient: {
-      id: recipientId
-    },
-    message: {
-      attachment: {
-        type: "audio",
-        payload: {
-          url: `${SERVER_URL}/assets/sample.mp3`
-        }
-      }
-    }
-  };
-
-  callSendAPI(messageData);
-}
+// function sendAudioMessage (recipientId) {
+//   const messageData = {
+//     recipient: {
+//       id: recipientId
+//     },
+//     message: {
+//       attachment: {
+//         type: "audio",
+//         payload: {
+//           url: `${SERVER_URL}/assets/sample.mp3`
+//         }
+//       }
+//     }
+//   };
+//
+//   sendMessageToAPI(messageData);
+// }
 
 /*
  * Send a video using the Send API.
  *
  */
-function sendVideoMessage (recipientId) {
-  const messageData = {
-    recipient: {
-      id: recipientId
-    },
-    message: {
-      attachment: {
-        type: "video",
-        payload: {
-          url: `${SERVER_URL}/assets/allofus480.mov`
-        }
-      }
-    }
-  };
-
-  callSendAPI(messageData);
-}
+// function sendVideoMessage (recipientId) {
+//   const messageData = {
+//     recipient: {
+//       id: recipientId
+//     },
+//     message: {
+//       attachment: {
+//         type: "video",
+//         payload: {
+//           url: `${SERVER_URL}/assets/allofus480.mov`
+//         }
+//       }
+//     }
+//   };
+//
+//   sendMessageToAPI(messageData);
+// }
 
 /*
  * Send a file using the Send API.
  *
  */
-function sendFileMessage (recipientId) {
-  const messageData = {
-    recipient: {
-      id: recipientId
-    },
-    message: {
-      attachment: {
-        type: "file",
-        payload: {
-          url: `${SERVER_URL}/assets/test.txt`
-        }
-      }
-    }
-  };
-
-  callSendAPI(messageData);
-}
+// function sendFileMessage (recipientId) {
+//   const messageData = {
+//     recipient: {
+//       id: recipientId
+//     },
+//     message: {
+//       attachment: {
+//         type: "file",
+//         payload: {
+//           url: `${SERVER_URL}/assets/test.txt`
+//         }
+//       }
+//     }
+//   };
+//
+//   sendMessageToAPI(messageData);
+// }
 
 /*
  * Send a text message using the Send API.
@@ -260,7 +302,7 @@ function sendTextMessage (recipientId, messageText) {
     }
   };
 
-  return callSendAPI(messageData);
+  return sendMessageToAPI(messageData);
 }
 
 /*
@@ -280,124 +322,124 @@ function sendButtonMessage (recipientId, buttonMessage) {
     }
   };
 
-  callSendAPI(messageData);
+  sendMessageToAPI(messageData);
 }
 
 /*
  * Send a Structured Message (Generic Message type) using the Send API.
  *
  */
-function sendListMessage (recipientId, list) {
-  const messageData = {
-    recipient: {
-      id: recipientId
-    },
-
-    message: {
-      attachment: {
-        type: "template",
-        payload: list
-      }
-    }
-  };
-
-  return callSendAPI(messageData);
-}
+// function sendListMessage (recipientId, list) {
+//   const messageData = {
+//     recipient: {
+//       id: recipientId
+//     },
+//
+//     message: {
+//       attachment: {
+//         type: "template",
+//         payload: list
+//       }
+//     }
+//   };
+//
+//   return sendMessageToAPI(messageData);
+// }
 
 /*
  * Send a Structured Message (Generic Message type) using the Send API.
  *
  */
-function sendGenericMessage (recipientId, elements) {
-  const messageData = {
-    recipient: {
-      id: recipientId
-    },
-    message: {
-      attachment: {
-        type: "template",
-        payload: {
-          template_type: "generic",
-          elements
-        }
-      }
-    }
-  };
-
-  callSendAPI(messageData);
-}
+// function sendGenericMessage (recipientId, elements) {
+//   const messageData = {
+//     recipient: {
+//       id: recipientId
+//     },
+//     message: {
+//       attachment: {
+//         type: "template",
+//         payload: {
+//           template_type: "generic",
+//           elements
+//         }
+//       }
+//     }
+//   };
+//
+//   sendMessageToAPI(messageData);
+// }
 
 /*
  * Send a receipt message using the Send API.
  *
  */
-function sendReceiptMessage (recipientId) {
-  // Generate a random receipt ID as the API requires a unique ID
-  const receiptId = `order${Math.floor(Math.random() * 1000)}`;
-
-  const messageData = {
-    recipient: {
-      id: recipientId
-    },
-    message: {
-      attachment: {
-        type: "template",
-        payload: {
-          template_type: "receipt",
-          recipient_name: "Peter Chang",
-          order_number: receiptId,
-          currency: "USD",
-          payment_method: "Visa 1234",
-          timestamp: "1428444852",
-          elements: [
-            {
-              title: "Oculus Rift",
-              subtitle: "Includes: headset, sensor, remote",
-              quantity: 1,
-              price: 599.00,
-              currency: "USD",
-              image_url: `${SERVER_URL}/assets/riftsq.png`
-            },
-            {
-              title: "Samsung Gear VR",
-              subtitle: "Frost White",
-              quantity: 1,
-              price: 99.99,
-              currency: "USD",
-              image_url: `${SERVER_URL}/assets/gearvrsq.png`
-            }
-          ],
-          address: {
-            street_1: "1 Hacker Way",
-            street_2: "",
-            city: "Menlo Park",
-            postal_code: "94025",
-            state: "CA",
-            country: "US"
-          },
-          summary: {
-            subtotal: 698.99,
-            shipping_cost: 20.00,
-            total_tax: 57.67,
-            total_cost: 626.66
-          },
-          adjustments: [
-            {
-              name: "New Customer Discount",
-              amount: -50
-            },
-            {
-              name: "$100 Off Coupon",
-              amount: -100
-            }
-          ]
-        }
-      }
-    }
-  };
-
-  callSendAPI(messageData);
-}
+// function sendReceiptMessage (recipientId) {
+//   // Generate a random receipt ID as the API requires a unique ID
+//   const receiptId = `order${Math.floor(Math.random() * 1000)}`;
+//
+//   const messageData = {
+//     recipient: {
+//       id: recipientId
+//     },
+//     message: {
+//       attachment: {
+//         type: "template",
+//         payload: {
+//           template_type: "receipt",
+//           recipient_name: "Peter Chang",
+//           order_number: receiptId,
+//           currency: "USD",
+//           payment_method: "Visa 1234",
+//           timestamp: "1428444852",
+//           elements: [
+//             {
+//               title: "Oculus Rift",
+//               subtitle: "Includes: headset, sensor, remote",
+//               quantity: 1,
+//               price: 599.00,
+//               currency: "USD",
+//               image_url: `${SERVER_URL}/assets/riftsq.png`
+//             },
+//             {
+//               title: "Samsung Gear VR",
+//               subtitle: "Frost White",
+//               quantity: 1,
+//               price: 99.99,
+//               currency: "USD",
+//               image_url: `${SERVER_URL}/assets/gearvrsq.png`
+//             }
+//           ],
+//           address: {
+//             street_1: "1 Hacker Way",
+//             street_2: "",
+//             city: "Menlo Park",
+//             postal_code: "94025",
+//             state: "CA",
+//             country: "US"
+//           },
+//           summary: {
+//             subtotal: 698.99,
+//             shipping_cost: 20.00,
+//             total_tax: 57.67,
+//             total_cost: 626.66
+//           },
+//           adjustments: [
+//             {
+//               name: "New Customer Discount",
+//               amount: -50
+//             },
+//             {
+//               name: "$100 Off Coupon",
+//               amount: -100
+//             }
+//           ]
+//         }
+//       }
+//     }
+//   };
+//
+//   sendMessageToAPI(messageData);
+// }
 
 /*
  * Send a message with Quick Reply buttons.
@@ -411,121 +453,88 @@ function sendQuickReply (recipientId, message) {
     message
   };
 
-  callSendAPI(messageData);
+  sendMessageToAPI(messageData);
 }
 
 /*
  * Send a read receipt to indicate the message has been read
  *
  */
-function sendReadReceipt (recipientId) {
-  console.log("Sending a read receipt to mark message as seen");
-
-  const messageData = {
-    recipient: {
-      id: recipientId
-    },
-    sender_action: "mark_seen"
-  };
-
-  callSendAPI(messageData);
-}
+// function sendReadReceipt (recipientId) {
+//   console.log("Sending a read receipt to mark message as seen");
+//
+//   const messageData = {
+//     recipient: {
+//       id: recipientId
+//     },
+//     sender_action: "mark_seen"
+//   };
+//
+//   sendMessageToAPI(messageData);
+// }
 
 /*
  * Turn typing indicator on
  *
  */
-function sendTypingOn (recipientId) {
-  console.log("Turning typing indicator on");
-
-  const messageData = {
-    recipient: {
-      id: recipientId
-    },
-    sender_action: "typing_on"
-  };
-
-  callSendAPI(messageData);
-}
+// function sendTypingOn (recipientId) {
+//   console.log("Turning typing indicator on");
+//
+//   const messageData = {
+//     recipient: {
+//       id: recipientId
+//     },
+//     sender_action: "typing_on"
+//   };
+//
+//   sendMessageToAPI(messageData);
+// }
 
 /*
  * Turn typing indicator off
  *
  */
-function sendTypingOff (recipientId) {
-  console.log("Turning typing indicator off");
-
-  const messageData = {
-    recipient: {
-      id: recipientId
-    },
-    sender_action: "typing_off"
-  };
-
-  callSendAPI(messageData);
-}
+// function sendTypingOff (recipientId) {
+//   console.log("Turning typing indicator off");
+//
+//   const messageData = {
+//     recipient: {
+//       id: recipientId
+//     },
+//     sender_action: "typing_off"
+//   };
+//
+//   sendMessageToAPI(messageData);
+// }
 
 /*
  * Send a message with the account linking call-to-action
  */
-function sendAccountLinking (recipientId, url) {
-  const messageData = {
-    recipient: {
-      id: recipientId
-    },
-    message: {
-      attachment: {
-        type: "template",
-        payload: {
-          template_type: "button",
-          text: "",
-          buttons: [
-            {
-              type: "account_link",
-              url
-            }
-          ]
-        }
-      }
-    }
-  };
+// function sendAccountLinking (recipientId, url) {
+//   const messageData = {
+//     recipient: {
+//       id: recipientId
+//     },
+//     message: {
+//       attachment: {
+//         type: "template",
+//         payload: {
+//           template_type: "button",
+//           text: "",
+//           buttons: [
+//             {
+//               type: "account_link",
+//               url
+//             }
+//           ]
+//         }
+//       }
+//     }
+//   };
+//
+//   sendMessageToAPI(messageData);
+// }
 
-  callSendAPI(messageData);
-}
-
-/*
- * Call the Send API. The message data goes in the body. If successful, we"ll
- * get the message id in a response
- *
- */
-function callSendAPI (messageData) {
-  return new Bluebird((resolve) => {
-    request(
-      {
-        uri: "https://graph.facebook.com/v2.6/me/messages",
-        qs: { access_token: PAGE_ACCESS_TOKEN },
-        method: "POST",
-        json: messageData
-      },
-      (error, response, body) => {
-        if (!error && response.statusCode === 200) {
-          const recipientId = body.recipient_id;
-          const messageId = body.message_id;
-
-          if (messageId) {
-            console.log("Successfully sent message with id %s to recipient %s", messageId, recipientId);
-          } else {
-            console.log("Successfully called Send API for recipient %s", recipientId);
-          }
-        } else {
-          console.error("Failed calling Send API", response.statusCode, response.statusMessage, body.error);
-        }
-
-        return resolve({ body, message: messageData.message });
-      }
-    );
-  });
-}
 
 function send (recipientId, message) {
   if (typeof message === "string") {
@@ -544,12 +553,7 @@ function send (recipientId, message) {
     return sendButtonMessage(recipientId, buttonsMessageAdapter(message));
   }
 
-  if (message instanceof CardMessage) {
-    return Bluebird.mapSeries(message.attachments.items, (item) => sendTextMessage(recipientId, `${item.title}\n${item.text}`))
-      .then(() => message.attachments.buttons ? sendButtonMessage(recipientId, buttonsMessageAdapter(message)) : null);
-  }
-
-  return callSendAPI(message);
+  return sendMessageToAPI(message);
 }
 
 module.exports = {
@@ -558,21 +562,6 @@ module.exports = {
   receivedPostback,
   receivedMessageRead,
   receivedAccountLink,
-  sendImageMessage,
-  sendGifMessage,
-  sendAudioMessage,
-  sendVideoMessage,
-  sendFileMessage,
-  sendTextMessage,
-  sendButtonMessage,
-  sendGenericMessage,
-  sendListMessage,
-  sendReceiptMessage,
-  sendQuickReply,
-  sendReadReceipt,
-  sendTypingOn,
-  sendTypingOff,
-  sendAccountLinking,
-  callSendAPI,
-  send
+  send,
+  getUserProfile
 };

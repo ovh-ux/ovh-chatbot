@@ -2,11 +2,12 @@
 
 const Bluebird = require("bluebird");
 const { TextMessage } = require("../../../platforms/generics");
-const responsesCst = require("../../../constants/responses").FR;
+const translator = require("../../../utils/translator");
 
 class NdhQuestion {
-  static action () {
-    return Bluebird.resolve({ responses: [new TextMessage(responsesCst.ndhQuestionStart + responsesCst.ndhQuestions[Math.floor(Math.random() * responsesCst.ndhQuestions.length)])], feedback: false });
+  static action (senderId, message, entities, res, locale) {
+    let questions = translator("ndhQuestions", locale);
+    return Bluebird.resolve({ responses: [new TextMessage(translator("ndhQuestionStart", locale) + questions[Math.floor(Math.random() * questions.length)])], feedback: false });
   }
 }
 

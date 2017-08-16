@@ -2,11 +2,11 @@
 
 const error = require("../../../providers/errors/apiError");
 const { Button, createPostBackList, TextMessage, BUTTON_TYPE, MAX_LIMIT } = require("../../../platforms/generics");
-const utils = require("../../utils");
+const utils = require("../../../utils/ovh");
 const Bluebird = require("bluebird");
 const xDSLDiag = require("../../../diagnostics/xdsl");
-const responsesCst = require("../../../constants/responses").FR;
-const { sprintf } = require("voca");
+
+const translator = require("../../../utils/translator");
 
 Bluebird.config({
   warnings: false
@@ -15,7 +15,7 @@ Bluebird.config({
 module.exports = [
   {
     regx: "XDSL_SELECTED_(.*)",
-    action (senderId, postback, regx, entites, res) {
+    action (senderId, postback, regx, entities, res, locale) {
       const xdslOffer = postback.match(new RegExp(regx))[1];
 
       return utils
@@ -42,7 +42,7 @@ module.exports = [
             managerLink: findManagerLink(ovhClient, xdslOffer)
           })
         )
-        .then(({ xdsl, serviceInfos, orderFollowUp, incident, diag, managerLink }) => xDSLDiag.checkxDSLDiag(xdsl, serviceInfos, orderFollowUp, incident, diag, managerLink))
+        .then(({ xdsl, serviceInfos, orderFollowUp, incident, diag, managerLink }) => xDSLDiag.checkxDSLDiag(xdsl, serviceInfos, orderFollowUp, incident, diag, managerLink, locale))
         .then((responses) => Bluebird.resolve({ responses, feedback: true }))
         .catch((err) => {
           res.logger.error(err);
@@ -53,7 +53,7 @@ module.exports = [
 
   {
     regx: "XDSL_DIAG_(.*)",
-    action (senderId, postback, regx, entites, res) {
+    action (senderId, postback, regx, entities, res, locale) {
       const xdslOffer = postback.match(new RegExp(regx))[1];
 
       let ovhClient;
@@ -80,11 +80,11 @@ module.exports = [
             });
           }, 1000);
         }).then((diag) => xDSLDiag.checkxDSLDiagAdvanced(diag));
-        return Bluebird.resolve({ responses: [new TextMessage(responsesCst.xdslDiagInProgress), promise], feedback: false });
+        return Bluebird.resolve({ responses: [new TextMessage(translator("xdslDiagInProgress", locale)), promise], feedback: false });
       })
       .catch((err) => {
         if (err.statusCode === 401 || err.errorCode === 401) {
-          return Bluebird.resolve({ responses: [new TextMessage(responsesCst.xdslQuotaReached)] });
+          return Bluebird.resolve({ responses: [new TextMessage(translator("xdslQuotaReached", locale))] });
         }
         res.logger.error(err);
         return Bluebird.reject(error(err));
@@ -94,7 +94,7 @@ module.exports = [
 
   {
     regx: "MORE_XDSL_([0-9]+)",
-    action (senderId, postback, regx, entites, res) {
+    action (senderId, postback, regx, entities, res, locale) {
       let currentIndex = parseInt(postback.match(new RegExp(regx))[1], 10);
       let ovhClient;
       return utils
@@ -106,7 +106,10 @@ module.exports = [
         .map((offer) => ovhClient.requestPromised("GET", `/xdsl/${offer}`)
           .then((xdslInfo) => new Button(BUTTON_TYPE.POSTBACK, `XDSL_SELECTED_${xdslInfo.accessName}`, xdslInfo.description || offer))
         )
-        .then((buttons) => ({ responses: [createPostBackList(sprintf(responsesCst.xdslSelect, Math.floor(1 + (currentIndex / MAX_LIMIT)), Math.ceil(buttons.length / MAX_LIMIT)), buttons, "MORE_XDSL", currentIndex, MAX_LIMIT)], feedback: false }))
+        .then((buttons) => ({
+          responses: [createPostBackList(translator("xdslSelect", locale, Math.floor(1 + (currentIndex / MAX_LIMIT)), Math.ceil(buttons.length / MAX_LIMIT)), buttons, "MORE_XDSL", currentIndex, MAX_LIMIT, locale)],
+          feedback: false
+        }))
         .catch((err) => {
           res.logger.error(err);
           return Bluebird.reject(error(err));

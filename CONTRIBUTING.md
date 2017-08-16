@@ -9,23 +9,15 @@ pay attention to a few things:
 
 ## Coding and documentation Style:
 
+Refer to our [guidelines](https://github.com/ovh-ux/ovh-ux-guidelines)
+
 - Code must pass with `npm run lint`
 - Code must pass with `npm test`
 
 ## Licensing for new files:
 
-Ovh-chatbot is licensed under a MIT license. Anything contributed to
+Ovh-chatbot is licensed under a BSD-3 Clause license. Anything contributed to
 Ovh-chatbot must be released under this license.
 
 When introducing a new file into the project, please make sure it has a
 copyright header making clear under which license it's being released.
-
-### Add a new platform [visit this page](platforms/README.md)
-
-### Add a new intent and response [visit this page](bots/README.md)
-
-### Add a new diagnostic
-
-+ At the moment only diagnostics for hosting are made but in order to create a new kind of diagnostic you have to create new file in `diagnostics`.
-
-+ This file should must object with methods to make diagnostics
