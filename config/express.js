@@ -44,7 +44,7 @@ module.exports = function (config) {
 
   app.use(requestLogger(config.server.logType));
 
-  app.get("/mon/ping", (req, res) => res.status(200).end(null));
+  app.get("/mon/ping", (req, res) => res.status(204).end(null));
   app.use((req, res, next) => {
     if (!mongo.isConnected()) {
       return res.status(503).json({ message: "database not available" });

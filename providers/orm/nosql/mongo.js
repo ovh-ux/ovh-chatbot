@@ -10,7 +10,12 @@ mongoose.Promise = Bluebird;
 module.exports = {
   connect (config) {
     const self = this;
-    const options = {};
+    const options = {
+      keepAlive: 1,
+      connectTimeoutMS: 30000,
+      autoReconnect: true,
+      useMongoClient: true
+    };
 
     const connectWithRetry = (url, mongoOptions) => {
       if (self.isConnected()) {
@@ -51,13 +56,6 @@ module.exports = {
         logger.debug(`${collectionName}.${method}`, util.inspect(query, false, 20), doc);
       });
     }
-
-    options.server = options.replset = {};
-    options.server.socketOptions = options.replset.socketOptions = {
-      keepAlive: 1
-    };
-    options.server.socketOptions.connectTimeoutMS = options.replset.socketOptions.connectTimeoutMS = 30000;
-    options.server.auto_reconnect = true;
 
     return connectWithRetry(config.url, options);
   },
