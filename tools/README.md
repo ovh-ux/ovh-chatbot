@@ -29,12 +29,12 @@ Tool to update all the api.ai agents at once.
 4. Provide all the translations files needed based of the generated translation file: `translations/apiai_fr.json`
 
 5. Set the `APIAI_COOKIE` environment variable, how to do it:
-  - Login to api.ai.
-  - Open the developer tools.
-  - Go to https://console.api.ai/api-client/user/.
-  - In your developer tools window, go to the network tab.
-  - Find the request.
-  - The cookie value, in the request headers is what you need.
+    - Login to api.ai.
+    - Open the developer tools.
+    - Go to https://console.api.ai/api-client/user/.
+    - In your developer tools window, go to the network tab.
+    - Find the request.
+    - The cookie value, in the request headers is what you need.
 
 6. `$ grunt import`: it will generate back the different archives and upload it to api.ai
 
