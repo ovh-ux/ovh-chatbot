@@ -14,7 +14,7 @@ module.exports = function (grunt) {
     apiaiDir: "apiai",
 
     unzip: {
-      "<%= unzipDir %>": "archives/ovh-chatbot.zip"
+      "<%= unzipDir %>": "apiai/archives/ovh-chatbot.zip"
     },
 
     zip2json: {
@@ -125,7 +125,7 @@ module.exports = function (grunt) {
   });
 
   // Default task(s).
-  grunt.registerTask("default", ["clean:reset", "export", "copy", "import"]);
+  grunt.registerTask("default", ["clean:reset", "export", "import"]);
 
   grunt.registerTask("export", ["clean:all", "unzip", "zip2json", "apiai2json", "clean:all"]);
   grunt.registerTask("import", ["clean:all", "json2apiai", "json2zip", "compress", "upload", "clean:all"]);

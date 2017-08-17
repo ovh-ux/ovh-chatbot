@@ -9,6 +9,11 @@ const fs = require("fs");
 const path = require("path");
 
 const cookie = process.env.APIAI_COOKIE;
+
+if (!cookie) {
+  throw new Error("APIAI_COOKIE is not set!");
+}
+
 const XSRF_TOKEN = cookie.match(/XSRF-TOKEN=(.*?);/g)[1];
 
 const checkConnection = () => new Bluebird((resolve, reject) => request({
