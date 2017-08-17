@@ -30,9 +30,9 @@ Tool to update all the api.ai agents at once.
 
 5. Set the `APIAI_COOKIE` environment variable, how to do it:
   - Login to api.ai.
-  - Open the developer tools
-  - Go to https://console.api.ai/api-client/user/
-  - In you developer tools window, go to the network tab.
+  - Open the developer tools.
+  - Go to https://console.api.ai/api-client/user/.
+  - In your developer tools window, go to the network tab.
   - Find the request.
   - The cookie value, in the request headers is what you need.
 
