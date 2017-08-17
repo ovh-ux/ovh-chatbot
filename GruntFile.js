@@ -1,3 +1,7 @@
+const _ = require("lodash");
+
+const LANGUAGES = ["fr", "de", "en", "es", "it"];
+
 module.exports = function (grunt) {
   "use strict";
   require("matchdep").filterAll("grunt-*").forEach(grunt.loadNpmTasks);
@@ -59,47 +63,61 @@ module.exports = function (grunt) {
       }
     },
 
-    compress: {
-      fr: {
-        options: {
-          archive: "<%= outputDir %>/fr.zip",
-          mode: "zip"
-        },
-        files: [
-          {
-            cwd: "<%= workDir %>/fr/",
-            src: ["**/*.json"],
-            expand: true
-          }
-        ]
+    compress: _.fromPairs(_.map(LANGUAGES, (lang) => [lang, {
+      options: {
+        archive: `<%= outputDir %>/${lang}.zip`,
+        mode: "zip"
       },
-      en: {
-        options: {
-          archive: "<%= outputDir %>/en.zip",
-          mode: "zip"
-        },
-        files: [
-          {
-            cwd: "<%= workDir %>/en/",
-            src: ["**/*.json"],
-            expand: true
-          }
-        ]
-      },
-      es: {
-        options: {
-          archive: "<%= outputDir %>/es.zip",
-          mode: "zip"
-        },
-        files: [
-          {
-            cwd: "<%= workDir %>/es/",
-            src: ["**/*.json"],
-            expand: true
-          }
-        ]
-      }
-    },
+      files: [{
+        cwd: `<%= workDir %>/${lang}/`,
+        src: ["**/*.json"],
+        expand: true
+      }]
+    }])),
+
+    // compress: {
+    //   all: [
+    //     {
+    //       options: {
+    //         archive: "<%= outputDir %>/fr.zip",
+    //         mode: "zip"
+    //       },
+    //       files: [
+    //         {
+    //           cwd: "<%= workDir %>/fr/",
+    //           src: ["**/*.json"],
+    //           expand: true
+    //         }
+    //       ]
+    //     },
+    //     {
+    //       options: {
+    //         archive: "<%= outputDir %>/en.zip",
+    //         mode: "zip"
+    //       },
+    //       files: [
+    //         {
+    //           cwd: "<%= workDir %>/en/",
+    //           src: ["**/*.json"],
+    //           expand: true
+    //         }
+    //       ]
+    //     },
+    //     {
+    //       options: {
+    //         archive: "<%= outputDir %>/es.zip",
+    //         mode: "zip"
+    //       },
+    //       files: [
+    //         {
+    //           cwd: "<%= workDir %>/es/",
+    //           src: ["**/*.json"],
+    //           expand: true
+    //         }
+    //       ]
+    //     }
+    //   ],
+    // },
 
     upload: {
       options: {
