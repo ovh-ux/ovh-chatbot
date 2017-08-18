@@ -42,6 +42,10 @@ const UserSchema = new mongoose.Schema({
   messageNumber: {
     type: Number,
     "default": 0
+  },
+  updates: {
+    type: Boolean,
+    "default": false
   }
 });
 

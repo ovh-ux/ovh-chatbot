@@ -2,19 +2,21 @@
 
 const Bluebird = require("bluebird");
 const utils = require("../../../utils/ovh");
-const { TextMessage } = require("../../../platforms/generics");
+const { TextMessage, ButtonsMessage, Button, BUTTON_TYPE } = require("../../../platforms/generics");
 const translator = require("../../../utils/translator");
+const Users = require("../../../models/users.model");
 
 
 class StatusUpdate {
   static action (senderId, message, entities, res, locale) {
+    let responses;
     return utils.getOvhClient(senderId)
       .then((ovhClient) => Bluebird.props({
         cloudStatus: ovhClient.requestPromised("GET", "/status/task").filter((incident) => incident.status !== "finished"),
         xdslStatus: getXdslStatus(ovhClient)
       }))
       .then(({ cloudStatus, xdslStatus }) => {
-        let responses = [
+        responses = [
           ...cloudStatus.map((cloudIncident) => new TextMessage(translator("cloud-incident", locale, cloudIncident.title, translator(`cloud-${cloudIncident.status}`, locale), cloudIncident.progress, cloudIncident.details))),
           ...xdslStatus.map((xdslIncident) => new TextMessage(translator("xdsl-incident", locale, xdslIncident.comment, xdslIncident.endDate, `http://travaux.ovh.net/?do=details&id=${xdslIncident.taskId}`)))
         ];
@@ -23,6 +25,15 @@ class StatusUpdate {
           responses = [new TextMessage(translator("allOk", locale))];
         }
 
+        return Users.findOne({ senderId }).exec();
+      }).then((user) => {
+        if (user) {
+          let buttons = [
+            new Button(BUTTON_TYPE.POSTBACK, "SETTINGS_UPDATES_true", translator("on", locale)),
+            new Button(BUTTON_TYPE.POSTBACK, "SETTINGS_UPDATES_false", translator("off", locale))
+          ];
+          responses.push(new ButtonsMessage(translator(`settings-updates-${user.updates}`, locale), buttons));
+        }
         return { responses, feedback: false };
       });
   }

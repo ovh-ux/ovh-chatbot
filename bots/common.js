@@ -6,6 +6,7 @@ const Bluebird = require("bluebird");
 const Users = require("../models/users.model");
 const { TextMessage } = require("../platforms/generics");
 const translator = require("../utils/translator");
+const logger = require("../providers/logging/logger");
 
 module.exports = () => ({
   ask (type, senderId, message, intent, entities, res, locale) {
@@ -43,6 +44,7 @@ function isDisconnected (err, locale) {
   if (err.statusCode === 403 || err.statusCode === 401) {
     error = Object.assign({}, err, { message: translator("disconnected", locale) });
   } else {
+    logger.error(err);
     error = err;
   }
 
