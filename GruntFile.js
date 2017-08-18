@@ -75,50 +75,6 @@ module.exports = function (grunt) {
       }]
     }])),
 
-    // compress: {
-    //   all: [
-    //     {
-    //       options: {
-    //         archive: "<%= outputDir %>/fr.zip",
-    //         mode: "zip"
-    //       },
-    //       files: [
-    //         {
-    //           cwd: "<%= workDir %>/fr/",
-    //           src: ["**/*.json"],
-    //           expand: true
-    //         }
-    //       ]
-    //     },
-    //     {
-    //       options: {
-    //         archive: "<%= outputDir %>/en.zip",
-    //         mode: "zip"
-    //       },
-    //       files: [
-    //         {
-    //           cwd: "<%= workDir %>/en/",
-    //           src: ["**/*.json"],
-    //           expand: true
-    //         }
-    //       ]
-    //     },
-    //     {
-    //       options: {
-    //         archive: "<%= outputDir %>/es.zip",
-    //         mode: "zip"
-    //       },
-    //       files: [
-    //         {
-    //           cwd: "<%= workDir %>/es/",
-    //           src: ["**/*.json"],
-    //           expand: true
-    //         }
-    //       ]
-    //     }
-    //   ],
-    // },
-
     upload: {
       options: {
         filter: (agent) => agent.name.indexOf("-prod") === -1, // Filter function: doesn't upload for production yet

@@ -5,7 +5,7 @@ const slackSDK = require("../platforms/slack/slack");
 const SlackModel = require("../models/slack.model");
 const config = require("../config/config-loader").load();
 const bot = require("../bots/common")();
-const request = require("request-promise");
+const request = require("request");
 const apiai = require("../utils/apiai");
 const { TextMessage, ButtonsListMessage, Button, createFeedback, BUTTON_TYPE } = require("../platforms/generics");
 const ovh = require("../utils/ovh");
@@ -18,7 +18,6 @@ function getUserLocale (senderId) {
     .then((meInfos) => meInfos.language)
     .catch(() => "en_US");
 }
-
 
 module.exports = () => ({
   receiveMessage (req, res) {
@@ -133,7 +132,7 @@ module.exports = () => ({
   authorize (req, res) {
     let infos;
 
-    return request({
+    return new Bluebird((resolve, reject) => request({
       method: "GET",
       uri: "https://slack.com/api/oauth.access",
       qs: {
@@ -145,7 +144,7 @@ module.exports = () => ({
         "content-type": "application/json;charset=utf-8"
       },
       json: true
-    })
+    }, (err, response, body) => err ? reject(err) : resolve(body)))
       .then((resp) => {
         infos = resp;
 
