@@ -65,7 +65,7 @@ module.exports = () => ({
           }
 
           return bot
-            .ask("message", channel, message, apiaiResponse.result.action, apiaiResponse.result.parameters, res)
+            .ask("message", channel, message, apiaiResponse.result.action, apiaiResponse.result.parameters, res, locale)
             .then((answer) => {
               needFeedback = answer.feedback || needFeedback;
 
@@ -104,7 +104,7 @@ module.exports = () => ({
     return getUserLocale(channel)
       .then((locale) =>
         Bluebird.props({
-          botResut: bot.ask(BUTTON_TYPE.POSTBACK, channel, value, "", {}, res, locale),
+          botResut: bot.ask("postback", channel, value, "", {}, res, locale),
           slackClient: slackSDK(payload.team.id)
         }))
       .then(({ botResut, slackClientLocal }) => {
