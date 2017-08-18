@@ -146,5 +146,7 @@
   "xdsl-resultOk": "Nous n'avons détecté de problème ni sur ta facturation, ni sur ta ligne. :v:\nTu peux te rendre dans ton espace client :point_right: %s",
   "xdsl-resultAdvancedDiag": "Souhaites-tu faire un diagnostic plus précis de ton équipement :mag: ?\n\n :zap: Assure-toi d'avoir bien branché ta box :zap:",
   "xdsl-resultLastDiag": "Voici le résultat du dernier diagnostic réalisé.",
-  "xdsl-resultDiagRemaining": "Tu peux encore effectuer %s diagnostic(s) aujourd'hui."
+  "xdsl-resultDiagRemaining": "Tu peux encore effectuer %s diagnostic(s) aujourd'hui.",
+  "view-title": "Connected",
+  "view-connected":"You are connected as: %s. You can close this window and start chatting"
 }

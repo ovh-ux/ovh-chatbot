@@ -32,8 +32,9 @@ module.exports = () => ({
         return ovhClient.requestPromised("GET", "/me");
       })
       .then((meInfos) => {
+        let locale = meInfos.language;
         welcome(senderId, meInfos, userInfos);
-        return res.render("authorize", { user: meInfos });
+        return res.render("authorize", { paragraph: translator("view-connected", locale, meInfos.nichandle), title: translator("view-title", locale) });
       })
       .catch((err) => {
         const errorApi = res.error(403, err);
