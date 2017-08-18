@@ -188,5 +188,5 @@ function sendResponses (res, channel, responses, slack, message_ts) {
 
 function sendResponse (res, channel, response, slack, message_ts) {
   return slack.send(channel, response, message_ts)
-    .then((result) => !result.ok ? logger.error(result.error) : logger.debug(`Sucessfully sent ${result.ts} to ${result.channel}`));
+    .then((result) => !result.ok ? logger.error(`failed sending: ${response} to ${channel}, code: ${result.error}`) : logger.debug(`Sucessfully sent ${result.ts} to ${result.channel}`));
 }
