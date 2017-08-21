@@ -61,7 +61,7 @@ module.exports = () => ({
               quickResponses = [{ speech: apiaiResponse.result.fulfillment.speech, type: 0 }];
             }
 
-            return sendQuickResponses(res, channel, quickResponses, slack).then(() => sendFeedback(res, channel, apiaiResponse.result.action, message, slack));
+            return sendQuickResponses(res, channel, quickResponses, slack).then(() => sendFeedback(res, channel, apiaiResponse.result.action, message, slack, locale));
           }
 
           return bot
@@ -73,7 +73,7 @@ module.exports = () => ({
             })
             .then(() => {
               if (needFeedback) {
-                return sendFeedback(res, channel, apiaiResponse.result.action, message, slack);
+                return sendFeedback(res, channel, apiaiResponse.result.action, message, slack, locale);
               }
               return null;
             })
@@ -97,16 +97,19 @@ module.exports = () => ({
     const message_ts = payload.message_ts;
     let slackClient;
     let needFeedback = false;
+    let locale;
 
     // We have to respond with a 200 within 3000ms
     Bluebird.delay(2000).then(() => res.headersSent ? null : res.status(200).end());
 
     return getUserLocale(channel)
-      .then((locale) =>
-        Bluebird.props({
+      .then((localeLocal) => {
+        locale = localeLocal;
+        return Bluebird.props({
           botResut: bot.ask("postback", channel, value, "", {}, res, locale),
           slackClient: slackSDK(payload.team.id)
-        }))
+        });
+      })
       .then(({ botResut, slackClientLocal }) => {
         slackClient = slackClientLocal;
         needFeedback = botResut.feedback || needFeedback;
@@ -116,7 +119,7 @@ module.exports = () => ({
       .then(() => res.headersSent ? null : res.status(200).end())
       .then(() => {
         if (needFeedback) {
-          return sendFeedback(res, channel, value, "message", slackClient);
+          return sendFeedback(res, channel, value, "message", slackClient, locale);
         }
 
         return null;
