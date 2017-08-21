@@ -107,7 +107,7 @@ module.exports = () => ({
         locale = localeLocal;
         return Bluebird.props({
           botResut: bot.ask("postback", channel, value, "", {}, res, locale),
-          slackClient: slackSDK(payload.team.id)
+          slackClientLocal: slackSDK(payload.team.id)
         });
       })
       .then(({ botResut, slackClientLocal }) => {
