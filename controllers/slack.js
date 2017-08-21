@@ -61,7 +61,7 @@ module.exports = () => ({
               quickResponses = [{ speech: apiaiResponse.result.fulfillment.speech, type: 0 }];
             }
 
-            return sendQuickResponses(res, channel, quickResponses, slack).then(() => sendFeedback(res, channel, apiaiResponse.result.action, message, slack));
+            return sendQuickResponses(res, channel, quickResponses, slack).then(() => sendFeedback(res, channel, apiaiResponse.result.action, message, slack, locale));
           }
 
           return bot
@@ -69,11 +69,11 @@ module.exports = () => ({
             .then((answer) => {
               needFeedback = answer.feedback || needFeedback;
 
-              return sendResponses(res, channel, answer.responses, slack);
+              return sendResponses(res, channel, answer.responses, slack, locale);
             })
             .then(() => {
               if (needFeedback) {
-                return sendFeedback(res, channel, apiaiResponse.result.action, message, slack);
+                return sendFeedback(res, channel, apiaiResponse.result.action, message, slack, locale);
               }
               return null;
             })
@@ -97,26 +97,29 @@ module.exports = () => ({
     const message_ts = payload.message_ts;
     let slackClient;
     let needFeedback = false;
+    let locale;
 
     // We have to respond with a 200 within 3000ms
     Bluebird.delay(2000).then(() => res.headersSent ? null : res.status(200).end());
 
     return getUserLocale(channel)
-      .then((locale) =>
-        Bluebird.props({
+      .then((localeLocal) => {
+        locale = localeLocal;
+        return Bluebird.props({
           botResut: bot.ask("postback", channel, value, "", {}, res, locale),
           slackClient: slackSDK(payload.team.id)
-        }))
+        });
+      })
       .then(({ botResut, slackClientLocal }) => {
         slackClient = slackClientLocal;
         needFeedback = botResut.feedback || needFeedback;
 
-        return sendResponses(res, channel, botResut.responses, slackClient, message_ts);
+        return sendResponses(res, channel, botResut.responses, slackClient, message_ts, locale);
       })
       .then(() => res.headersSent ? null : res.status(200).end())
       .then(() => {
         if (needFeedback) {
-          return sendFeedback(res, channel, value, "message", slackClient);
+          return sendFeedback(res, channel, value, "message", slackClient, locale);
         }
 
         return null;
@@ -166,27 +169,27 @@ module.exports = () => ({
 });
 
 function sendFeedback (res, senderId, intent, messageRaw, slack, locale) {
-  return sendResponse(res, senderId, createFeedback(intent, messageRaw, locale), slack);
+  return sendResponse(res, senderId, createFeedback(intent, messageRaw, locale), slack, locale);
 }
 
-function sendQuickResponses (res, senderId, responses, slack) {
+function sendQuickResponses (res, senderId, responses, slack, locale) {
   return Bluebird.mapSeries(responses, (response) => {
     switch (response.type) {
     case 0:
-      return sendResponse(res, senderId, response.speech, slack);
+      return sendResponse(res, senderId, response.speech, slack, null, locale);
     default:
-      return sendResponse(res, senderId, response.speech, slack);
+      return sendResponse(res, senderId, response.speech, slack, null, locale);
     }
   });
 }
 
-function sendResponses (res, channel, responses, slack, message_ts) {
+function sendResponses (res, channel, responses, slack, message_ts, locale) {
   return Bluebird.mapSeries(responses, (response, index) =>
     Bluebird.resolve(response)
-      .then((resp) => Array.isArray(resp) ? sendResponses(res, channel, resp, slack, message_ts) : sendResponse(res, channel, resp, slack, index === 0 ? message_ts : null)));
+      .then((resp) => Array.isArray(resp) ? sendResponses(res, channel, resp, slack, message_ts, locale) : sendResponse(res, channel, resp, slack, index === 0 ? message_ts : null, locale)));
 }
 
-function sendResponse (res, channel, response, slack, message_ts) {
-  return slack.send(channel, response, message_ts)
+function sendResponse (res, channel, response, slack, message_ts, locale) {
+  return slack.send(channel, response, message_ts, locale)
     .then((result) => !result.ok ? logger.error(`failed sending: ${response} to ${channel}, code: ${result.error}`) : logger.debug(`Sucessfully sent ${result.ts} to ${result.channel}`));
 }
