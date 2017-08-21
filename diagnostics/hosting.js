@@ -6,8 +6,8 @@ const Bluebird = require("bluebird").config({
   warnings: false
 });
 const _ = require("lodash");
-const request = require("request-promise");
 const logger = require("../providers/logging/logger");
+const request = require("request");
 
 const translator = require("../utils/translator");
 
@@ -28,7 +28,7 @@ module.exports = {
           return Bluebird.reject(isDNSInvalid);
         }
 
-        return request(protocol + domain.domain);
+        return new Bluebird((resolve, reject) => request(protocol + domain.domain, (err) => err ? reject(err) : resolve()));
       })
       .then(() => {
         switch (hosting.state) {

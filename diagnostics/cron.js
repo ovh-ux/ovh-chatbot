@@ -154,7 +154,7 @@ function getServicesExpirationDate (ovhClient, baseUrl, expiresPeriod) {
     }
     return null;
   }).catch((err) => {
-    console.error(err, baseUrl, serviceName);
+    logger.error(err, baseUrl, serviceName);
     return null;
   }))).then((infos) => infos.filter((info) => !!info));
 }

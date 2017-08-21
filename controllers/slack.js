@@ -5,7 +5,7 @@ const slackSDK = require("../platforms/slack/slack");
 const SlackModel = require("../models/slack.model");
 const config = require("../config/config-loader").load();
 const bot = require("../bots/common")();
-const request = require("request-promise");
+const request = require("request");
 const apiai = require("../utils/apiai");
 const { TextMessage, ButtonsListMessage, Button, createFeedback, BUTTON_TYPE } = require("../platforms/generics");
 const ovh = require("../utils/ovh");
@@ -18,7 +18,6 @@ function getUserLocale (senderId) {
     .then((meInfos) => meInfos.language)
     .catch(() => "en_US");
 }
-
 
 module.exports = () => ({
   receiveMessage (req, res) {
@@ -66,7 +65,7 @@ module.exports = () => ({
           }
 
           return bot
-            .ask("message", channel, message, apiaiResponse.result.action, apiaiResponse.result.parameters, res)
+            .ask("message", channel, message, apiaiResponse.result.action, apiaiResponse.result.parameters, res, locale)
             .then((answer) => {
               needFeedback = answer.feedback || needFeedback;
 
@@ -105,7 +104,7 @@ module.exports = () => ({
     return getUserLocale(channel)
       .then((locale) =>
         Bluebird.props({
-          botResut: bot.ask(BUTTON_TYPE.POSTBACK, channel, value, "", {}, res, locale),
+          botResut: bot.ask("postback", channel, value, "", {}, res, locale),
           slackClient: slackSDK(payload.team.id)
         }))
       .then(({ botResut, slackClientLocal }) => {
@@ -133,7 +132,7 @@ module.exports = () => ({
   authorize (req, res) {
     let infos;
 
-    return request({
+    return new Bluebird((resolve, reject) => request({
       method: "GET",
       uri: "https://slack.com/api/oauth.access",
       qs: {
@@ -145,7 +144,7 @@ module.exports = () => ({
         "content-type": "application/json;charset=utf-8"
       },
       json: true
-    })
+    }, (err, response, body) => err ? reject(err) : resolve(body)))
       .then((resp) => {
         infos = resp;
 
@@ -189,5 +188,5 @@ function sendResponses (res, channel, responses, slack, message_ts) {
 
 function sendResponse (res, channel, response, slack, message_ts) {
   return slack.send(channel, response, message_ts)
-    .then((result) => !result.ok ? logger.error(result.error) : logger.debug(`Sucessfully sent ${result.ts} to ${result.channel}`));
+    .then((result) => !result.ok ? logger.error(`failed sending: ${response} to ${channel}, code: ${result.error}`) : logger.debug(`Sucessfully sent ${result.ts} to ${result.channel}`));
 }

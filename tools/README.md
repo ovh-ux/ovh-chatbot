@@ -22,20 +22,20 @@ Tool to update all the api.ai agents at once.
 
 1. Work on one agent in api.ai, add you intents and entities, with example and (if needed) the responses.
 
--  Download the agent archive (`Settings/Export and Import/Export as Zip`) and copy it to `apiai/archives/ovh-chatbot.zip`
+2.  Download the agent archive (`Settings/Export and Import/Export as Zip`) and copy it to `apiai/archives/ovh-chatbot.zip`
 
-- `$ grunt export`: it will create the `apiai/translations` folder and the `template.json` based on the `apiai/archives/ovh-chatbot.zip`.
+3. `$ grunt export`: it will create the `apiai/translations` folder and the `template.json` based on the `apiai/archives/ovh-chatbot.zip`.
 
-- Provide all the translations files needed based of the generated translation file: `translations/apiai_fr.json`
+4. Provide all the translations files needed based of the generated translation file: `translations/apiai_fr.json`
 
-- Set the `APIAI_COOKIE` environment variable, how to do it:
-  - Login to api.ai.
-  - Open the developer tools
-  - Go to https://console.api.ai/api-client/user/
-  - In you developer tools window, go to the network tab.
-  - Find the request.
-  - The cookie value, in the request headers is what you need.
+5. Set the `APIAI_COOKIE` environment variable, how to do it:
+    - Login to api.ai.
+    - Open the developer tools.
+    - Go to https://console.api.ai/api-client/user/.
+    - In your developer tools window, go to the network tab.
+    - Find the request.
+    - The cookie value, in the request headers is what you need.
 
-- `$ grunt import`: it will generate back the different archives and upload it to api.ai
+6. `$ grunt import`: it will generate back the different archives and upload it to api.ai
 
-- You're done! Each agent in api.ai has been updated to the last translations files and the new intents and entities have been added :tada:
+7. You're done! Each agent in api.ai has been updated to the last translations files and the new intents and entities have been added :tada:
