@@ -46,6 +46,14 @@ const UserSchema = new mongoose.Schema({
   updates: {
     type: Boolean,
     "default": false
+  },
+  expires: {
+    type: Boolean,
+    "default": false
+  },
+  expiresPeriod: {
+    type: Number,
+    "default": 14
   }
 });
 
