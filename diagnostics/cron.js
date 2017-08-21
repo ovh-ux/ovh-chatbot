@@ -8,7 +8,7 @@ const { TextMessage } = require("../platforms/generics");
 const translator = require("../utils/translator");
 const messenger = require("../platforms/messenger/messenger");
 const slack = require("../platforms/slack/slack");
-const request = require("request-promise");
+const request = require("request");
 const hostingDiagnostics = require("./hosting");
 const cron = require("node-cron");
 const _ = require("lodash");
@@ -74,7 +74,7 @@ function getXdslStatus (ovhClient) {
 
 function getHostingStatus (ovhClient, locale) {
   return ovhClient.requestPromised("GET", "/hosting/web/")
-  .then((websites) => Bluebird.map(websites, (site) => request(`http://${site}`)
+  .then((websites) => Bluebird.map(websites, (site) => new Bluebird((resolve, reject) => request(`http://${site}`, (err) => err ? reject() : resolve()))
   .then(() => [])
   .catch(() => ovhClient.requestPromised("GET", `/hosting/web/${site}/attachedDomain`) // sites has issue do advance check
   .then((domains) => Bluebird.map(domains, (domain) => hostingAdvanceCheck(ovhClient, site, domain, locale).catch(() => []))))
