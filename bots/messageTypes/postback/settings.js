@@ -38,7 +38,7 @@ module.exports = [
 
       return Users.findOne({ senderId }).exec()
         .then((user) => {
-          let buttons = days.map((day) => new Button(BUTTON_TYPE.POSTBACK, `SETTINGS_EXPIRES_${days}`, translator("settings-expires-period", locale, day)));
+          let buttons = days.map((day) => new Button(BUTTON_TYPE.POSTBACK, `SETTINGS_EXPIRES_${day}`, translator("settings-expires-period", locale, day)));
 
           return { responses: [new ButtonsListMessage(translator("settings-expires-true", locale, user.expiresPeriod), buttons)], feedback: false };
         });

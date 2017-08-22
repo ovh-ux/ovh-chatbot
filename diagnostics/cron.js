@@ -13,20 +13,50 @@ const hostingDiagnostics = require("./hosting");
 const cron = require("node-cron");
 const _ = require("lodash");
 const logger = require("../providers/logging/logger");
+const ovh = require("../utils/ovh");
 
 module.exports = {
   getServicesStatus,
-  getServicesExpires
+  getServicesExpires,
+  tasks: [cron.schedule("0 */2 * * *", performStatusUpdate, false), cron.schedule("0 2 * * *", performExpiresUpdate, false)]
 };
 
-cron.schedule("0 */2 * * *", performUpdate, false);
-function performUpdate () {
+performStatusUpdate();
+performExpiresUpdate();
+
+function performStatusUpdate () {
   logger.info("Status update:", new Date());
-  Users.find({ updates: true }).then((users) => Bluebird.map(users, (user) => getServicesExpires(user.senderId, user.platform).then((resp) => send(user.senderId, user.platform, resp))))
-  .then(() => logger.info("Status update done"));
+  Users.find({ updates: true })
+    .then((users) =>
+      Bluebird.mapSeries(users, (user) => {
+        let ovhClient;
+        return ovh.getOvhClient(user.senderId)
+          .then((ovhClientLocale) => {
+            ovhClient = ovhClientLocale;
+            return ovhClient.requestPromised("GET", "/me");
+          })
+          .then((meInfos) => getServicesStatus(ovhClient, meInfos.language))
+          .then((resp) => send(user.senderId, user.platform, resp));
+      }))
+    .then(() => logger.info("Status update done"));
 }
 
-// performUpdate();
+function performExpiresUpdate () {
+  logger.info("Expires update:", new Date());
+  Users.find({ expires: true })
+    .then((users) =>
+      Bluebird.mapSeries(users, (user) => {
+        let ovhClient;
+        return ovh.getOvhClient(user.senderId)
+          .then((ovhClientLocale) => {
+            ovhClient = ovhClientLocale;
+            return ovhClient.requestPromised("GET", "/me");
+          })
+          .then((meInfos) => getServicesExpires(ovhClient, meInfos.language, user.expiresPeriod))
+          .then((resp) => send(user.senderId, user.platform, resp));
+      }))
+    .then(() => logger.info("Expires update done"));
+}
 
 /**
 what is my service status ?
@@ -128,7 +158,7 @@ function getServicesExpires (ovhClient, locale, expiresPeriod) {
     if (serviceInfosArray.length) {
 
       let string = serviceInfosArray.map((info) =>
-        translator(info.diff > 0 ? "serviceWillExpired" : "serviceHasExpired", locale, info.serviceName, info.status, Math.abs(info.diff), info.expireDate.toLocaleDateString(locale.replace("_", "-")))).join("\n");
+        translator(info.diff > 0 ? "serviceWillExpired" : "serviceHasExpired", locale, info.serviceName, translator(`service-${info.status}`, locale), Math.abs(info.diff), info.expireDate.toLocaleDateString(locale.replace("_", "-")))).join("\n");
       return new TextMessage(`${serviceInfosArray[0].baseUrl}:\n${string}`);
     }
     return null;

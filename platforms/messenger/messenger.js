@@ -322,7 +322,7 @@ function sendButtonMessage (recipientId, buttonMessage) {
     }
   };
 
-  sendMessageToAPI(messageData);
+  return sendMessageToAPI(messageData);
 }
 
 /*
@@ -453,7 +453,7 @@ function sendQuickReply (recipientId, message) {
     message
   };
 
-  sendMessageToAPI(messageData);
+  return sendMessageToAPI(messageData);
 }
 
 /*
@@ -537,11 +537,20 @@ function sendQuickReply (recipientId, message) {
 
 
 function send (recipientId, message) {
+  const regx = /^([\S\s]{0,640})(?:\n|[.,]\s)([\S\s]*$)/g; // Regex for "smart" splitting (str.length limit is 640)
   if (typeof message === "string") {
+    if (message.length > 640) {
+      let matchs = regx.exec(message);
+      return send(recipientId, matchs[1]).then(() => send(recipientId, matchs[2]));
+    }
     return sendTextMessage(recipientId, emojify(message));
   }
 
   if (message instanceof TextMessage) {
+    if (message.text.length > 640) {
+      let matchs = regx.exec(message.text);
+      return send(recipientId, matchs[1]).then(() => send(recipientId, matchs[2]));
+    }
     return sendTextMessage(recipientId, textMessageAdapter(message));
   }
 
