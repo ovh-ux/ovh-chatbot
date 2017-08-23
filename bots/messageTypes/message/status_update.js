@@ -29,7 +29,7 @@ class StatusUpdate {
         return responses;
       });
 
-    return Bluebird.resolve({ responses: [new TextMessage(translator("diagInProgress", locale)), promise], feedback: false });
+    return Bluebird.resolve({ responses: [new TextMessage(translator("scanInProgress", locale)), promise], feedback: false });
 
   }
 }
