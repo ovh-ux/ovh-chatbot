@@ -5,12 +5,12 @@ const { TextMessage, ButtonsMessage, Button, BUTTON_TYPE } = require("../../../p
 const translator = require("../../../utils/translator");
 const Users = require("../../../models/users.model");
 const { getServicesStatus } = require("../../../diagnostics/cron");
-
+const Bluebird = require("bluebird");
 
 class StatusUpdate {
   static action (senderId, message, entities, res, locale) {
     let responses;
-    return utils.getOvhClient(senderId)
+    let promise = utils.getOvhClient(senderId)
       .then((ovhClient) => getServicesStatus(ovhClient, locale))
       .then((responsesCron) => {
         responses = responsesCron;
@@ -26,8 +26,11 @@ class StatusUpdate {
           ];
           responses.push(new ButtonsMessage(translator(`settings-updates-${user.updates}`, locale), buttons));
         }
-        return { responses, feedback: true };
+        return responses;
       });
+
+    return Bluebird.resolve({ responses: [new TextMessage(translator("diagInProgress", locale)), promise], feedback: false });
+
   }
 }
 

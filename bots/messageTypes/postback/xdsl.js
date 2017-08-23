@@ -80,7 +80,7 @@ module.exports = [
             });
           }, 1000);
         }).then((diag) => xDSLDiag.checkxDSLDiagAdvanced(diag));
-        return Bluebird.resolve({ responses: [new TextMessage(translator("xdslDiagInProgress", locale)), promise], feedback: false });
+        return Bluebird.resolve({ responses: [new TextMessage(translator("diagInProgress", locale)), promise], feedback: false });
       })
       .catch((err) => {
         if (err.statusCode === 401 || err.errorCode === 401) {

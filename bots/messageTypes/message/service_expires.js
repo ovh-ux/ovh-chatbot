@@ -5,12 +5,13 @@ const { TextMessage, ButtonsMessage, Button, BUTTON_TYPE } = require("../../../p
 const translator = require("../../../utils/translator");
 const Users = require("../../../models/users.model");
 const { getServicesExpires } = require("../../../diagnostics/cron");
+const Bluebird = require("bluebird");
 
 
 class ServiceExpires {
   static action (senderId, message, entities, res, locale) {
     let user;
-    return Users.findOne({ senderId }).exec()
+    let promise = Users.findOne({ senderId }).exec()
       .then((userLocal) => {
         user = userLocal;
         return utils.getOvhClient(senderId);
@@ -32,8 +33,10 @@ class ServiceExpires {
           ];
           responses.push(new ButtonsMessage(translator(`settings-expires-${user.expires}`, locale, user.expiresPeriod), buttons));
         }
-        return { responses, feedback: true };
+        return responses;
       });
+
+    return Bluebird.resolve({ responses: [new TextMessage(translator("diagInProgress", locale)), promise], feedback: false });
   }
 }
 
