@@ -161,7 +161,7 @@ function getServicesExpires (ovhClient, locale, expiresPeriod) {
     if (serviceInfosArray.length) {
       let string = serviceInfosArray.map((info) =>
         translator(info.diff > 0 ? "serviceWillExpired" : "serviceHasExpired", locale, info.serviceName, translator(`service-${info.status}`, locale), Math.abs(info.diff), info.expireDate.toLocaleDateString(locale.replace("_", "-")))).join("\n");
-      return new TextMessage(`${serviceInfosArray[0].baseUrl}:\n${string}`);
+      return new TextMessage(translator("serviceInfo", locale, serviceInfosArray[0].baseUrl, string));
     }
     return null;
   }).filter((element) => !!element));

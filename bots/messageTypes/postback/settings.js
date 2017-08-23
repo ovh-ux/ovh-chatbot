@@ -26,7 +26,7 @@ module.exports = [
         .then((user) => {
           user.expiresPeriod = period;
           return user.save();
-        }).then(() => ({ responses: [new TextMessage(translator("settings-expires-true", locale, period))], feedback: false }));
+        }).then(() => ({ responses: [new TextMessage(translator("settings-expires-period", locale, period))], feedback: false }));
 
 
     }
@@ -34,13 +34,13 @@ module.exports = [
   {
     regx: "SETTINGS_EXPIRES_edit",
     action (senderId, postback, regx, entities, res, locale) {
-      const days = [1, 7, 14, 30, 60];
+      const days = [2, 7, 14, 30, 60];
 
       return Users.findOne({ senderId }).exec()
         .then((user) => {
-          let buttons = days.map((day) => new Button(BUTTON_TYPE.POSTBACK, `SETTINGS_EXPIRES_${day}`, translator("settings-expires-period", locale, day)));
+          let buttons = days.map((day) => new Button(BUTTON_TYPE.POSTBACK, `SETTINGS_EXPIRES_${day}`, translator("settings-expires-days", locale, day)));
 
-          return { responses: [new ButtonsListMessage(translator("settings-expires-true", locale, user.expiresPeriod), buttons)], feedback: false };
+          return { responses: [new ButtonsListMessage(translator("settings-expires-edit", locale, user.expiresPeriod), buttons)], feedback: false };
         });
     }
   },

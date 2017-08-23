@@ -28,7 +28,7 @@ class ServiceExpires {
           let buttons = [
             new Button(BUTTON_TYPE.POSTBACK, "SETTINGS_EXPIRES_true", translator("on", locale)),
             new Button(BUTTON_TYPE.POSTBACK, "SETTINGS_EXPIRES_false", translator("off", locale)),
-            new Button(BUTTON_TYPE.POSTBACK, "SETTINGS_EXPIRES_edit", translator("settings-expires-edit", locale))
+            new Button(BUTTON_TYPE.POSTBACK, "SETTINGS_EXPIRES_edit", translator("preferences", locale))
           ];
           responses.push(new ButtonsMessage(translator(`settings-expires-${user.expires}`, locale, user.expiresPeriod), buttons));
         }
