@@ -18,13 +18,11 @@ const ovh = require("../utils/ovh");
 module.exports = {
   getServicesStatus,
   getServicesExpires,
-  tasks: [cron.schedule("0 */2 * * *", performStatusUpdate, false), cron.schedule("0 2 * * *", performExpiresUpdate, false)]
+  tasks: [cron.schedule("0 */2 * * *", performStatusUpdate, true), cron.schedule("0 2 * * *", performExpiresUpdate, true)]
 };
 
-performStatusUpdate();
-performExpiresUpdate();
-
 function performStatusUpdate () {
+  let now = Date.now();
   logger.info("Status update:", new Date());
   Users.find({ updates: true })
     .then((users) =>
@@ -36,12 +34,14 @@ function performStatusUpdate () {
             return ovhClient.requestPromised("GET", "/me");
           })
           .then((meInfos) => getServicesStatus(ovhClient, meInfos.language))
-          .then((resp) => send(user.senderId, user.platform, resp));
+          .then((resp) => send(user.senderId, user.platform, resp))
+          .then(() => logger.debug("Status update done for user %s, platform: %s", user.senderId, user.platform));
       }))
-    .then(() => logger.info("Status update done"));
+    .then(() => logger.info("Status update done, took %d seconds", (Date.now() - now) / 1000));
 }
 
 function performExpiresUpdate () {
+  let now = Date.now();
   logger.info("Expires update:", new Date());
   Users.find({ expires: true })
     .then((users) =>
@@ -53,9 +53,10 @@ function performExpiresUpdate () {
             return ovhClient.requestPromised("GET", "/me");
           })
           .then((meInfos) => getServicesExpires(ovhClient, meInfos.language, user.expiresPeriod))
-          .then((resp) => send(user.senderId, user.platform, resp));
+          .then((resp) => send(user.senderId, user.platform, resp))
+          .then(() => logger.debug("Expires update done for user %s, platform: %s", user.senderId, user.platform));
       }))
-    .then(() => logger.info("Expires update done"));
+    .then(() => logger.info("Expires update done, took %d seconds", (Date.now() - now) / 1000));
 }
 
 /**
@@ -104,11 +105,12 @@ function getXdslStatus (ovhClient) {
 
 function getHostingStatus (ovhClient, locale) {
   return ovhClient.requestPromised("GET", "/hosting/web/")
-  .then((websites) => Bluebird.map(websites, (site) => new Bluebird((resolve, reject) => request(`http://${site}`, (err) => err ? reject() : resolve()))
-  .then(() => [])
-  .catch(() => ovhClient.requestPromised("GET", `/hosting/web/${site}/attachedDomain`) // sites has issue do advance check
-  .then((domains) => Bluebird.map(domains, (domain) => hostingAdvanceCheck(ovhClient, site, domain, locale).catch(() => []))))
-)).then((responses) => _.flattenDeep(responses));
+  .then((websites) => Bluebird.all(websites.map((site) => new Bluebird((resolve, reject) => request(`http://${site}`, (err) => err ? reject() : resolve()))
+    .then(() => [])
+    .catch(() => ovhClient.requestPromised("GET", `/hosting/web/${site}/attachedDomain`) // sites has issue do advance check
+      .then((domains) => Bluebird.all(domains.map((domain) => hostingAdvanceCheck(ovhClient, site, domain, locale).catch(() => [])))))
+  )))
+  .then((responses) => _.flattenDeep(responses));
 }
 
 function hostingAdvanceCheck (ovhClient, site, domain, locale) {
@@ -152,11 +154,12 @@ function getServicesExpires (ovhClient, locale, expiresPeriod) {
     "/metrics", "/msServices/sharepoint", "/overTheBox", "/paas/database/", "/paas/monitoring", "/pack/siptrunk", "/pack/xdsl", "/router", "/saas/csp2",
     "/sms", "/ssl", "/sslGateway", "/stack/mis", "/telephony", "/veeamCloudConnect", "/vps", "/xdsl", "/xdsl/spare"];
 
-  // TODO email/exchange
-  return Bluebird.all(services.map((service) => getServicesExpirationDate(ovhClient, service, expiresPeriod)))
+  return ovhClient.requestPromised("GET", "/email/exchange")
+  .then((orgNames) => orgNames.map((name) => `/email/exchange/${name}/service`))
+  .then((exchanges) => [...services, ...exchanges])
+  .then((serviceArray) => Bluebird.all(serviceArray.map((service) => getServicesExpirationDate(ovhClient, service, expiresPeriod))))
   .then((infoArray) => infoArray.map((serviceInfosArray) => {
     if (serviceInfosArray.length) {
-
       let string = serviceInfosArray.map((info) =>
         translator(info.diff > 0 ? "serviceWillExpired" : "serviceHasExpired", locale, info.serviceName, translator(`service-${info.status}`, locale), Math.abs(info.diff), info.expireDate.toLocaleDateString(locale.replace("_", "-")))).join("\n");
       return new TextMessage(`${serviceInfosArray[0].baseUrl}:\n${string}`);
@@ -168,23 +171,24 @@ function getServicesExpires (ovhClient, locale, expiresPeriod) {
 
 function getServicesExpirationDate (ovhClient, baseUrl, expiresPeriod) {
   return ovhClient.requestPromised("GET", baseUrl)
-  .then((servicesNames) => Bluebird.mapSeries(servicesNames, (serviceName) => ovhClient.requestPromised("GET", `${baseUrl}/${serviceName}/serviceInfos`)
-  .then((serviceInfos) => {
-    let expireDate = new Date(serviceInfos.expiration);
-    let diff = Math.ceil((expireDate - new Date()) / (1000 * 3600 * 24)); // conversion to diff in days
-    if (diff <= expiresPeriod && serviceInfos.renewalType === "manual") {
-      return {
-        baseUrl,
-        serviceName,
-        diff,
-        expireDate: new Date(serviceInfos.expiration),
-        renewalType: serviceInfos.renewalType,
-        status: serviceInfos.status
-      };
-    }
-    return null;
-  }).catch((err) => {
-    logger.error(err, baseUrl, serviceName);
-    return null;
-  }))).then((infos) => infos.filter((info) => !!info));
+  .then((servicesNames) => Bluebird.all(servicesNames.map((serviceName) =>
+    ovhClient.requestPromised("GET", `${baseUrl}/${serviceName}/serviceInfos`)
+      .then((serviceInfos) => {
+        let expireDate = new Date(serviceInfos.expiration);
+        let diff = Math.ceil((expireDate - new Date()) / (1000 * 3600 * 24)); // conversion to diff in days
+        if (diff <= expiresPeriod && serviceInfos.renewalType === "manual") {
+          return {
+            baseUrl,
+            serviceName,
+            diff,
+            expireDate: new Date(serviceInfos.expiration),
+            renewalType: serviceInfos.renewalType,
+            status: serviceInfos.status
+          };
+        }
+        return null;
+      }).catch((err) => logger.error(err, baseUrl, serviceName))
+    )))
+  .then((infos) => infos.filter((info) => !!info))
+  .catch((err) => logger.error(err, baseUrl));
 }
