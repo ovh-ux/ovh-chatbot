@@ -16,7 +16,7 @@ class ServiceExpires {
         user = userLocal;
         return utils.getOvhClient(senderId);
       })
-      .then((ovhClient) => getServicesExpires(ovhClient, locale, user.expiresPeriod || 14))
+      .then((ovhClient) => getServicesExpires(ovhClient, locale, user ? user.expiresPeriod : 14))
       .then((responsesCron) => {
         let responses = responsesCron;
         if (!responses.length) {
