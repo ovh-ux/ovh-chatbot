@@ -2,7 +2,6 @@
 
 const Users = require("../models/users.model");
 
-// const utils = require("../utils/ovh");
 const Bluebird = require("bluebird");
 const { TextMessage } = require("../platforms/generics");
 const translator = require("../utils/translator");
