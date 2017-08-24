@@ -44,11 +44,28 @@ The bot uses [api.ai](https://www.api.ai) as a language processor.
 > + **Intent**: what the user *ask* to the bot.
 > + **Response**: What the bot *respond* to an user.
 
-All the intents needing dynamic responses can be found [here](bots/README.md). However, the responses to intents which doesn't need a dynamic response are stored in [api.ai](https://www.api.ai) database.
+All the intents needing processed responses can be found [here](bots/).
+
+The intents which doesn't need processed responses (aka: answers to basic questions) are stored in the [api.ai](https://www.api.ai) database, have a look at the [api.ai folder](apiai/).
+
+This intents and response are translated in:
++ Dutch
++ English (US, CA, GB)
++ French
++ German
++ Italian
++ Portuguese
++ Spanish
 
 ### Diagnostics
-Currently, this bot is able to diagnose a website, a xdsl line or a phone line.
-More details [here](diagnostics/README.md)
+Currently, this bot is able to:
++ diagnose a website
++ diagnose a xDSL line
++ diagnose a land line
++ warn about the expiration of a service
++ warn when an incident happens
+
+More details [here](diagnostics/)
 
 
 ## Contributing
@@ -67,10 +84,7 @@ Have a look at the [Contributing section](CONTRIBUTING.md). If you have any ques
 + Refactor to typescript
 + Docker compose
 + Documentation
-+ Translations
-+ When will my service expire?
-+ Monitoring
-+ Alerting
++ Cloud diagnostics
 
 ## License
 See https://github.com/ovh-ux/ovh-chatbot/blob/master/LICENSE
