@@ -7,6 +7,7 @@ Contains all the handlers to communicate with different platforms
 + `messenger` --> Contains all the object and functions and adapter object to reply on Facebook Messenger
 + `slack` --> Contains functions and adapter object to send reply on Slack
 + `web` --> Contains functions and adapter object to send reply in the *ovh's managers*
++ `twitter` -->  Contains functions and adapter object to send reply on Twitter DMs
 
 ### Add a new platform
 

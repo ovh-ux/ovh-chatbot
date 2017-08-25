@@ -34,6 +34,10 @@ This project handles callbacks for authentication, messages and postback actions
 ### Web (OVH managers)
 This project handles callbacks messages and postback actions. The authentication is handled by the managers.The bot *only* checks if the user is logged in or not.
 
+### Twitter
+:construction: **Currently twitter DM api is in beta so it's not yet ready for production usage** :construction:
+This project handles callbacks for authentication, messages and postback actions. More details are available at the [Twitter Documentations](https://dev.twitter.com/overview/api).
+
 ## Bot functions
 
 The bot uses [api.ai](https://www.api.ai) as a language processor.

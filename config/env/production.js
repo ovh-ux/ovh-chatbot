@@ -18,6 +18,13 @@ module.exports = {
     pageAccessToken: process.env.FB_APP_ACCESS_TOKEN,
     validationToken: process.env.FB_VALIDATION_TOKEN
   },
+  twitter: {
+    apiKey: process.env.TWITTER_API_KEY,
+    appSecret: process.env.TWITTER_API_SECRET,
+    clientAccessToken: process.env.TWITTER_ACCESS_TOKEN,
+    clientAccessSecret: process.env.TWITTER_ACCESS_TOKEN_SECRET,
+    appId: process.env.TWITTER_APP_ID
+  },
   apiai: {
     token: process.env.APIAI_TOKEN
   },
