@@ -58,7 +58,7 @@ module.exports = () => {
     return ovh.getOvhClient(senderId)
       .then((client) => client.requestPromised("GET", "/me"))
       .then((meInfos) => meInfos.language)
-      .catch(() => twitter.getUserInfo(senderId).then((userInfo) => userInfo.lang))
+      .catch(() => twitter.getUserInfo(senderId).then((userInfo) => userInfo.lang)) // TODO twitter format is not ISO 15897 complient
       .catch((err) => {
         logger.error(err);
         return "en_US";

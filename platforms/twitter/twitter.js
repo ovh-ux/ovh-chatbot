@@ -4,7 +4,6 @@ const Twitter = require("twitter");
 const config = require("../../config/config-loader").load();
 const { textMessageAdapter, buttonsMessageAdapter } = require("./twitter_adapter");
 const { ButtonsMessage, ButtonsListMessage, TextMessage } = require("../generics");
-const logger = require("../../providers/logging/logger");
 const Bluebird = require("bluebird");
 
 const client = new Twitter({
@@ -15,7 +14,7 @@ const client = new Twitter({
 });
 
 function sendDM (recipient_id, message_data) {
-  return recipient_id === config.twitter.appId ? Bluebird.resolve(null) : client.post("/direct_messages/events/new", {
+  return recipient_id === config.twitter.appId ? Bluebird.reject(new Error("You cannot send a dm to yourself")) : client.post("/direct_messages/events/new", {
     event: {
       type: "message_create",
       message_create: {
@@ -25,8 +24,7 @@ function sendDM (recipient_id, message_data) {
         message_data
       }
     }
-  }).then((dm) => logger.debug(`Successfully sent dm: ${dm.event.id} to ${recipient_id}`))
-  .catch(logger.error);
+  });
 }
 
 function getUserInfo (user_id) {
@@ -42,6 +40,7 @@ function send (senderId, message) {
     return sendDM(senderId, buttonsMessageAdapter(message));
   }
   return sendDM(senderId, message);
+
 }
 
 module.exports = {

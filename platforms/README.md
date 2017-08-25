@@ -29,6 +29,8 @@ Contains all the handlers to communicate with different platforms
 
 ### Button types
 
++ `ACCOUNT_LINKING` --> button in order to perfomr the OVH account linking
+
 + `URL` --> button with a link to other pages on the browser for example (http://ovh.com)
 
 + `POSTBACK` --> Button that launch an action on this API

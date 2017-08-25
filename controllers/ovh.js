@@ -3,6 +3,7 @@
 const ovh = require("ovh");
 const config = require("../config/config-loader").load();
 const messenger = require("../platforms/messenger/messenger");
+const twitter = require("../platforms/twitter/twitter");
 const User = require("../models/users.model");
 const slackSDK = require("../platforms/slack/slack");
 const translator = require("../utils/translator");
@@ -57,6 +58,12 @@ function welcome (senderId, meInfos, userInfos) {
     slackSDK(userInfos.team_id)
     .then((slack) => slack.send(senderId, translator("connectedAs", meInfos.language, meInfos.nichandle)))
     .catch(logger.error);
+    break;
+  }
+  case "twitter": {
+    twitter
+      .send(senderId, translator("connectedAs", meInfos.language, meInfos.nichandle))
+      .catch(logger.error);
     break;
   }
   default: break;
