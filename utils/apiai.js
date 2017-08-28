@@ -13,7 +13,7 @@ apiaiSDK.textRequestAsync = (message, opts, locale) => {
   return ApiAiTokens.findOne({ locale })
     .then((token) => {
       logger.debug(`Apiai token for ${locale}:${token ? "FOUND" : "DEFAULT"}`);
-      return apiaiSDK(token || DEFAULT_TOKEN);
+      return apiaiSDK(token ? token.token : DEFAULT_TOKEN);
     })
     .then((apiai) => new Bluebird((resolve, reject) => {
       const request = apiai.textRequest(message, opts);
