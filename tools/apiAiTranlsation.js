@@ -26,7 +26,7 @@ module.exports = function (grunt) {
           outputJSON[++i] = key;
           templateJSON.entities[i] = entities[key].map((value) => {
             outputJSON[++i] = value;
-            return i;
+            return `${i}`;
           });
         });
 
@@ -36,11 +36,11 @@ module.exports = function (grunt) {
           Object.assign(templateJSON.intents[i], intents[key], {
             userSays: intents[key].userSays.map((value) => {
               outputJSON[++i] = value.replace(/\<\@(.+?)\|(.+?)\|/g, parseEntities);
-              return i;
+              return `${i}`;
             }),
             responses: intents[key].responses.map((value) => {
               outputJSON[++i] = value;
-              return i;
+              return `${i}`;
             })
           });
         });
@@ -69,11 +69,11 @@ module.exports = function (grunt) {
       let dest = file.dest;
       file.src.forEach((src) => {
         let lang = path.basename(src, ".json").replace(/^.*?_/, "");
-        let translationJSON = JSON.parse(fs.readFileSync(src));
+        let translationJSON = JSON.parse(fs.readFileSync(src, "utf8").replace(/&lt;/g, "<").replace(/&gt;/g, ">"));
 
         const parseEntities = (match, p1) => JSON.stringify(translationJSON[p1].replace(/\<\@(\d+)\|(\d+)\|/g, (match2, find1, find2) => `<@${translationJSON[find1]}|${translationJSON[find2]}|`));
 
-        let copy = templateString.replace(/\"(\d+)\"/g, "$1").replace(/\s+(\d+)/g, (match, p1) => ` ${parseEntities(match, p1)}`);
+        let copy = templateString.replace(/\"(\d+)\"/g, (match, p1) => translationJSON[p1] ? ` ${parseEntities(match, p1)}` : p1);
 
         fs.ensureDirSync(dest);
         fs.writeJsonSync(path.join(dest, `${lang}.json`), JSON.parse(copy));
