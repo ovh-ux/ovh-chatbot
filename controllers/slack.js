@@ -48,8 +48,8 @@ module.exports = () => ({
         if (apiaiResponse.status && apiaiResponse.status.code === 200 && apiaiResponse.result) {
           if (apiaiResponse.result.action === "connection" || apiaiResponse.result.action === "welcome") {
             const accountLinkButton = new Button(BUTTON_TYPE.URL, `${config.server.url}${config.server.basePath}/authorize?state=${channel}-slack-${req.body.team_id}`, translator("signIn", locale));
-            return sendResponse(res, channel, new TextMessage(translator("welcome", locale)), slack)
-              .then(() => sendResponse(res, channel, new ButtonsListMessage("", [accountLinkButton]), slack));
+            return sendResponse(res, channel, new TextMessage(translator("welcome", locale)), slack, locale)
+              .then(() => sendResponse(res, channel, new ButtonsListMessage("", [accountLinkButton]), slack, locale));
           }
 
           if (apiaiResponse.result.fulfillment && apiaiResponse.result.fulfillment.speech && Array.isArray(apiaiResponse.result.fulfillment.messages) && apiaiResponse.result.fulfillment.messages.length) {
@@ -61,7 +61,7 @@ module.exports = () => ({
               quickResponses = [{ speech: apiaiResponse.result.fulfillment.speech, type: 0 }];
             }
 
-            return sendQuickResponses(res, channel, quickResponses, slack).then(() => sendFeedback(res, channel, apiaiResponse.result.action, message, slack, locale));
+            return sendQuickResponses(res, channel, quickResponses, slack, locale).then(() => sendFeedback(res, channel, apiaiResponse.result.action, message, slack, locale));
           }
 
           return bot
@@ -83,7 +83,7 @@ module.exports = () => ({
             });
         }
 
-        return slack.send(channel, translator("noIntent", locale));
+        return sendResponse(null, channel, translator("noIntent", locale), slack, locale);
       })
       .catch(res.logger.error);
 
@@ -176,9 +176,9 @@ function sendQuickResponses (res, senderId, responses, slack, locale) {
   return Bluebird.mapSeries(responses, (response) => {
     switch (response.type) {
     case 0:
-      return sendResponse(res, senderId, response.speech, slack, null, locale);
+      return sendResponse(res, senderId, response.speech, slack, locale);
     default:
-      return sendResponse(res, senderId, response.speech, slack, null, locale);
+      return sendResponse(res, senderId, response.speech, slack, locale);
     }
   });
 }
@@ -186,10 +186,18 @@ function sendQuickResponses (res, senderId, responses, slack, locale) {
 function sendResponses (res, channel, responses, slack, message_ts, locale) {
   return Bluebird.mapSeries(responses, (response, index) =>
     Bluebird.resolve(response)
-      .then((resp) => Array.isArray(resp) ? sendResponses(res, channel, resp, slack, message_ts, locale) : sendResponse(res, channel, resp, slack, index === 0 ? message_ts : null, locale)));
+      .then((resp) => Array.isArray(resp) ? sendResponses(res, channel, resp, slack, index === 0 ? message_ts : undefined, locale) : sendResponse(res, channel, resp, slack, index === 0 ? message_ts : undefined, locale)));
 }
 
-function sendResponse (res, channel, response, slack, message_ts, locale) {
+function sendResponse (res, channel, response, slack, message_ts_raw, locale_raw) {
+  let locale = locale_raw;
+  let message_ts = message_ts_raw;
+
+  if (!locale_raw) {
+    locale = message_ts_raw;
+    message_ts = undefined;
+  }
   return slack.send(channel, response, message_ts, locale)
-    .then((result) => !result.ok ? logger.error(`failed sending: ${response} to ${channel}, code: ${result.error}`) : logger.debug(`Sucessfully sent ${result.ts} to ${result.channel}`));
+    .then((result) => !result.ok ? logger.error(`failed sending to channel: ${channel}, error: ${result.error || result}`) : logger.debug(`Sucessfully sent ${result.ts} to ${result.channel}`))
+    .catch(logger.error);
 }
