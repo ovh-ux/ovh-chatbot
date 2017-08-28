@@ -6,6 +6,7 @@ const utils = require("../../../utils/ovh");
 const Bluebird = require("bluebird");
 const URL = require("url");
 const translator = require("../../../utils/translator");
+const logger = require("../../../providers/logging/logger");
 
 class WebsiteBreak {
   static action (senderId, message, entities, res, locale) {
@@ -46,7 +47,7 @@ class WebsiteBreak {
         return { responses: [createPostBackList(translator("hostingSelectHost", locale, 1, Math.ceil(eltInfos.length / MAX_LIMIT)), eltInfos, "MORE_HOSTING", 0, MAX_LIMIT, locale)], feedback: false };
       })
       .catch((err) => {
-        res.logger.error(err);
+        logger.error(err);
         return Bluebird.reject(error(err.error || err.statusCode || 400, err));
       });
   }

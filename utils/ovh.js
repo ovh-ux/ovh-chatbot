@@ -44,13 +44,13 @@ class OvhWebClient {
 }
 
 module.exports = {
-  getOvhClient: (senderId) =>
+  getOvhClient: (senderId, locale = "en_US") =>
     User.findOne({ senderId }).exec().then((userInfos) => {
       if (!userInfos) {
         // check if web user and if so return the custom "ovhClientModule";
         return WebAuth.findOne({ _nichandle: senderId }).exec().then((webAuth) => {
           if (!webAuth) {
-            return Bluebird.reject({ statusCode: 403, message: translator("signInFirst") });
+            return Bluebird.reject({ statusCode: 403, message: translator("signInFirst", locale) });
           }
 
           return new OvhWebClient(webAuth.cookie, webAuth.userAgent);

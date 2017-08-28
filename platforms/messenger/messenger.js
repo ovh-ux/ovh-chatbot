@@ -322,7 +322,7 @@ function sendButtonMessage (recipientId, buttonMessage) {
     }
   };
 
-  sendMessageToAPI(messageData);
+  return sendMessageToAPI(messageData);
 }
 
 /*
@@ -453,7 +453,7 @@ function sendQuickReply (recipientId, message) {
     message
   };
 
-  sendMessageToAPI(messageData);
+  return sendMessageToAPI(messageData);
 }
 
 /*

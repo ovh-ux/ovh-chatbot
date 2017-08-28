@@ -39,12 +39,9 @@ module.exports = () => ({
 });
 
 function isDisconnected (err, locale) {
-  let error;
   if (err.statusCode === 403 || err.statusCode === 401) {
-    error = Object.assign({}, err, { message: translator("disconnected", locale) });
-  } else {
-    error = err;
+    let error = Object.assign({}, err, { responses: [new TextMessage(translator("disconnected", locale))] });
+    return Bluebird.resolve(error);
   }
-
-  return Bluebird.reject(error);
+  return Bluebird.reject(err);
 }

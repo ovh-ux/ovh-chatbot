@@ -3,5 +3,8 @@
   "extends": "ovh/configs/es6-node",
   "rules": {
         "indent": ["error", 2]
+  },
+  "env": {
+    "mocha": true
   }
 }
