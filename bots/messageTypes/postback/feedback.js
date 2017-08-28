@@ -8,7 +8,6 @@ const Message = require("../../../models/messages.model");
 const { TextMessage } = require("../../../platforms/generics");
 const translator = require("../../../utils/translator");
 
-
 module.exports = [
   {
     regx: "FEEDBACK_GOOD_([^_]*)_(.*)",
@@ -32,8 +31,8 @@ module.exports = [
 
 function saveFeedback (postback, regx, feedback, locale) {
   const intent = snakeCase(postback.match(new RegExp(regx))[1]);
-  const message = postback.match(new RegExp(regx))[2];
+  const text = postback.match(new RegExp(regx))[2];
 
-  new Message({ intent, text: message, feedback }).save();
+  new Message({ intent, text, feedback }).save();
   return Bluebird.resolve({ responses: [new TextMessage(translator("feedbackThanks", locale))], feedback: false });
 }
