@@ -7,12 +7,13 @@ const Bluebird = require("bluebird").config({
 });
 const _ = require("lodash");
 const request = require("request");
+const logger = require("../providers/logging/logger");
 
 const translator = require("../utils/translator");
 
 module.exports = {
   checkWebsite (res, hosting, domain, hostingEmails, ssl, dns, locale) {
-    res.logger.info(domain);
+    logger.info(domain);
     const protocol = domain.ssl ? "https://" : "http://";
     let responses = this.checkEmailsState(hosting, hostingEmails, locale);
     const sslState = this.checkSSL(hosting, domain, ssl, locale);
@@ -22,11 +23,11 @@ module.exports = {
     return utils
       .dig(domain.domain)
       .then((ip) => {
-        res.logger.info(hosting);
-        res.logger.info(ip);
+        logger.info(hosting);
+        logger.info(ip);
         const isDNSInvalid = this.checkDNS(ip, hosting, domain, dns);
 
-        res.logger.info(isDNSInvalid);
+        logger.info(isDNSInvalid);
         if (isDNSInvalid) {
           return Bluebird.reject(isDNSInvalid);
         }
@@ -65,7 +66,7 @@ module.exports = {
       .catch((err) => {
         let managerButton;
 
-        res.logger.info(err);
+        logger.info(err);
         if (Array.isArray(err) && err.length && (typeof err[0] === "string" || err[0] instanceof TextMessage)) {
           return err;
         }

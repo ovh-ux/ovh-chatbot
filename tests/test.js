@@ -21,8 +21,24 @@ const NLP_TEST = [
     intent: "who_am_i"
   },
   {
+    message: "est-ce que je suis connecté ?",
+    intent: "who_am_i"
+  },
+  {
     message: "mon site est cassé",
     intent: "website_break"
+  },
+  {
+    message: "mon site ne marche plus",
+    intent: "website_break"
+  },
+  {
+    message: "mon téléphone est cassé",
+    intent: "telephony_break"
+  },
+  {
+    message: "ma ligne adsl est cassé",
+    intent: "xdsl_break"
   },
   {
     message: "se connecter",
@@ -34,12 +50,13 @@ const NLP_TEST = [
   }
 ];
 const INTENT_TEST = [
-  "who_am_i", "website_break"
+  "dns_server_config", "domain_to_hosting", "telephony_break", "thanks", "website_break", "who_am_i", "xdsl_break"
 ];
 const POSTBACK_TEST = [
-  "FEEDBACK_GOOD_testIntent_testMessage", "FEEDBACK_BAD_testIntent_testMessage"
+  "FEEDBACK_GOOD_testIntent_testMessage", "FEEDBACK_BAD_testIntent_testMessage", "FEEDBACK_MISUNDERSTOOD_testIntent_testMessage",
+  "HOSTING_SELECTED_testHosting", "ATTACHED_DOMAIN_SELECTED_testDomain_testSite", "MORE_ATTACHED_DOMAIN_testDomain_0", "MORE_HOSTING_0",
+  "TELEPHONY_SELECTED_testPhony", "MORE_TELEPHONY_0", "XDSL_SELECTED_testXDSL", "XDSL_DIAG_testXDSL", "MORE_XDSL_0"
 ];
-
 const GENERIC_TEXT_MSG = new TextMessage("TEST MESSAGE");
 const GENERIC_BTNS_MSG = new ButtonsMessage("TEST MESSAGE",
   [
@@ -47,18 +64,16 @@ const GENERIC_BTNS_MSG = new ButtonsMessage("TEST MESSAGE",
   ]);
 const GENERIC_BTNS_LIST_MSG = new ButtonsListMessage("TEST MESSAGE",
   [
-    new Button(BUTTON_TYPE.ACCOUNT_LINKING, "url", "btn"),
+    new Button(BUTTON_TYPE.ACCOUNT_LINKING, "account_link", "btn"),
     new Button(BUTTON_TYPE.URL, "url", "btn"),
-    new Button(BUTTON_TYPE.POSTBACK, "url", "btn"),
-    new Button(BUTTON_TYPE.MORE, "url", "btn")
+    new Button(BUTTON_TYPE.POSTBACK, "POSTBACK", "btn"),
+    new Button(BUTTON_TYPE.MORE, "MORE", "btn")
   ]);
 
 describe("chatbot", () => {
-
   before(() => {
     mongo.connect(config.mongo);
   });
-
   after(() => {
     mongo.close("SIGTERM");
   });
@@ -76,12 +91,12 @@ describe("chatbot", () => {
     this.slow(500);
     describe("intent processing", () => INTENT_TEST.forEach((test) =>
         it(`should handle intent: ${test}`, () =>
-          bot.ask("message", null, test, test, null, null, "fr_FR")
+          bot.ask("message", null, test, test, {}, null, "fr_FR")
             .then(({ responses }) => assert.isAtLeast(responses.length, 1)))));
 
     describe("postback processing", () => POSTBACK_TEST.forEach((postback) =>
        it(`should handle postback: ${postback}`, () =>
-        bot.ask("postback", null, postback, postback, null, null, "fr_FR")
+        bot.ask("postback", null, postback, postback, {}, null, "fr_FR")
           .then(({ responses }) => assert.isAtLeast(responses.length, 1)))));
   });
 
@@ -124,6 +139,10 @@ describe("chatbot", () => {
     it("should send a generic text message", () => web.send(null, "testuser", GENERIC_TEXT_MSG).then(() => assert.isOk(true)));
     it("should send a generic Buttons message", () => web.send(null, "testuser", GENERIC_BTNS_MSG).then(() => assert.isOk(true)));
     it("should send a generic ButtonsList message", () => web.send(null, "testuser", GENERIC_BTNS_LIST_MSG).then(() => assert.isOk(true)));
+  });
+
+  describe("slack", () => {
+    it("should execute (no test for now)", () => assert.isOk(true));
   });
 
 });

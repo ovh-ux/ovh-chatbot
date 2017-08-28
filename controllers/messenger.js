@@ -107,7 +107,7 @@ module.exports = () => {
         return null;
       }) // Ask if it was useful
       .catch((err) => {
-        res.logger.error(err);
+        logger.error(err);
         messenger.send(senderId, `Oups ! ${err.message}`);
       });
   }
@@ -151,13 +151,13 @@ module.exports = () => {
               }
             }) // Ask if it was useful
             .catch((err) => {
-              res.logger.error(err);
+              logger.error(err);
               return messenger.send(senderId, `Oups ! ${err.message}`);
             });
         }
         return null;
       })
-      .catch(res.logger.error);
+      .catch(logger.error);
   }
 
   function sendFeedback (res, senderId, intent, rawMessage, locale) {

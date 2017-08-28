@@ -7,6 +7,7 @@ const User = require("../models/users.model");
 const slackSDK = require("../platforms/slack/slack");
 const translator = require("../utils/translator");
 const logger = require("../providers/logging/logger");
+const error = require("../providers/errors/apiError");
 
 module.exports = () => ({
   getAuth (req, res) {
@@ -37,7 +38,7 @@ module.exports = () => ({
         return res.render("authorize", { paragraph: translator("view-connected", locale, meInfos.nichandle), title: translator("view-title", locale) });
       })
       .catch((err) => {
-        const errorApi = res.error(403, err);
+        const errorApi = error(403, err);
         User.remove({ senderId }).exec();
 
         return res.status(errorApi.statusCode).json(errorApi);

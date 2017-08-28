@@ -78,14 +78,14 @@ module.exports = () => ({
               return null;
             })
             .catch((err) => {
-              res.logger.error(err);
+              logger.error(err);
               slack.send(channel, `Oups ! ${err.message}`);
             });
         }
 
         return sendResponse(null, channel, translator("noIntent", locale), slack, locale);
       })
-      .catch(res.logger.error);
+      .catch(logger.error);
 
     return res.status(200).end();
   },
@@ -125,7 +125,7 @@ module.exports = () => ({
         return null;
       })
       .catch((err) => {
-        res.logger.error(err);
+        logger.error(err);
         slackSDK(payload.team.id).then((uSlackClient) => uSlackClient.send(channel, `Oups ! ${err.message}`));
         return res.headersSent ? null : res.status(200).end();
       });
@@ -151,7 +151,7 @@ module.exports = () => ({
       .then((resp) => {
         infos = resp;
 
-        res.logger.info(resp);
+        logger.info(resp);
 
         return SlackModel.where({ team_id: resp.team_id })
           .setOptions({ upsert: true })
@@ -162,7 +162,7 @@ module.exports = () => ({
       })
       .then(() => res.redirect(`https://${infos.team_name}.slack.com`))
       .catch((err) => {
-        res.logger.error(err);
+        logger.error(err);
         res.status(403).json(err);
       });
   }

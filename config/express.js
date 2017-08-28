@@ -10,9 +10,9 @@ const routes = requireDir("../routes");
 const mongo = require("../providers/orm/nosql/mongo");
 const verifyRequestSignature = require("./middlewares/verifyRequest");
 const requestLogger = require("../providers/logging/request");
-const utilsMiddleware = require("./middlewares/utils");
 const cookieParser = require("cookie-parser");
 const verifyOvhUser = require("./middlewares/verifyOvhUser");
+const error = require("../providers/errors/apiError");
 
 module.exports = function (config) {
   assert(config, "config for mongo is required");
@@ -52,7 +52,6 @@ module.exports = function (config) {
     return next();
   });
 
-  app.use(utilsMiddleware());
   app.use(compression());
   app.use(bodyParser.urlencoded({ limit: "50mb", extended: false }));
   app.use(bodyParser.json({ limit: "50mb", verify: verifyRequestSignature(config) }));
@@ -64,7 +63,7 @@ module.exports = function (config) {
       return next();
     }
     res.setHeader("Connection", "close");
-    const errorApi = res.error(503, "Server is reloading...");
+    const errorApi = error(503, "Server is reloading...");
 
     return res.status(errorApi.statusCode).json(errorApi);
   });
@@ -74,7 +73,7 @@ module.exports = function (config) {
   app.use(config.server.basePath, api);
 
   app.use((req, res) => {
-    const errorApi = res.error(404, `${req.originalUrl} doesn't exist`);
+    const errorApi = error(404, `${req.originalUrl} doesn't exist`);
     return res.status(errorApi.statusCode).json(errorApi);
   });
 

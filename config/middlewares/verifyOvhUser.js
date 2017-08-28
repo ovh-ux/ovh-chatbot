@@ -4,6 +4,7 @@ const Bluebird = require("bluebird");
 const request = require("request");
 const WebAuth = require("../../models/webAuth.model");
 const logger = require("../../providers/logging/logger");
+const error = require("../../providers/errors/apiError");
 const config = require("../config-loader").load();
 const cache = require("memory-cache");
 
@@ -58,7 +59,7 @@ module.exports = () =>
       .then(() => next())
       .catch((err) => {
         logger.error(err);
-        const errorApi = res.error(err.statusCode, err.data ? err.data.message : err);
+        const errorApi = error(err.statusCode, err.data ? err.data.message : err);
         return res.status(errorApi.statusCode).json(errorApi);
       });
   };

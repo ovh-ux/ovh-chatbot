@@ -6,6 +6,7 @@ const apiai = require("../utils/apiai");
 const Bluebird = require("bluebird");
 const { TextMessage } = require("../platforms/generics");
 const translator = require("../utils/translator");
+const logger = require("../providers/logging/logger");
 
 module.exports = () => {
   const sendQuickResponses = (res, nichandle, responses) =>
@@ -150,7 +151,7 @@ module.exports = () => {
       })
       .then((result) => res.status(200).json(result))
       .catch((err) => {
-        res.logger.error(err);
+        logger.error(err);
         return res.status(503).json(err);
       });
   }

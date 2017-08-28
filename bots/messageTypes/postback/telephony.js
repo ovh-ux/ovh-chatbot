@@ -1,7 +1,5 @@
 "use strict";
 
-
-const error = require("../../../providers/errors/apiError");
 const { Button, createPostBackList, TextMessage, BUTTON_TYPE, MAX_LIMIT } = require("../../../platforms/generics");
 const utils = require("../../../utils/ovh");
 const Bluebird = require("bluebird").config({
@@ -40,11 +38,7 @@ module.exports = [
         portability: parsePortability(ovhClient, service),
         serviceInfos: ovhClient.requestPromised("GET", `/telephony/${service}/serviceInfos`)
       }))
-      .then(({ billing, portability, serviceInfos }) => ({ responses: telephonyDiag.telephonyDiag(billing, portability, serviceInfos, locale), feedback: true }))
-      .catch((err) => {
-        res.logger.error(err);
-        return Bluebird.reject(error(err));
-      });
+      .then(({ billing, portability, serviceInfos }) => ({ responses: telephonyDiag.telephonyDiag(billing, portability, serviceInfos, locale), feedback: true }));
     }
   },
   {

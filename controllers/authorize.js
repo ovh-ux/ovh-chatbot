@@ -3,6 +3,8 @@
 const config = require("../config/config-loader").load();
 const User = require("../models/users.model");
 const ovh = require("ovh");
+const error = require("../providers/errors/apiError");
+const logger = require("../providers/logging/logger");
 
 module.exports = function () {
   return {
@@ -50,9 +52,9 @@ module.exports = function () {
         })
         .then(() => res.redirect(consumerInfos.validationUrl))
         .catch(() => {
-          const errorApi = res.error(403, "Unable to connect");
+          const errorApi = error(403, "Unable to connect");
 
-          req.logger.error(errorApi);
+          logger.error(errorApi);
 
           return res.status(errorApi.statusCode, errorApi);
         });

@@ -8,6 +8,7 @@ const Bluebird = require("bluebird").config({
 });
 const translator = require("../../../utils/translator");
 const hostingDiagnostics = require("../../../diagnostics/hosting");
+const logger = require("../../../providers/logging/logger");
 
 module.exports = [
   {
@@ -27,7 +28,7 @@ module.exports = [
           return { responses: [createPostBackList(translator("hostingSelectSite", locale, 1, Math.ceil(buttons.length / MAX_LIMIT)), buttons, `MORE_ATTACHED_DOMAIN_${hosting}`, 0, MAX_LIMIT, locale)], feedback: false };
         })
         .catch((err) => {
-          res.logger.error(err);
+          logger.error(err);
 
           return Bluebird.reject(error(err.error || err.statusCode || 400, err));
         });
@@ -55,7 +56,7 @@ module.exports = [
         .then(({ hosting, attachedDomain, hostingEmails, ssl, dns }) => hostingDiagnostics.checkWebsite(res, hosting, attachedDomain, hostingEmails, ssl, dns, locale))
         .then((responses) => ({ responses, feedback: true }))
         .catch((err) => {
-          res.logger.error(err);
+          logger.error(err);
           if (err.error === 404 || err.statusCode === 404) {
             return Bluebird.reject(error(404, translator("hostingWrongSite", locale)));
           }
@@ -93,7 +94,7 @@ module.exports = [
           };
         })
         .catch((err) => {
-          res.logger.error(err);
+          logger.error(err);
           return Bluebird.reject(error(err.error || err.statusCode || 400, err));
         });
     }
@@ -111,7 +112,7 @@ module.exports = [
           return { responses: [createPostBackList(translator("hostingSelectHost", locale, Math.floor(1 + (currentIndex / MAX_LIMIT)), Math.ceil(eltInfos.length / 4)), eltInfos, "MORE_HOSTING", currentIndex, MAX_LIMIT, locale)], feedback: false };
         })
         .catch((err) => {
-          res.logger.error(err);
+          logger.error(err);
           return Bluebird.reject(error(err.error || err.statusCode || 400, err));
         });
     }

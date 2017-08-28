@@ -1,10 +1,10 @@
 "use strict";
 
-const error = require("../../../providers/errors/apiError");
 const { Button, createPostBackList, TextMessage, BUTTON_TYPE, MAX_LIMIT } = require("../../../platforms/generics");
 const utils = require("../../../utils/ovh");
 const Bluebird = require("bluebird");
 const xDSLDiag = require("../../../diagnostics/xdsl");
+const logger = require("../../../providers/logging/logger");
 
 const translator = require("../../../utils/translator");
 
@@ -43,11 +43,7 @@ module.exports = [
           })
         )
         .then(({ xdsl, serviceInfos, orderFollowUp, incident, diag, managerLink }) => xDSLDiag.checkxDSLDiag(xdsl, serviceInfos, orderFollowUp, incident, diag, managerLink, locale))
-        .then((responses) => Bluebird.resolve({ responses, feedback: true }))
-        .catch((err) => {
-          res.logger.error(err);
-          return Bluebird.reject(error(err));
-        });
+        .then((responses) => Bluebird.resolve({ responses, feedback: true }));
     }
   },
 
@@ -86,8 +82,8 @@ module.exports = [
         if (err.statusCode === 401 || err.errorCode === 401) {
           return Bluebird.resolve({ responses: [new TextMessage(translator("xdslQuotaReached", locale))] });
         }
-        res.logger.error(err);
-        return Bluebird.reject(error(err));
+        logger.error(err);
+        return Bluebird.reject(err);
       });
     }
   },
@@ -109,11 +105,7 @@ module.exports = [
         .then((buttons) => ({
           responses: [createPostBackList(translator("xdslSelect", locale, Math.floor(1 + (currentIndex / MAX_LIMIT)), Math.ceil(buttons.length / MAX_LIMIT)), buttons, "MORE_XDSL", currentIndex, MAX_LIMIT, locale)],
           feedback: false
-        }))
-        .catch((err) => {
-          res.logger.error(err);
-          return Bluebird.reject(error(err));
-        });
+        }));
     }
   }
 ];
