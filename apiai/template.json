@@ -166,7 +166,7 @@
         "ndh_question"
       ],
       "auto": true,
-      "priority": 500000
+      "priority": 0
     },
     "87": {
       "userSays": [
@@ -189,9 +189,11 @@
       "responses": [],
       "action": "good_answer",
       "contextAdd": {},
-      "contextNeed": [],
+      "contextNeed": [
+        "ndh_question"
+      ],
       "auto": false,
-      "priority": 500000
+      "priority": 0
     },
     "103": {
       "userSays": [
@@ -208,7 +210,7 @@
       },
       "contextNeed": [],
       "auto": true,
-      "priority": 500000
+      "priority": 0
     },
     "109": {
       "userSays": [
@@ -362,7 +364,9 @@
     "172": {
       "userSays": [
         "173",
-        "174"
+        "174",
+        "175",
+        "176"
       ],
       "responses": [],
       "action": "service_expires",
@@ -371,12 +375,11 @@
       "auto": true,
       "priority": 500000
     },
-    "175": {
+    "177": {
       "userSays": [
-        "176",
-        "177",
         "178",
-        "179"
+        "179",
+        "180"
       ],
       "responses": [],
       "action": "status_update",
@@ -385,16 +388,16 @@
       "auto": true,
       "priority": 500000
     },
-    "180": {
+    "181": {
       "userSays": [
-        "181",
         "182",
         "183",
         "184",
-        "185"
+        "185",
+        "186"
       ],
       "responses": [
-        "186"
+        "187"
       ],
       "action": "email_account_create",
       "contextAdd": {},
@@ -402,13 +405,13 @@
       "auto": true,
       "priority": 500000
     },
-    "187": {
+    "188": {
       "userSays": [
-        "188",
-        "189"
+        "189",
+        "190"
       ],
       "responses": [
-        "190"
+        "191"
       ],
       "action": "hosting_db_create",
       "contextAdd": {},
@@ -416,16 +419,16 @@
       "auto": true,
       "priority": 500000
     },
-    "191": {
+    "192": {
       "userSays": [
-        "192",
         "193",
         "194",
-        "195"
+        "195",
+        "196"
       ],
       "responses": [
-        "196",
-        "197"
+        "197",
+        "198"
       ],
       "action": "hosting_ftp_connect",
       "contextAdd": {},
@@ -433,18 +436,18 @@
       "auto": true,
       "priority": 500000
     },
-    "198": {
+    "199": {
       "userSays": [
-        "199",
         "200",
         "201",
         "202",
         "203",
         "204",
-        "205"
+        "205",
+        "206"
       ],
       "responses": [
-        "206"
+        "207"
       ],
       "action": "hosting_seo_partners",
       "contextAdd": {},
