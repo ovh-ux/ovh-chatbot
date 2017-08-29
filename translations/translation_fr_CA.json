@@ -66,7 +66,7 @@
   "upsellingWeb": "Tu peux commander un hébergement web en te rendant sur https://www.ovh.com/fr/hebergement-web/",
   "upsellingXDSL": "Tu peux commander une ligne xDSL en te rendant sur https://www.ovhtelecom.fr/offre-internet/",
   "upsellingPhone": "Tu peux commander une ligne téléphonique sur https://www.ovhtelecom.fr/telephonie/",
-  "welcome": "Bonjour, pour l'instant je ne peux te répondre que sur des informations concernant un dysfonctionnement sur ton site web ou sur ta ligne xDSL/Téléphonique. Voici des exemples de questions que tu peux me poser : • Mon site ne fonctionne plus • Comment je fais pour changer mes serveurs DNS de ma zone exemple.ovh ? • Comment je peux faire pointer mon domaine exemple.ovh sur mon hébergement web ? • Peux tu faire un diagnostic de ma ligne ADSL ? • Pourquoi je ne peux pas téléphoner ?",
+  "welcome": "Bonjour, pour l'instant je ne peux te répondre que sur des informations concernant un dysfonctionnement sur ton site web ou sur ta ligne xDSL/Téléphonique.\nVoici des exemples de questions que tu peux me poser :\n\t• Mon site ne fonctionne plus\n\t• Comment je fais pour changer mes serveurs DNS de ma zone exemple.ovh ?\n\t• Comment je peux faire pointer mon domaine exemple.ovh sur mon hébergement web ?\n\t• Peux tu faire un diagnostic de ma ligne ADSL ?\n\t• Pourquoi je ne peux pas téléphoner ?",
   "welcomeWeb": "Bienvenue %s, en quoi puis-je t'être utile ?",
   "xdslSelect": "Sélectionne ton offre xDSL (%1$s/%2$s)",
   "xdslNone": ":satellite: Il semblerait que tu n'as pas d'offre xDSL.",
@@ -147,8 +147,8 @@
   "xdsl-orderNotReady": "Ta commande n'est pas encore finalisée : %1$s Rends-toi dans ton espace client pour plus de détails :point_right: %2$s",
   "xdsl-lineSlamming": "Il semblerait qu'un autre opérateur ait ouvert une ligne par-dessus ta ligne actuelle",
   "xdsl-lineUnPaid": "Il semblerait que tu as oublié de payer. STP, rends-toi à l'espace client :point_right: https://www.ovhtelecom.fr/manager/index.html#/",
-  "xdsl-resultOk": "Nous n'avons détecté de problème ni sur ta facturation, ni sur ta ligne. :v: Tu peux te rendre dans ton espace client :point_right: %s",
-  "xdsl-resultAdvancedDiag": "Souhaites-tu faire un diagnostic plus précis de ton équipement :mag: ? :zap: Assure-toi d'avoir bien branché ta box :zap:",
+  "xdsl-resultOk": "Nous n'avons détecté de problème ni sur ta facturation, ni sur ta ligne. :v:\nTu peux te rendre dans ton espace client :point_right: %s",
+  "xdsl-resultAdvancedDiag": "Souhaites-tu faire un diagnostic plus précis de ton équipement :mag: ?\n\n:zap: Assure-toi d'avoir bien branché ta box :zap:",
   "xdsl-resultLastDiag": "Voici le résultat du dernier diagnostic réalisé.",
   "xdsl-resultDiagRemaining": "Tu peux encore effectuer %s diagnostic(s) aujourd'hui."
 }

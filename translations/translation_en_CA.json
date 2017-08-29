@@ -66,7 +66,7 @@
   "upsellingWeb": "You can order a web hosting service by going to https://www.ovh.com/fr/hebergement-web/",
   "upsellingXDSL": "You can order an xDSL line by going to https://www.ovhtelecom.fr/offre-internet/",
   "upsellingPhone": "You can order a phone line by going to https://www.ovhtelecom.fr/telephonie/",
-  "welcome": "Hello. At the moment, I can only answer questions regarding issues with your website or your xDSL/phone line. Here are some examples of questions you can ask me: • My website doesn’t work anymore • How can I change the DNS servers of my example.ovh zone? • How can I make my example.ovh domain point to my web hosting service? • Can you perform a diagnostic of my ADSL line? • Why can’t I make a phone call?",
+  "welcome": "Hello. At the moment, I can only answer questions regarding issues with your website or your xDSL/phone line.\nHere are some examples of questions you can ask me:\n\t• My website doesn’t work anymore\n\t• How can I change the DNS servers of my example.ovh zone?\n\t• How can I make my example.ovh domain point to my web hosting service?\n\t• Can you perform a diagnostic of my ADSL line?\n\t• Why can’t I make a phone call?",
   "welcomeWeb": "Welcome %s, how can I help you?",
   "xdslSelect": "Choose your xDSL offer (%1$s/%2$s)",
   "xdslNone": ":satellite: It seems you don’t have an xDSL plan",
@@ -147,8 +147,8 @@
   "xdsl-orderNotReady": "Your order hasn’t been finalized yet : %1$s Please go to your customer control panel for more information :point_right: %2$s",
   "xdsl-lineSlamming": "It seems that another operator has opened a line over your current one.",
   "xdsl-lineUnPaid": "It seems that you forgot to pay. Please log in to your customer control panel :point_right: https://www.ovhtelecom.fr/manager/index.html#/",
-  "xdsl-resultOk": "We didn’t detect any problems with billing or with your line. :v: You can go to your customer control panel :point_right: %s",
-  "xdsl-resultAdvancedDiag": "Do you want to run a more thorough diagnostic of your equipment :mag:? :zap: Make sure you plugged your box properly.",
+  "xdsl-resultOk": "We didn’t detect any problems with billing or with your line. :v:\nYou can go to your customer control panel :point_right: %s",
+  "xdsl-resultAdvancedDiag": "Do you want to run a more thorough diagnostic of your equipment :mag:?\n\n :zap: Make sure you plugged your box properly.",
   "xdsl-resultLastDiag": "Here’s the result of the last diagnostic performed.",
   "xdsl-resultDiagRemaining": "You can still run %s diagnostic(s) today."
 }
