@@ -22,6 +22,7 @@ class ServiceExpires {
         if (!responses.length) {
           responses = [new TextMessage(translator("expires-allOk", locale))];
         }
+        responses.push(new TextMessage(translator("serviceExpireInfo", locale)));
         return responses;
       })
       .then((responses) => {

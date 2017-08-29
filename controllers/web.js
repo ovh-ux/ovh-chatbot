@@ -9,17 +9,19 @@ const translator = require("../utils/translator");
 
 module.exports = () => {
   const sendQuickResponses = (res, nichandle, responses) =>
-    Bluebird.mapSeries(responses, (response) => {
+    ({ responses: responses.map((response) => {
       switch (response.type) {
       case 0: {
         const textResponse = response.speech.replace(/<(.*)\|+(.*)>/, "$1");
-        return Bluebird.resolve({ responses: [textResponse] });
+        return new TextMessage(textResponse);
       }
       default: {
         const textResponse = response.speech.replace(/<(.*)\|+(.*)>/, "$1");
-        return Bluebird.resolve({ responses: [textResponse] });
+        return new TextMessage(textResponse);
       }
       }
+    }),
+      feedback: true
     });
 
   const postbackReceived = (res, nichandle, payload, locale) =>

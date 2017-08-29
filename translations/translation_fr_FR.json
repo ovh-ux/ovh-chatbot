@@ -58,6 +58,7 @@
   "off": "Desactivé",
   "preferences": "Préférences",
   "serviceInfo": ":pushpin: %1$s:\n%2$s",
+  "serviceExpireInfo": "Tu peux gérer le renouvellement automatique de tes services ici :point_right: https://www.ovh.com/manager/dedicated/index.html#/billing/autoRenew",
   "serviceHasExpired": "\t• Le service \"%1$s\" (état actuel: %2$s) est expiré depuis %3$s jour(s) (%4$s)",
   "serviceWillExpired": "\t• Le service \"%1$s\" (état actuel: %2$s) va expiré dans %3$s jour(s) (%4$s)",
   "service-ok": "En fonctionement",

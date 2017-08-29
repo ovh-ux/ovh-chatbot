@@ -84,7 +84,9 @@ Have a look at the [Contributing section](CONTRIBUTING.md). If you have any ques
 + Refactor to typescript
 + Docker compose
 + Documentation
-+ Cloud diagnostics
++ Cloud diagnostics (vps)
++ Order followup
++ Improve conversation skill
 
 ## License
 See https://github.com/ovh-ux/ovh-chatbot/blob/master/LICENSE
