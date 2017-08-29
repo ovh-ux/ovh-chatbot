@@ -2,18 +2,18 @@
 
 const { emojify } = require("node-emoji");
 const { BUTTON_TYPE } = require("../generics");
-const responsesCst = require("../../constants/responses").FR;
+const translator = require("../../utils/translator");
 
-function textMessageAdapter (channel, message, ts = "") {
+function textMessageAdapter (channel, message, ts = "", locale = "en_US") {
   return {
     channel,
     ts,
     attachments: JSON.stringify([{
-      author_name: responsesCst.slackAuthor,
-      author_icon: responsesCst.slackImg,
-      author_link: responsesCst.slackLink,
-      fallback: responsesCst.slackFallback,
-      color: responsesCst.slackColor,
+      author_name: translator("slackAuthor", locale),
+      author_icon: translator("slackImg", locale),
+      author_link: translator("slackLink", locale),
+      fallback: translator("slackFallback", locale),
+      color: translator("slackColor", locale),
       text: emojify(message.text || message)
     }])
   };
@@ -37,7 +37,7 @@ function buttonAdapter (button) {
   }
 }
 
-function buttonsMessageAdapter (channel, buttonList, ts = "") {
+function buttonsMessageAdapter (channel, buttonList, ts = "", locale = "en_US") {
   let text = emojify(`${buttonList.text}\n`);
   const actions = buttonList.attachments.buttons.map(buttonAdapter).filter((button) => {
     if (typeof button === "string") {
@@ -53,11 +53,11 @@ function buttonsMessageAdapter (channel, buttonList, ts = "") {
     ts,
     attachments: JSON.stringify([
       {
-        author_name: responsesCst.slackAuthor,
-        author_icon: responsesCst.slackImg,
-        author_link: responsesCst.slackLink,
-        fallback: responsesCst.slackFallback,
-        color: responsesCst.slackColor,
+        author_name: translator("slackAuthor", locale),
+        author_icon: translator("slackImg", locale),
+        author_link: translator("slackLink", locale),
+        fallback: translator("slackFallback", locale),
+        color: translator("slackColor", locale),
         text,
         callback_id: "button_list",
         attachment_type: "default",

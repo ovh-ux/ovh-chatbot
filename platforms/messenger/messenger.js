@@ -6,6 +6,7 @@ const config = require("../../config/config-loader").load();
 const { emojify } = require("node-emoji");
 const { ButtonsListMessage, ButtonsMessage, TextMessage } = require("../generics");
 const { textMessageAdapter, buttonsListMessageAdapter, buttonsMessageAdapter } = require("./messenger_adapters");
+const logger = require("../../providers/logging/logger");
 
 /*
  * Be sure to setup your config values before running this code. You can
@@ -19,6 +20,47 @@ const PAGE_ACCESS_TOKEN = config.facebook.pageAccessToken;
 // URL where the app is running (include protocol). Used to point to scripts and
 // assets located at this address.
 // const SERVER_URL = config.server.url;
+
+
+function callFacebookAPI (requestObject) {
+  return new Bluebird((resolve) => {
+    request(requestObject, (error, response, body) => {
+      if (!error && response.statusCode === 200) {
+        const recipientId = body.recipient_id;
+        const messageId = body.message_id;
+
+        if (messageId) {
+          logger.debug("Successfully sent message %s to recipient %s", messageId, recipientId);
+        } else {
+          logger.debug("Successfully called FB API at: %s", requestObject.uri);
+        }
+      } else {
+        logger.error("Failed calling Send API", response.statusCode, response.statusMessage, body.error);
+      }
+
+      return resolve(body);
+    });
+  });
+}
+
+const getUserProfile = (userid) => callFacebookAPI({
+  uri: `https://graph.facebook.com/v2.6/${userid}`,
+  qs: { access_token: PAGE_ACCESS_TOKEN },
+  method: "GET"
+});
+
+
+/*
+ * Call the Send API. The message data goes in the body. If successful, we"ll
+ * get the message id in a response
+ *
+ */
+const sendMessageToAPI = (messageData) => callFacebookAPI({
+  uri: "https://graph.facebook.com/v2.6/me/messages",
+  qs: { access_token: PAGE_ACCESS_TOKEN },
+  method: "POST",
+  json: messageData
+});
 
 /*
  * Authorization Event
@@ -40,7 +82,7 @@ function receivedAuthentication (event) {
   // plugin.
   const passThroughParam = event.optin.ref;
 
-  console.log("Received authentication for user %d and page %d with pass through param '%s' at %d", senderID, recipientID, passThroughParam, timeOfAuth);
+  logger.debug("Received authentication for user %d and page %d with pass through param '%s' at %d", senderID, recipientID, passThroughParam, timeOfAuth);
 
   // When an authentication is received, we"ll send a message back to the sender
   // to let them know it was successful.
@@ -65,11 +107,11 @@ function receivedDeliveryConfirmation (event) {
 
   if (messageIDs) {
     messageIDs.forEach((messageID) => {
-      console.log("Received delivery confirmation for message ID: %s", messageID);
+      logger.debug("Received delivery confirmation for message ID: %s", messageID);
     });
   }
 
-  console.log("All message before %d were delivered.", watermark);
+  logger.debug("All message before %d were delivered.", watermark);
 }
 
 /*
@@ -88,7 +130,7 @@ function receivedPostback (event) {
   // button for Structured Messages.
   const payload = event.postback.payload;
 
-  console.log("Received postback for user %d and page %d with payload '%s' at %d", senderID, recipientID, payload, timeOfPostback);
+  logger.debug("Received postback for user %d and page %d with payload '%s' at %d", senderID, recipientID, payload, timeOfPostback);
 
   // When a postback is called, we"ll send a message back to the sender to
   // let them know it was successful
@@ -110,7 +152,7 @@ function receivedMessageRead (event) {
   const watermark = event.read.watermark;
   const sequenceNumber = event.read.seq;
 
-  console.log("Received message read event for watermark %d and sequence number %d", watermark, sequenceNumber);
+  logger.debug("Received message read event for watermark %d and sequence number %d", watermark, sequenceNumber);
 }
 
 /*
@@ -129,7 +171,7 @@ function receivedAccountLink (event) {
   const status = event.account_linking.status;
   const authCode = event.account_linking.authorization_code;
 
-  console.log("Received account link event with for user %d with status %s and auth code %s ", senderID, status, authCode);
+  logger.debug("Received account link event with for user %d with status %s and auth code %s ", senderID, status, authCode);
 }
 
 /*
@@ -151,7 +193,7 @@ function receivedAccountLink (event) {
 //     }
 //   };
 //
-//   callSendAPI(messageData);
+//   sendMessageToAPI(messageData);
 // }
 
 /*
@@ -173,7 +215,7 @@ function receivedAccountLink (event) {
 //     }
 //   };
 //
-//   callSendAPI(messageData);
+//   sendMessageToAPI(messageData);
 // }
 
 /*
@@ -195,7 +237,7 @@ function receivedAccountLink (event) {
 //     }
 //   };
 //
-//   callSendAPI(messageData);
+//   sendMessageToAPI(messageData);
 // }
 
 /*
@@ -217,7 +259,7 @@ function receivedAccountLink (event) {
 //     }
 //   };
 //
-//   callSendAPI(messageData);
+//   sendMessageToAPI(messageData);
 // }
 
 /*
@@ -239,7 +281,7 @@ function receivedAccountLink (event) {
 //     }
 //   };
 //
-//   callSendAPI(messageData);
+//   sendMessageToAPI(messageData);
 // }
 
 /*
@@ -260,7 +302,7 @@ function sendTextMessage (recipientId, messageText) {
     }
   };
 
-  return callSendAPI(messageData);
+  return sendMessageToAPI(messageData);
 }
 
 /*
@@ -280,7 +322,7 @@ function sendButtonMessage (recipientId, buttonMessage) {
     }
   };
 
-  callSendAPI(messageData);
+  sendMessageToAPI(messageData);
 }
 
 /*
@@ -301,7 +343,7 @@ function sendButtonMessage (recipientId, buttonMessage) {
 //     }
 //   };
 //
-//   return callSendAPI(messageData);
+//   return sendMessageToAPI(messageData);
 // }
 
 /*
@@ -324,7 +366,7 @@ function sendButtonMessage (recipientId, buttonMessage) {
 //     }
 //   };
 //
-//   callSendAPI(messageData);
+//   sendMessageToAPI(messageData);
 // }
 
 /*
@@ -396,7 +438,7 @@ function sendButtonMessage (recipientId, buttonMessage) {
 //     }
 //   };
 //
-//   callSendAPI(messageData);
+//   sendMessageToAPI(messageData);
 // }
 
 /*
@@ -411,7 +453,7 @@ function sendQuickReply (recipientId, message) {
     message
   };
 
-  callSendAPI(messageData);
+  sendMessageToAPI(messageData);
 }
 
 /*
@@ -428,7 +470,7 @@ function sendQuickReply (recipientId, message) {
 //     sender_action: "mark_seen"
 //   };
 //
-//   callSendAPI(messageData);
+//   sendMessageToAPI(messageData);
 // }
 
 /*
@@ -445,7 +487,7 @@ function sendQuickReply (recipientId, message) {
 //     sender_action: "typing_on"
 //   };
 //
-//   callSendAPI(messageData);
+//   sendMessageToAPI(messageData);
 // }
 
 /*
@@ -462,7 +504,7 @@ function sendQuickReply (recipientId, message) {
 //     sender_action: "typing_off"
 //   };
 //
-//   callSendAPI(messageData);
+//   sendMessageToAPI(messageData);
 // }
 
 /*
@@ -490,42 +532,9 @@ function sendQuickReply (recipientId, message) {
 //     }
 //   };
 //
-//   callSendAPI(messageData);
+//   sendMessageToAPI(messageData);
 // }
 
-/*
- * Call the Send API. The message data goes in the body. If successful, we"ll
- * get the message id in a response
- *
- */
-function callSendAPI (messageData) {
-  return new Bluebird((resolve) => {
-    request(
-      {
-        uri: "https://graph.facebook.com/v2.6/me/messages",
-        qs: { access_token: PAGE_ACCESS_TOKEN },
-        method: "POST",
-        json: messageData
-      },
-      (error, response, body) => {
-        if (!error && response.statusCode === 200) {
-          const recipientId = body.recipient_id;
-          const messageId = body.message_id;
-
-          if (messageId) {
-            console.log("Successfully sent message with id %s to recipient %s", messageId, recipientId);
-          } else {
-            console.log("Successfully called Send API for recipient %s", recipientId);
-          }
-        } else {
-          console.error("Failed calling Send API", response.statusCode, response.statusMessage, body.error);
-        }
-
-        return resolve({ body, message: messageData.message });
-      }
-    );
-  });
-}
 
 function send (recipientId, message) {
   if (typeof message === "string") {
@@ -544,7 +553,7 @@ function send (recipientId, message) {
     return sendButtonMessage(recipientId, buttonsMessageAdapter(message));
   }
 
-  return callSendAPI(message);
+  return sendMessageToAPI(message);
 }
 
 module.exports = {
@@ -553,5 +562,6 @@ module.exports = {
   receivedPostback,
   receivedMessageRead,
   receivedAccountLink,
-  send
+  send,
+  getUserProfile
 };

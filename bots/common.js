@@ -5,10 +5,10 @@ const messageActions = require("./messageTypes/message");
 const Bluebird = require("bluebird");
 const Users = require("../models/users.model");
 const { TextMessage } = require("../platforms/generics");
-const responsesCst = require("../constants/responses").FR;
+const translator = require("../utils/translator");
 
 module.exports = () => ({
-  ask (type, senderId, message, intent, entities, res) {
+  ask (type, senderId, message, intent, entities, res, locale) {
     Users.where({ senderId }).update({ $inc: { messageNumber: 1 } }).exec();
 
     switch (type) {
@@ -17,20 +17,20 @@ module.exports = () => ({
 
       postbackActions.some((postback) => {
         if (message.match(new RegExp(postback.regx))) {
-          promise = postback.action(senderId, message, postback.regx, entities, res);
+          promise = postback.action(senderId, message, postback.regx, entities, res, locale);
           return true;
         }
         return false;
       });
 
-      return promise.catch(isDisconnected);
+      return promise.catch((err) => isDisconnected(err, locale));
     }
     case "message": {
       if (!messageActions[intent] || !messageActions[intent].action) {
-        return Bluebird.resolve({ responses: [new TextMessage(responsesCst.noAnswer)], feedback: false });
+        return Bluebird.resolve({ responses: [new TextMessage(translator("noAnswer", locale))], feedback: false });
       }
 
-      return messageActions[intent].action(senderId, message, entities, res).catch(isDisconnected);
+      return messageActions[intent].action(senderId, message, entities, res, locale).catch((err) => isDisconnected(err, locale));
     }
     default:
       return null;
@@ -38,10 +38,10 @@ module.exports = () => ({
   }
 });
 
-function isDisconnected (err) {
+function isDisconnected (err, locale) {
   let error;
   if (err.statusCode === 403 || err.statusCode === 401) {
-    error = Object.assign({}, err, { message: responsesCst.disconnected });
+    error = Object.assign({}, err, { message: translator("disconnected", locale) });
   } else {
     error = err;
   }

@@ -71,6 +71,10 @@ $ curl -X POST -H "Content-Type: application/json" -d '{
 
 + Go on [this page](https://api.ovh.com) and click on [**First steps with the OVH API**](https://api.ovh.com/g934.first_step_with_api) to create an application and save the application key and secret in env variable `OVH_KEY` and `OVH_SECRET`
 
+### Translations
+
++ For the api.ai agent translation: Have a look at [tools](./tools)
++ For the bot translation: Have a look at [translations](./translations)
 
 ### List of all the Enviroment Variables used:
 

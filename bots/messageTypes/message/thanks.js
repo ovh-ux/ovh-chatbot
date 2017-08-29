@@ -2,11 +2,11 @@
 
 const Bluebird = require("bluebird");
 const { TextMessage } = require("../../../platforms/generics");
-const responsesCst = require("../../../constants/responses").FR;
+const translator = require("../../../utils/translator");
 
 class Thanks {
-  static action () {
-    return Bluebird.resolve({ responses: [new TextMessage(responsesCst.thanks)], feedback: false });
+  static action (senderId, message, entities, res, locale) {
+    return Bluebird.resolve({ responses: [new TextMessage(translator("thanks", locale))], feedback: false });
   }
 }
 

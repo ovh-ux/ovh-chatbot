@@ -1,6 +1,7 @@
 "use strict";
 
 const crypto = require("crypto");
+const logger = require("../../providers/logging/logger");
 
 //  * Verify that the callback came from Facebook. Using the App Secret from
 //  * the App Dashboard, we can verify the signature that is sent with each
@@ -15,10 +16,10 @@ module.exports = (config) => function verifyRequestSignature (req, res, buf) {
         // For testing, let's log an error. In production, you should throw an
         // error.
       if (process.env.NODE_ENV !== "development") {
-        console.error("Request Invalid:", req.method, req.originalUrl, "From:", req.ip);
+        logger.error("Request Invalid:", req.method, req.originalUrl, "From:", req.ip);
         throw new Error("Couldn't validate the request signature.", req);
       }
-      console.error("Couldn't validate the signature.");
+      logger.error("Couldn't validate the signature.");
 
     } else {
       const elements = signature.split("=");

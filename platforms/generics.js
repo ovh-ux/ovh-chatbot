@@ -1,7 +1,8 @@
 "use strict";
 
-const responsesCst = require("../constants/responses").FR;
-const v = require("voca");
+const { camelCase } = require("lodash");
+const translator = require("../utils/translator");
+const config = require("../config/config-loader").load();
 
 const BUTTON_TYPE = {
   URL: "web_url",
@@ -61,9 +62,9 @@ class ButtonsListMessage {
   }
 }
 
-function createPostBackList (text, listInfos, morePayload, offset, limit) {
+function createPostBackList (text, listInfos, morePayload, offset, limit, locale = "en_US") {
   const buttons = listInfos.slice(offset, limit + offset);
-  const moreButton = offset + limit >= listInfos.length ? null : new Button(BUTTON_TYPE.MORE, `${morePayload}_${offset + limit}`, v.sprintf(responsesCst.moreButton, listInfos.length - (offset + limit)));
+  const moreButton = offset + limit >= listInfos.length ? null : new Button(BUTTON_TYPE.MORE, `${morePayload}_${offset + limit}`, translator("moreButton", locale, listInfos.length - (offset + limit)));
 
 
   if (limit > MAX_LIMIT) {
@@ -77,12 +78,28 @@ function createPostBackList (text, listInfos, morePayload, offset, limit) {
   return new ButtonsListMessage(text, buttons);
 }
 
+function createFeedback (intent, messageRaw, locale) {
+  const message = messageRaw.length >= config.maxMessageLength ? config.maxMessageLengthString : messageRaw;
+
+  if (intent === "unknown") {
+    return null;
+  }
+
+  const buttons = [
+    new Button(BUTTON_TYPE.POSTBACK, `FEEDBACK_MISUNDERSTOOD_${camelCase(intent)}_${message}`, translator("feedbackBadUnderstanding", locale)),
+    new Button(BUTTON_TYPE.POSTBACK, `FEEDBACK_BAD_${camelCase(intent)}_${message}`, translator("feedbackNo", locale)),
+    new Button(BUTTON_TYPE.POSTBACK, `FEEDBACK_GOOD_${camelCase(intent)}_${message}`, translator("feedbackYes", locale))
+  ];
+  return new ButtonsListMessage(translator("feedbackHelp", locale), buttons);
+}
+
 module.exports = {
   TextMessage,
   Button,
   ButtonsMessage,
   ButtonsListMessage,
   createPostBackList,
+  createFeedback,
   BUTTON_TYPE,
   MAX_LIMIT
 };

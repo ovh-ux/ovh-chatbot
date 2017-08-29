@@ -3,9 +3,25 @@
 const Bluebird = require("bluebird");
 const request = require("request");
 const WebAuth = require("../../models/webAuth.model");
+const logger = require("../../providers/logging/logger");
+const config = require("../config-loader").load();
+const cache = require("memory-cache");
 
 module.exports = () =>
   function (req, res, next) {
+    let user;
+
+    if (!req.cookies.SESSION) {
+      return res.status(400).json("Session is missing");
+    }
+
+    user = cache.get(req.cookies.SESSION);
+
+    if (user) {
+      req.user = JSON.parse(user);
+      return next();
+    }
+
     const options = {
       uri: "https://www.ovh.com/engine/apiv6/me",
       json: true,
@@ -25,6 +41,7 @@ module.exports = () =>
         if (err || resp.statusCode >= 400) {
           return reject(resp && resp.statusCode ? { statusCode: resp.statusCode, data: body } : { statusCode: 500, data: err });
         }
+        cache.put(req.cookies.SESSION, JSON.stringify(body), config.web.cacheTime); // Cache the response for the next 2000 ms
         return resolve(body);
       });
     })
@@ -40,7 +57,7 @@ module.exports = () =>
       })
       .then(() => next())
       .catch((err) => {
-        console.log(err);
+        logger.error(err);
         const errorApi = res.error(err.statusCode, err.data ? err.data.message : err);
         return res.status(errorApi.statusCode).json(errorApi);
       });

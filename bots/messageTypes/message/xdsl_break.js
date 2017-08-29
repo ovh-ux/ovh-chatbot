@@ -1,14 +1,14 @@
 "use strict";
 
 const error = require("../../../providers/errors/apiError");
-const utils = require("../../utils");
+const utils = require("../../../utils/ovh");
 const Bluebird = require("bluebird");
 const { TextMessage, Button, createPostBackList, BUTTON_TYPE, MAX_LIMIT } = require("../../../platforms/generics");
-const responsesCst = require("../../../constants/responses").FR;
-const { sprintf } = require("voca");
+const translator = require("../../../utils/translator");
+
 
 class XdslBreak {
-  static action (senderId) {
+  static action (senderId, message, entities, res, locale) {
     let ovhClient;
     return utils
       .getOvhClient(senderId)
@@ -20,8 +20,8 @@ class XdslBreak {
           .then((xdslInfo) => new Button(BUTTON_TYPE.POSTBACK, `XDSL_SELECTED_${xdslInfo.accessName}`, xdslInfo.description || offer))
       )
       .then((buttons) => ({
-        responses: buttons.length > 0 ? [createPostBackList(sprintf(responsesCst.xdslSelect, 1, Math.ceil(buttons.length / MAX_LIMIT)), buttons, "MORE_XDSL", 0, MAX_LIMIT)] :
-          [new TextMessage(responsesCst.xdslNone), new TextMessage(responsesCst.upsellingXDSL)],
+        responses: buttons.length > 0 ? [createPostBackList(translator("xdslSelect", locale, 1, Math.ceil(buttons.length / MAX_LIMIT)), buttons, "MORE_XDSL", 0, MAX_LIMIT, locale)] :
+          [new TextMessage(translator("xdslNone", locale)), new TextMessage(translator("upsellingXDSL", locale))],
         feedback: false
       }))
       .catch((err) => Bluebird.reject(error(err.error || err.statusCode || 400, err)));

@@ -1,0 +1,445 @@
+{
+  "entities": {
+    "1": [
+      "2",
+      "3",
+      "4",
+      "5",
+      "6",
+      "7",
+      "8"
+    ],
+    "9": [
+      "10",
+      "11",
+      "12",
+      "13",
+      "14",
+      "15",
+      "16",
+      "17",
+      "18",
+      "19",
+      "20",
+      "21",
+      "22",
+      "23",
+      "24"
+    ],
+    "25": [
+      "26",
+      "27",
+      "28",
+      "29",
+      "30"
+    ],
+    "31": [
+      "32",
+      "33",
+      "34",
+      "35",
+      "36",
+      "37",
+      "38",
+      "39",
+      "40"
+    ]
+  },
+  "intents": {
+    "41": {
+      "userSays": [],
+      "responses": [
+        "42",
+        "43",
+        "44"
+      ],
+      "action": "unknown",
+      "contextAdd": {},
+      "contextNeed": [],
+      "auto": false,
+      "priority": 500000
+    },
+    "45": {
+      "userSays": [
+        "46",
+        "47",
+        "48",
+        "49",
+        "50"
+      ],
+      "responses": [],
+      "action": "welcome",
+      "contextAdd": {},
+      "contextNeed": [],
+      "auto": true,
+      "priority": 500000
+    },
+    "51": {
+      "userSays": [
+        "52",
+        "53",
+        "54",
+        "55",
+        "56"
+      ],
+      "responses": [
+        "57",
+        "58",
+        "59"
+      ],
+      "action": "thanks",
+      "contextAdd": {},
+      "contextNeed": [],
+      "auto": true,
+      "priority": 500000
+    },
+    "60": {
+      "userSays": [
+        "61",
+        "62",
+        "63"
+      ],
+      "responses": [
+        "64",
+        "65",
+        "66"
+      ],
+      "action": "hosting_commerciale_activerstart10m",
+      "contextAdd": {},
+      "contextNeed": [],
+      "auto": true,
+      "priority": 500000
+    },
+    "67": {
+      "userSays": [
+        "68",
+        "69",
+        "70",
+        "71"
+      ],
+      "responses": [],
+      "action": "dns_server_config",
+      "contextAdd": {},
+      "contextNeed": [],
+      "auto": true,
+      "priority": 500000
+    },
+    "72": {
+      "userSays": [
+        "73",
+        "74"
+      ],
+      "responses": [],
+      "action": "domain_to_hosting",
+      "contextAdd": {},
+      "contextNeed": [],
+      "auto": true,
+      "priority": 500000
+    },
+    "75": {
+      "userSays": [
+        "76",
+        "77",
+        "78",
+        "79",
+        "80",
+        "81"
+      ],
+      "responses": [],
+      "action": "website_break",
+      "contextAdd": {},
+      "contextNeed": [],
+      "auto": true,
+      "priority": 500000
+    },
+    "82": {
+      "userSays": [
+        "83",
+        "84",
+        "85"
+      ],
+      "responses": [
+        "86"
+      ],
+      "contextAdd": {},
+      "contextNeed": [
+        "ndh_question"
+      ],
+      "auto": true,
+      "priority": 0
+    },
+    "87": {
+      "userSays": [
+        "88",
+        "89",
+        "90",
+        "91",
+        "92",
+        "93",
+        "94",
+        "95",
+        "96",
+        "97",
+        "98",
+        "99",
+        "100",
+        "101",
+        "102"
+      ],
+      "responses": [],
+      "action": "good_answer",
+      "contextAdd": {},
+      "contextNeed": [
+        "ndh_question"
+      ],
+      "auto": false,
+      "priority": 0
+    },
+    "103": {
+      "userSays": [
+        "104",
+        "105",
+        "106",
+        "107",
+        "108"
+      ],
+      "responses": [],
+      "action": "ndh_question",
+      "contextAdd": {
+        "ndh_question": 10
+      },
+      "contextNeed": [],
+      "auto": true,
+      "priority": 0
+    },
+    "109": {
+      "userSays": [
+        "110",
+        "111",
+        "112",
+        "113",
+        "114",
+        "115",
+        "116",
+        "117",
+        "118",
+        "119"
+      ],
+      "responses": [],
+      "action": "telephony_break",
+      "contextAdd": {},
+      "contextNeed": [],
+      "auto": true,
+      "priority": 500000
+    },
+    "120": {
+      "userSays": [
+        "121",
+        "122",
+        "123",
+        "124",
+        "125",
+        "126",
+        "127",
+        "128",
+        "129",
+        "130",
+        "131",
+        "132",
+        "133"
+      ],
+      "responses": [],
+      "action": "xdsl_break",
+      "contextAdd": {},
+      "contextNeed": [],
+      "auto": true,
+      "priority": 500000
+    },
+    "134": {
+      "userSays": [
+        "135",
+        "136",
+        "137",
+        "138"
+      ],
+      "responses": [
+        "139"
+      ],
+      "action": "account_become_client",
+      "contextAdd": {},
+      "contextNeed": [],
+      "auto": true,
+      "priority": 500000
+    },
+    "140": {
+      "userSays": [
+        "141",
+        "142",
+        "143"
+      ],
+      "responses": [
+        "144"
+      ],
+      "action": "transverse_compte_devenirclient",
+      "contextAdd": {},
+      "contextNeed": [],
+      "auto": true,
+      "priority": 500000
+    },
+    "145": {
+      "userSays": [
+        "146",
+        "147",
+        "148"
+      ],
+      "responses": [],
+      "action": "connection",
+      "contextAdd": {},
+      "contextNeed": [],
+      "auto": true,
+      "priority": 500000
+    },
+    "149": {
+      "userSays": [
+        "150",
+        "151",
+        "152",
+        "153"
+      ],
+      "responses": [],
+      "action": "who_am_i",
+      "contextAdd": {},
+      "contextNeed": [],
+      "auto": true,
+      "priority": 500000
+    },
+    "154": {
+      "userSays": [
+        "155",
+        "156",
+        "157"
+      ],
+      "responses": [
+        "158"
+      ],
+      "action": "transverse_culture_postuler",
+      "contextAdd": {},
+      "contextNeed": [],
+      "auto": true,
+      "priority": 500000
+    },
+    "159": {
+      "userSays": [
+        "160",
+        "161",
+        "162",
+        "163"
+      ],
+      "responses": [
+        "164"
+      ],
+      "action": "billing_show_bill",
+      "contextAdd": {},
+      "contextNeed": [],
+      "auto": true,
+      "priority": 500000
+    },
+    "165": {
+      "userSays": [
+        "166",
+        "167",
+        "168",
+        "169",
+        "170"
+      ],
+      "responses": [
+        "171"
+      ],
+      "action": "tranverse_facture_dateexpiration",
+      "contextAdd": {},
+      "contextNeed": [],
+      "auto": true,
+      "priority": 500000
+    },
+    "172": {
+      "userSays": [
+        "173",
+        "174",
+        "175"
+      ],
+      "responses": [],
+      "action": "status_update",
+      "contextAdd": {},
+      "contextNeed": [],
+      "auto": true,
+      "priority": 500000
+    },
+    "176": {
+      "userSays": [
+        "177",
+        "178",
+        "179",
+        "180",
+        "181"
+      ],
+      "responses": [
+        "182"
+      ],
+      "action": "email_account_create",
+      "contextAdd": {},
+      "contextNeed": [],
+      "auto": true,
+      "priority": 500000
+    },
+    "183": {
+      "userSays": [
+        "184",
+        "185"
+      ],
+      "responses": [
+        "186"
+      ],
+      "action": "hosting_db_create",
+      "contextAdd": {},
+      "contextNeed": [],
+      "auto": true,
+      "priority": 500000
+    },
+    "187": {
+      "userSays": [
+        "188",
+        "189",
+        "190",
+        "191"
+      ],
+      "responses": [
+        "192",
+        "193"
+      ],
+      "action": "hosting_ftp_connect",
+      "contextAdd": {},
+      "contextNeed": [],
+      "auto": true,
+      "priority": 500000
+    },
+    "194": {
+      "userSays": [
+        "195",
+        "196",
+        "197",
+        "198",
+        "199",
+        "200",
+        "201"
+      ],
+      "responses": [
+        "202"
+      ],
+      "action": "hosting_seo_partners",
+      "contextAdd": {},
+      "contextNeed": [],
+      "auto": true,
+      "priority": 500000
+    }
+  }
+}

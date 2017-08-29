@@ -4,9 +4,8 @@ const web = require("../platforms/web/web");
 const bot = require("../bots/common")();
 const apiai = require("../utils/apiai");
 const Bluebird = require("bluebird");
-const { sprintf } = require("voca");
 const { TextMessage } = require("../platforms/generics");
-const responsesCst = require("../constants/responses").FR;
+const translator = require("../utils/translator");
 
 module.exports = () => {
   const sendQuickResponses = (res, nichandle, responses) =>
@@ -23,9 +22,9 @@ module.exports = () => {
       }
     });
 
-  const postbackReceived = (res, nichandle, payload) =>
+  const postbackReceived = (res, nichandle, payload, locale) =>
     bot
-      .ask("postback", nichandle, payload, null, null, res)
+      .ask("postback", nichandle, payload, null, null, res, locale)
       .then((answer) => {
         answer.intent = payload;
         answer.message = "message";
@@ -33,19 +32,18 @@ module.exports = () => {
       })
       .catch((err) => Bluebird.resolve(err));
 
-  const messageReceived = (res, nic, message) =>
-    apiai
-      .textRequestAsync(message, { sessionId: nic })
+  const messageReceived = (res, nic, message, locale) =>
+      apiai.textRequestAsync(message, { sessionId: nic }, locale)
       .then((resp) => {
         const nichandle = resp.sessionId;
         if (resp.status && resp.status.code === 200 && resp.result) {
           // successful request
           if (resp.result.action === "welcome") {
-            return Bluebird.resolve({ responses: [new TextMessage(responsesCst.welcome)], feedback: false });
+            return Bluebird.resolve({ responses: [new TextMessage(translator("welcome", locale))], feedback: false });
           }
 
           if (resp.result.action === "connection") {
-            return Bluebird.resolve({ responses: [new TextMessage(sprintf(responsesCst.connectedAs, nichandle))], feedback: false });
+            return Bluebird.resolve({ responses: [new TextMessage(translator("connectedAs", locale, nichandle))], feedback: false });
           }
 
           // if api.ai has a premade response
@@ -78,7 +76,8 @@ module.exports = () => {
               message,
               resp.result.action,
               resp.result.parameters,
-              res
+              res,
+              locale
             )
             .then((result) => {
               result.intent = resp.result.action;
@@ -92,11 +91,11 @@ module.exports = () => {
 
   function onGet (req, res) {
     const nichandle = req.user.nichandle;
-    return web
-      .getHistory(res, nichandle)
+    let locale = req.user.language;
+    return web.getHistory(res, nichandle)
       .then((result) => {
         if (!result.length) {
-          web.send(null, nichandle, sprintf(responsesCst.welcomeWeb, nichandle));
+          web.send(null, nichandle, translator("welcomeWeb", locale, nichandle));
         }
         return res.status(200).json(result);
       })
@@ -106,6 +105,7 @@ module.exports = () => {
   function onPost (req, res) {
     const message = req.body.message;
     const nichandle = req.user.nichandle;
+    const locale = req.user.language;
     const type = req.body.type;
 
     // check the data sent first;
@@ -135,18 +135,18 @@ module.exports = () => {
       .pushToHistory(nichandle, userMsg)
       .then(() => {
         if (type === "message") {
-          return messageReceived(res, nichandle, message);
+          return messageReceived(res, nichandle, message, locale);
         } else if (type === "postback") {
-          return postbackReceived(res, nichandle, message);
+          return postbackReceived(res, nichandle, message, locale);
         }
         throw new Error(`unknown type, ${type}`);
       })
       .then((result) => {
         // if result.responses then the origin is the bot, ie there might be a feedback request
         if (result.responses) {
-          return web.send(res, nichandle, result.responses, result);
+          return web.send(res, nichandle, result.responses, result, locale);
         }
-        return web.send(res, nichandle, result);
+        return web.send(res, nichandle, result, locale);
       })
       .then((result) => res.status(200).json(result))
       .catch((err) => {

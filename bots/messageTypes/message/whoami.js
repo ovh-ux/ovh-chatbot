@@ -2,17 +2,16 @@
 
 const Bluebird = require("bluebird");
 const { TextMessage } = require("../../../platforms/generics");
-const utils = require("../../utils");
-const responsesCst = require("../../../constants/responses").FR;
-const { sprintf } = require("voca");
+const utils = require("../../../utils/ovh");
+const translator = require("../../../utils/translator");
 
 class WhoAmI {
-  static action (senderId) {
+  static action (senderId, message, entities, res, locale) {
     return utils
       .getOvhClient(senderId)
       .then((ovhClient) => ovhClient.requestPromised("GET", "/me"))
-      .then((me) => ({ responses: [new TextMessage(sprintf(responsesCst.connectedAs, me.nichandle))], feedback: false }))
-      .catch(() => Bluebird.resolve({ responses: [new TextMessage(responsesCst.notConnected)], feedback: false }));
+      .then((me) => ({ responses: [new TextMessage(translator("connectedAs", locale, me.nichandle))], feedback: false }))
+      .catch(() => Bluebird.resolve({ responses: [new TextMessage(translator("notConnected", locale))], feedback: false }));
   }
 }
 

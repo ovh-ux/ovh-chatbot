@@ -2,14 +2,22 @@
 
 const Bluebird = require("bluebird");
 const slackSDK = require("../platforms/slack/slack");
-const SlackModel = require("../models/slack.models");
+const SlackModel = require("../models/slack.model");
 const config = require("../config/config-loader").load();
 const bot = require("../bots/common")();
-const request = require("request-promise");
-const responsesCst = require("../constants/responses").FR;
+const request = require("request");
 const apiai = require("../utils/apiai");
-const { camelCase } = require("lodash");
-const { TextMessage, ButtonsListMessage, Button, BUTTON_TYPE } = require("../platforms/generics");
+const { TextMessage, ButtonsListMessage, Button, createFeedback, BUTTON_TYPE } = require("../platforms/generics");
+const ovh = require("../utils/ovh");
+const translator = require("../utils/translator");
+const logger = require("../providers/logging/logger");
+
+function getUserLocale (senderId) {
+  return ovh.getOvhClient(senderId)
+    .then((ovhClient) => ovhClient.requestPromised("GET", "/me"))
+    .then((meInfos) => meInfos.language)
+    .catch(() => "en_US");
+}
 
 module.exports = () => ({
   receiveMessage (req, res) {
@@ -27,52 +35,55 @@ module.exports = () => ({
     message = req.body.event.text;
     channel = req.body.event.channel;
 
-    Bluebird.props({
-      apiai: apiai.textRequestAsync(message, { sessionId: channel }),
-      slack: slackSDK(req.body.team_id)
-    })
-      .then((resp) => {
+    getUserLocale(channel)
+      .then((locale) =>
+        Bluebird.props({
+          apiaiResponse: apiai.textRequestAsync(message, { sessionId: channel }, locale),
+          slack: slackSDK(req.body.team_id),
+          locale
+        }))
+      .then(({ apiaiResponse, slack, locale }) => {
         let needFeedback = false;
 
-        if (resp.apiai.status && resp.apiai.status.code === 200 && resp.apiai.result) {
-          if (resp.apiai.result.action === "connection" || resp.apiai.result.action === "welcome") {
-            const accountLinkButton = new Button(BUTTON_TYPE.URL, `${config.server.url}${config.server.basePath}/authorize?state=${channel}-slack-${req.body.team_id}`, responsesCst.signIn);
-            return sendResponse(res, channel, new TextMessage(responsesCst.welcome), resp.slack)
-              .then(() => sendResponse(res, channel, new ButtonsListMessage("", [accountLinkButton]), resp.slack));
+        if (apiaiResponse.status && apiaiResponse.status.code === 200 && apiaiResponse.result) {
+          if (apiaiResponse.result.action === "connection" || apiaiResponse.result.action === "welcome") {
+            const accountLinkButton = new Button(BUTTON_TYPE.URL, `${config.server.url}${config.server.basePath}/authorize?state=${channel}-slack-${req.body.team_id}`, translator("signIn", locale));
+            return sendResponse(res, channel, new TextMessage(translator("welcome", locale)), slack, locale)
+              .then(() => sendResponse(res, channel, new ButtonsListMessage("", [accountLinkButton]), slack, locale));
           }
 
-          if (resp.apiai.result.fulfillment && resp.apiai.result.fulfillment.speech && Array.isArray(resp.apiai.result.fulfillment.messages) && resp.apiai.result.fulfillment.messages.length) {
-            const smalltalk = resp.apiai.result.action && resp.apiai.result.action.indexOf("smalltalk") !== -1;
-            let quickResponses = resp.apiai.result.fulfillment.messages;
+          if (apiaiResponse.result.fulfillment && apiaiResponse.result.fulfillment.speech && Array.isArray(apiaiResponse.result.fulfillment.messages) && apiaiResponse.result.fulfillment.messages.length) {
+            const smalltalk = apiaiResponse.result.action && apiaiResponse.result.action.indexOf("smalltalk") !== -1;
+            let quickResponses = apiaiResponse.result.fulfillment.messages;
 
             if (smalltalk && Math.floor(Math.random() * 2)) {
               // random to change response from original smalltalk to our custom sentence
-              quickResponses = [{ speech: resp.apiai.result.fulfillment.speech, type: 0 }];
+              quickResponses = [{ speech: apiaiResponse.result.fulfillment.speech, type: 0 }];
             }
 
-            return sendQuickResponses(res, channel, quickResponses, resp.slack).then(() => sendFeedback(res, channel, resp.apiai.result.action, message, resp.slack));
+            return sendQuickResponses(res, channel, quickResponses, slack, locale).then(() => sendFeedback(res, channel, apiaiResponse.result.action, message, slack, locale));
           }
 
           return bot
-            .ask("message", channel, message, resp.apiai.result.action, resp.apiai.result.parameters, res)
+            .ask("message", channel, message, apiaiResponse.result.action, apiaiResponse.result.parameters, res, locale)
             .then((answer) => {
               needFeedback = answer.feedback || needFeedback;
 
-              return sendResponses(res, channel, answer.responses, resp.slack);
+              return sendResponses(res, channel, answer.responses, slack, locale);
             })
             .then(() => {
               if (needFeedback) {
-                return sendFeedback(res, channel, resp.apiai.result.action, message, resp.slack);
+                return sendFeedback(res, channel, apiaiResponse.result.action, message, slack, locale);
               }
               return null;
             })
             .catch((err) => {
               res.logger.error(err);
-              resp.slack.send(channel, `Oups ! ${err.message}`);
+              slack.send(channel, `Oups ! ${err.message}`);
             });
         }
 
-        return resp.slack.send(channel, responsesCst.noIntent);
+        return sendResponse(null, channel, translator("noIntent", locale), slack, locale);
       })
       .catch(res.logger.error);
 
@@ -86,24 +97,29 @@ module.exports = () => ({
     const message_ts = payload.message_ts;
     let slackClient;
     let needFeedback = false;
+    let locale;
 
     // We have to respond with a 200 within 3000ms
     Bluebird.delay(2000).then(() => res.headersSent ? null : res.status(200).end());
 
-    return Bluebird.props({
-      bot: bot.ask(BUTTON_TYPE.POSTBACK, channel, value, "", {}, res),
-      slack: slackSDK(payload.team.id)
-    })
-      .then((responses) => {
-        slackClient = responses.slack;
-        needFeedback = responses.bot.feedback || needFeedback;
+    return getUserLocale(channel)
+      .then((localeLocal) => {
+        locale = localeLocal;
+        return Bluebird.props({
+          botResut: bot.ask("postback", channel, value, "", {}, res, locale),
+          slackClientLocal: slackSDK(payload.team.id)
+        });
+      })
+      .then(({ botResut, slackClientLocal }) => {
+        slackClient = slackClientLocal;
+        needFeedback = botResut.feedback || needFeedback;
 
-        return sendResponses(res, channel, responses.bot.responses, slackClient, message_ts);
+        return sendResponses(res, channel, botResut.responses, slackClient, message_ts, locale);
       })
       .then(() => res.headersSent ? null : res.status(200).end())
       .then(() => {
         if (needFeedback) {
-          return sendFeedback(res, channel, value, "message", slackClient);
+          return sendFeedback(res, channel, value, "message", slackClient, locale);
         }
 
         return null;
@@ -119,7 +135,7 @@ module.exports = () => ({
   authorize (req, res) {
     let infos;
 
-    return request({
+    return new Bluebird((resolve, reject) => request({
       method: "GET",
       uri: "https://slack.com/api/oauth.access",
       qs: {
@@ -131,7 +147,7 @@ module.exports = () => ({
         "content-type": "application/json;charset=utf-8"
       },
       json: true
-    })
+    }, (err, response, body) => err ? reject(err) : resolve(body)))
       .then((resp) => {
         infos = resp;
 
@@ -152,42 +168,36 @@ module.exports = () => ({
   }
 });
 
-function sendFeedback (res, senderId, intent, messageRaw, slack) {
-  const message = messageRaw.length >= config.maxMessageLength ? config.maxMessageLengthString : messageRaw;
-
-  if (intent === "unknown") {
-    return null;
-  }
-
-  const buttons = [
-    new Button(BUTTON_TYPE.POSTBACK, `FEEDBACK_MISUNDERSTOOD_${camelCase(intent)}_${message}`, responsesCst.feedbackBadUnderstanding),
-    new Button(BUTTON_TYPE.POSTBACK, `FEEDBACK_BAD_${camelCase(intent)}_${message}`, responsesCst.feedbackNo),
-    new Button(BUTTON_TYPE.POSTBACK, `FEEDBACK_GOOD_${camelCase(intent)}_${message}`, responsesCst.feedbackYes)
-  ];
-  const buttonsList = new ButtonsListMessage(responsesCst.feedbackHelp, buttons);
-  buttonsList.delete_original = true;
-
-  return sendResponse(res, senderId, buttonsList, slack);
+function sendFeedback (res, senderId, intent, messageRaw, slack, locale) {
+  return sendResponse(res, senderId, createFeedback(intent, messageRaw, locale), slack, locale);
 }
 
-function sendQuickResponses (res, senderId, responses, slack) {
+function sendQuickResponses (res, senderId, responses, slack, locale) {
   return Bluebird.mapSeries(responses, (response) => {
     switch (response.type) {
     case 0:
-      return sendResponse(res, senderId, response.speech, slack);
+      return sendResponse(res, senderId, response.speech, slack, locale);
     default:
-      return sendResponse(res, senderId, response.speech, slack);
+      return sendResponse(res, senderId, response.speech, slack, locale);
     }
   });
 }
 
-function sendResponses (res, channel, responses, slack, message_ts) {
+function sendResponses (res, channel, responses, slack, message_ts, locale) {
   return Bluebird.mapSeries(responses, (response, index) =>
     Bluebird.resolve(response)
-      .then((resp) => Array.isArray(resp) ? sendResponses(res, channel, resp, slack, message_ts) : sendResponse(res, channel, resp, slack, index === 0 ? message_ts : null)));
+      .then((resp) => Array.isArray(resp) ? sendResponses(res, channel, resp, slack, index === 0 ? message_ts : undefined, locale) : sendResponse(res, channel, resp, slack, index === 0 ? message_ts : undefined, locale)));
 }
 
-function sendResponse (res, channel, response, slack, message_ts) {
-  return slack.send(channel, response, message_ts)
-    .then((result) => !result.ok ? console.error(result.error) : console.log(`Sucessfully sent ${result.ts} to ${result.channel}`));
+function sendResponse (res, channel, response, slack, message_ts_raw, locale_raw) {
+  let locale = locale_raw;
+  let message_ts = message_ts_raw;
+
+  if (!locale_raw) {
+    locale = message_ts_raw;
+    message_ts = undefined;
+  }
+  return slack.send(channel, response, message_ts, locale)
+    .then((result) => !result.ok ? logger.error(`failed sending to channel: ${channel}, error: ${result.error || result}`) : logger.debug(`Sucessfully sent ${result.ts} to ${result.channel}`))
+    .catch(logger.error);
 }
