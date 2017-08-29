@@ -1,196 +1,205 @@
 {
   "entities": {
     "1": [
-      2,
-      3,
-      4,
-      5,
-      6,
-      7,
-      8
+      "2",
+      "3",
+      "4",
+      "5",
+      "6",
+      "7",
+      "8"
     ],
     "9": [
-      10,
-      11,
-      12,
-      13,
-      14,
-      15,
-      16,
-      17,
-      18,
-      19,
-      20,
-      21,
-      22,
-      23,
-      24
+      "10",
+      "11",
+      "12",
+      "13",
+      "14",
+      "15",
+      "16",
+      "17",
+      "18",
+      "19",
+      "20",
+      "21",
+      "22",
+      "23",
+      "24"
     ],
     "25": [
-      26,
-      27,
-      28,
-      29,
-      30
+      "26",
+      "27",
+      "28",
+      "29",
+      "30"
     ],
     "31": [
-      32,
-      33,
-      34,
-      35,
-      36,
-      37,
-      38,
-      39,
-      40
+      "32",
+      "33",
+      "34",
+      "35",
+      "36",
+      "37",
+      "38",
+      "39",
+      "40"
     ]
   },
   "intents": {
     "41": {
       "userSays": [],
       "responses": [
-        42,
-        43,
-        44
+        "42",
+        "43",
+        "44"
       ],
       "action": "unknown",
       "contextAdd": {},
       "contextNeed": [],
-      "auto": false
+      "auto": false,
+      "priority": 500000
     },
     "45": {
       "userSays": [
-        46,
-        47,
-        48,
-        49,
-        50
+        "46",
+        "47",
+        "48",
+        "49",
+        "50"
       ],
       "responses": [],
       "action": "welcome",
       "contextAdd": {},
       "contextNeed": [],
-      "auto": true
+      "auto": true,
+      "priority": 500000
     },
     "51": {
       "userSays": [
-        52,
-        53,
-        54,
-        55,
-        56
+        "52",
+        "53",
+        "54",
+        "55",
+        "56"
       ],
       "responses": [
-        57,
-        58,
-        59
+        "57",
+        "58",
+        "59"
       ],
       "action": "thanks",
       "contextAdd": {},
       "contextNeed": [],
-      "auto": true
+      "auto": true,
+      "priority": 500000
     },
     "60": {
       "userSays": [
-        61,
-        62,
-        63
+        "61",
+        "62",
+        "63"
       ],
       "responses": [
-        64,
-        65,
-        66
+        "64",
+        "65",
+        "66"
       ],
       "action": "hosting_commerciale_activerstart10m",
       "contextAdd": {},
       "contextNeed": [],
-      "auto": true
+      "auto": true,
+      "priority": 500000
     },
     "67": {
       "userSays": [
-        68,
-        69,
-        70,
-        71
+        "68",
+        "69",
+        "70",
+        "71"
       ],
       "responses": [],
       "action": "dns_server_config",
       "contextAdd": {},
       "contextNeed": [],
-      "auto": true
+      "auto": true,
+      "priority": 500000
     },
     "72": {
       "userSays": [
-        73,
-        74
+        "73",
+        "74"
       ],
       "responses": [],
       "action": "domain_to_hosting",
       "contextAdd": {},
       "contextNeed": [],
-      "auto": true
+      "auto": true,
+      "priority": 500000
     },
     "75": {
       "userSays": [
-        76,
-        77,
-        78,
-        79,
-        80,
-        81
+        "76",
+        "77",
+        "78",
+        "79",
+        "80",
+        "81"
       ],
       "responses": [],
       "action": "website_break",
       "contextAdd": {},
       "contextNeed": [],
-      "auto": true
+      "auto": true,
+      "priority": 500000
     },
     "82": {
       "userSays": [
-        83,
-        84,
-        85
+        "83",
+        "84",
+        "85"
       ],
       "responses": [
-        86
+        "86"
       ],
       "contextAdd": {},
       "contextNeed": [
         "ndh_question"
       ],
-      "auto": true
+      "auto": true,
+      "priority": 500000
     },
     "87": {
       "userSays": [
-        88,
-        89,
-        90,
-        91,
-        92,
-        93,
-        94,
-        95,
-        96,
-        97,
-        98,
-        99,
-        100,
-        101,
-        102
+        "88",
+        "89",
+        "90",
+        "91",
+        "92",
+        "93",
+        "94",
+        "95",
+        "96",
+        "97",
+        "98",
+        "99",
+        "100",
+        "101",
+        "102"
       ],
       "responses": [],
       "action": "good_answer",
       "contextAdd": {},
       "contextNeed": [],
-      "auto": false
+      "auto": false,
+      "priority": 500000
     },
     "103": {
       "userSays": [
-        104,
-        105,
-        106,
-        107,
-        108
+        "104",
+        "105",
+        "106",
+        "107",
+        "108"
       ],
       "responses": [],
       "action": "ndh_question",
@@ -198,234 +207,250 @@
         "ndh_question": 10
       },
       "contextNeed": [],
-      "auto": true
+      "auto": true,
+      "priority": 500000
     },
     "109": {
       "userSays": [
-        110,
-        111,
-        112,
-        113,
-        114,
-        115,
-        116,
-        117,
-        118,
-        119
+        "110",
+        "111",
+        "112",
+        "113",
+        "114",
+        "115",
+        "116",
+        "117",
+        "118",
+        "119"
       ],
       "responses": [],
       "action": "telephony_break",
       "contextAdd": {},
       "contextNeed": [],
-      "auto": true
+      "auto": true,
+      "priority": 500000
     },
     "120": {
       "userSays": [
-        121,
-        122,
-        123,
-        124,
-        125,
-        126,
-        127,
-        128,
-        129,
-        130,
-        131,
-        132,
-        133
+        "121",
+        "122",
+        "123",
+        "124",
+        "125",
+        "126",
+        "127",
+        "128",
+        "129",
+        "130",
+        "131",
+        "132",
+        "133"
       ],
       "responses": [],
       "action": "xdsl_break",
       "contextAdd": {},
       "contextNeed": [],
-      "auto": true
+      "auto": true,
+      "priority": 500000
     },
     "134": {
       "userSays": [
-        135,
-        136,
-        137,
-        138
+        "135",
+        "136",
+        "137",
+        "138"
       ],
       "responses": [
-        139
+        "139"
       ],
       "action": "account_become_client",
       "contextAdd": {},
       "contextNeed": [],
-      "auto": true
+      "auto": true,
+      "priority": 500000
     },
     "140": {
       "userSays": [
-        141,
-        142,
-        143
+        "141",
+        "142",
+        "143"
       ],
       "responses": [
-        144
+        "144"
       ],
       "action": "transverse_compte_devenirclient",
       "contextAdd": {},
       "contextNeed": [],
-      "auto": true
+      "auto": true,
+      "priority": 500000
     },
     "145": {
       "userSays": [
-        146,
-        147,
-        148
+        "146",
+        "147",
+        "148"
       ],
       "responses": [],
       "action": "connection",
       "contextAdd": {},
       "contextNeed": [],
-      "auto": true
+      "auto": true,
+      "priority": 500000
     },
     "149": {
       "userSays": [
-        150,
-        151,
-        152,
-        153
+        "150",
+        "151",
+        "152",
+        "153"
       ],
       "responses": [],
       "action": "who_am_i",
       "contextAdd": {},
       "contextNeed": [],
-      "auto": true
+      "auto": true,
+      "priority": 500000
     },
     "154": {
       "userSays": [
-        155,
-        156,
-        157
+        "155",
+        "156",
+        "157"
       ],
       "responses": [
-        158
+        "158"
       ],
       "action": "transverse_culture_postuler",
       "contextAdd": {},
       "contextNeed": [],
-      "auto": true
+      "auto": true,
+      "priority": 500000
     },
     "159": {
       "userSays": [
-        160,
-        161,
-        162,
-        163
+        "160",
+        "161",
+        "162",
+        "163"
       ],
       "responses": [
-        164
+        "164"
       ],
       "action": "billing_show_bill",
       "contextAdd": {},
       "contextNeed": [],
-      "auto": true
+      "auto": true,
+      "priority": 500000
     },
     "165": {
       "userSays": [
-        166,
-        167,
-        168,
-        169,
-        170
+        "166",
+        "167",
+        "168",
+        "169",
+        "170"
       ],
       "responses": [
-        171
+        "171"
       ],
       "action": "tranverse_facture_dateexpiration",
       "contextAdd": {},
       "contextNeed": [],
-      "auto": true
+      "auto": true,
+      "priority": 500000
     },
     "172": {
       "userSays": [
-        173,
-        174
+        "173",
+        "174"
       ],
       "responses": [],
       "action": "service_expires",
       "contextAdd": {},
       "contextNeed": [],
-      "auto": true
+      "auto": true,
+      "priority": 500000
     },
     "175": {
       "userSays": [
-        176,
-        177,
-        178,
-        179
+        "176",
+        "177",
+        "178",
+        "179"
       ],
       "responses": [],
       "action": "status_update",
       "contextAdd": {},
       "contextNeed": [],
-      "auto": true
+      "auto": true,
+      "priority": 500000
     },
     "180": {
       "userSays": [
-        181,
-        182,
-        183,
-        184,
-        185
+        "181",
+        "182",
+        "183",
+        "184",
+        "185"
       ],
       "responses": [
-        186
+        "186"
       ],
       "action": "email_account_create",
       "contextAdd": {},
       "contextNeed": [],
-      "auto": true
+      "auto": true,
+      "priority": 500000
     },
     "187": {
       "userSays": [
-        188,
-        189
+        "188",
+        "189"
       ],
       "responses": [
-        190
+        "190"
       ],
       "action": "hosting_db_create",
       "contextAdd": {},
       "contextNeed": [],
-      "auto": true
+      "auto": true,
+      "priority": 500000
     },
     "191": {
       "userSays": [
-        192,
-        193,
-        194,
-        195
+        "192",
+        "193",
+        "194",
+        "195"
       ],
       "responses": [
-        196,
-        197
+        "196",
+        "197"
       ],
       "action": "hosting_ftp_connect",
       "contextAdd": {},
       "contextNeed": [],
-      "auto": true
+      "auto": true,
+      "priority": 500000
     },
     "198": {
       "userSays": [
-        199,
-        200,
-        201,
-        202,
-        203,
-        204,
-        205
+        "199",
+        "200",
+        "201",
+        "202",
+        "203",
+        "204",
+        "205"
       ],
       "responses": [
-        206
+        "206"
       ],
       "action": "hosting_seo_partners",
       "contextAdd": {},
       "contextNeed": [],
-      "auto": true
+      "auto": true,
+      "priority": 500000
     }
   }
 }

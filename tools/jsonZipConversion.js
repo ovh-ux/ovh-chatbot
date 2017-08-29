@@ -29,6 +29,7 @@ module.exports = function (grunt) {
         intent.contextAdd = _.fromPairs(json.responses[0].affectedContexts.map((context) => [context.name, context.lifespan]));
         intent.contextNeed = json.contexts;
         intent.auto = json.auto;
+        intent.priority = json.priority;
         console.log("(intent) processed src:", src);
       });
       file.src.filter((srcPath) => srcPath.indexOf("entities") !== -1).forEach((src) => {
@@ -132,12 +133,13 @@ module.exports = function (grunt) {
             name: key,
             auto: intent.auto,
             contexts: intent.contextNeed,
+            priority: intent.priority,
             responses: [{
               action: intent.action,
-              affectedContexts: [Object.keys(intent.contextAdd).map((context) => ({
+              affectedContexts: Object.keys(intent.contextAdd).map((context) => ({
                 name: context,
                 lifespan: intent.contextAdd[context]
-              }))],
+              })),
               messages: [{
                 type: 0,
                 speech: intent.responses

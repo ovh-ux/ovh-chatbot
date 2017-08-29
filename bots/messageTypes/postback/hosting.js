@@ -128,7 +128,7 @@ function getSSLState (ovhClient, hosting) {
 function getDNSState (ovhClient, domain) {
   return Bluebird.props({
     target: ovhClient.requestPromised("GET", `/domain/zone/${domain}/record`, { fieldType: "NS" })
-      .then((ids) => Bluebird.mapSeries(ids, (id) => ovhClient.requestPromised("GET", `/domain/zone/${domain}/record/${id}`))),
+      .then((ids) => Bluebird.all(ids.map((id) => ovhClient.requestPromised("GET", `/domain/zone/${domain}/record/${id}`)))),
     real: ovhClient.requestPromised("GET", `/domain/zone/${domain}`)
   });
 }

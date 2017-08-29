@@ -15,4 +15,4 @@ if a translation file (or a key) is not found, it will use the default file `tra
 You can add you own translations:
 - duplicate a translation file
 - name it with your locale
-- edit the values
+- edit the values (watch out for the "\n" and "\t")

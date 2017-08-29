@@ -40,11 +40,11 @@ module.exports = {
     assert(config && config.url, "config.mongo.url is required");
 
     mongoose.connection.on("error", (err) => {
-      logger.error("MongoError:", err.message); // TODO Use logger
+      logger.error("MongoError:", err.message);
     });
 
     mongoose.connection.once("open", () => {
-      logger.info("Connected to MongoDB"); // TODO Use logger
+      logger.info("Connected to MongoDB");
     });
 
     process.once("SIGUSR2", self.close("SIGUSR2"));

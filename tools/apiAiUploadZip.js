@@ -95,10 +95,10 @@ module.exports = function (grunt) {
       .then(() => listAgents())
       .then((json) => {
         let agentList = json.agents.filter(filterFn);
-        return Bluebird.mapSeries(agentList, (agent) => getDetails(agent.id));
+        return Bluebird.all(agentList.map((agent) => getDetails(agent.id)));
       })
-      .then((agentArray) => Bluebird.mapSeries(agentArray, (agent) =>
-          uploadFile(agent.agent.name, agent.agent.id, path.join(srcDir, `${agent.agent.language}.zip`), resetBot)))
+      .then((agentArray) => Bluebird.all(agentArray.map((agent) =>
+          uploadFile(agent.agent.name, agent.agent.id, path.join(srcDir, `${agent.agent.language}.zip`), resetBot))))
       .then(() => done(true))
       .catch((err) => {
         console.error("APIAI ERROR:", err);
