@@ -23,6 +23,19 @@ In order to have the good api.ai token used (ie: use the right language), you ha
 }
 ```
 
+## Training apiai
+
+Once in production, you'll find that sometimes, api.ai doesn't find the right answer. Here is a step by step procedure to add new intent in production when you work with a preproduction agent.
+
+1. add the **new intents** to **preproduction**
+2. In the **production** agent, do the training with the **knwon** intents
+3. once you are done, export the **production** and import it in the **preproduction** (**DO NOT RESTORE**, you'll lose your progress)
+4. Now you can export your **preproduction** (it should have the new intents + the updated intents from production).
+5. You can test you archive by importing it in **production** and see in the training tab, if the answers are good.
+6. Repeat this process until your are satisfied.
+7. Once your done, follow the step in the [`tools`](../tools) folder to translate the agent
+
+
 ## tools
 
 Have a look at [/tools](../tools)!
