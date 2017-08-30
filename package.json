@@ -1,6 +1,6 @@
 {
   "name": "OvhChatbot",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "description": "Chatbot OVH to help support",
   "main": "app.js",
   "scripts": {
