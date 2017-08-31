@@ -93,16 +93,20 @@ module.exports = () => {
     let needFeedback = false;
     const senderId = event.sender.id;
     const payload = event.postback.payload;
+    let locale;
     getSenderLocale(senderId)
-      .then((locale) => bot
-        .ask("postback", senderId, payload, null, null, res, locale)
-        .then((answer) => {
-          needFeedback = answer.feedback || needFeedback;
-          return sendResponses(res, senderId, answer.responses);
-        }))
+      .then((localeLocal) => {
+        locale = localeLocal;
+        return bot
+          .ask("postback", senderId, payload, null, null, res, locale)
+          .then((answer) => {
+            needFeedback = answer.feedback || needFeedback;
+            return sendResponses(res, senderId, answer.responses);
+          });
+      })
       .then(() => {
         if (needFeedback) {
-          return sendFeedback(res, senderId, payload, "message");
+          return sendFeedback(res, senderId, payload, "message", locale);
         }
         return null;
       }) // Ask if it was useful
