@@ -35,7 +35,7 @@ class OvhWebClient {
       };
       return request(Object.assign(opt, this.options), (err, resp, body) => {
         if (err || resp.statusCode >= 400) {
-          return reject({ statusCode: resp.statusCode, data: body });
+          return reject(err ? { statusCode: 500, data: err } : { statusCode: resp.statusCode, data: body });
         }
         return resolve(body);
       });

@@ -5,6 +5,7 @@
 > All the files related to apiai agents
 
 - `translations/`: contains the translation files.
+- `archives/`: contains an archive of the chatbot api.ai setup. It is used to generate the other archives
 - `template.json`: template file where every number is replaced by its corresponding value from the translations files
 
 ### Warning
@@ -21,6 +22,19 @@ In order to have the good api.ai token used (ie: use the right language), you ha
   "token": "YOUR-TOKEN-HERE"
 }
 ```
+
+## Training apiai
+
+Once in production, you'll find that sometimes, api.ai doesn't find the right answer. Here is a step by step procedure to add new intent in production when you work with a preproduction agent.
+
+1. add the **new intents** to **preproduction**
+2. In the **production** agent, do the training with the **knwon** intents
+3. once you are done, export the **production** and import it in the **preproduction** (**DO NOT RESTORE**, you'll lose your progress)
+4. Now you can export your **preproduction** (it should have the new intents + the updated intents from production).
+5. You can test you archive by importing it in **production** and see in the training tab, if the answers are good.
+6. Repeat this process until your are satisfied.
+7. Once your done, follow the step in the [`tools`](../tools) folder to translate the agent
+
 
 ## tools
 

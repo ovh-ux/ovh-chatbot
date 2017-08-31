@@ -1,3 +1,46 @@
+<a name="1.2.0"></a>
+# :gem: [1.2.0](https://github.com/ovh-ux/ovh-chatbot/compare/1.1.0...1.2.0) inexpensive-science (2017-08-30) :gem:
+
+
+### :ambulance: Bug Fixes :ambulance:
+
+  **controller/web:**
+
+  * fix promise in response not resolved ([0ce998f](https://github.com/ovh-ux/ovh-chatbot/commit/0ce998f))
+
+  **platforms:**
+
+  * fix reaching message length limit ([a34d1aa](https://github.com/ovh-ux/ovh-chatbot/commit/a34d1aa))
+
+  **security:**
+
+  * fix x-hub-signature wasn't properly checked ([cf7ad8e](https://github.com/ovh-ux/ovh-chatbot/commit/cf7ad8e))
+
+### :sparkles: Features :sparkles:
+
+  **apiai:**
+
+  * support for multiple apiai ([0de6eac](https://github.com/ovh-ux/ovh-chatbot/commit/0de6eac))
+
+  **bot:**
+
+  * add when will my service expires ? ([a6d7f3c](https://github.com/ovh-ux/ovh-chatbot/commit/a6d7f3c))
+  * inform user when service doesn't work anymore ([0330462](https://github.com/ovh-ux/ovh-chatbot/commit/0330462))
+
+  **express:**
+
+  * add cache for web users ([fe57549](https://github.com/ovh-ux/ovh-chatbot/commit/fe57549))
+
+  **Grunt:**
+
+  * add grunt for compiling api.ai zip configs ([a1ee7f7](https://github.com/ovh-ux/ovh-chatbot/commit/a1ee7f7))
+  * add i18n feature ([e971185](https://github.com/ovh-ux/ovh-chatbot/commit/e971185))
+  * add loggin ([d8ba0cf](https://github.com/ovh-ux/ovh-chatbot/commit/d8ba0cf))
+
+  **tools:**
+
+  * add api ai update task ([c4c7b81](https://github.com/ovh-ux/ovh-chatbot/commit/c4c7b81))
+
 <a name="1.1.0"></a>
 # :gem: [1.1.0](https://github.com/ovh-ux/ovh-chatbot/compare/1.0.0...v1.1.0) Moving Smoke (2017-08-07) :gem:
 

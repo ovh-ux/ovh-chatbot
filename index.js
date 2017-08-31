@@ -5,6 +5,7 @@ const http = require("http");
 const app = exports.app = require("./config/express")(config);
 const port = config.server.port;
 const logger = require("./providers/logging/logger");
+const { tasks } = require("./diagnostics/cron");
 
 let httpserver;
 
@@ -15,7 +16,7 @@ if (require.main === module) {
 
 process.on("SIGTERM", () => {
   logger.info("SIGTERM Signal received, trying to close connections...");
-
+  tasks.forEach((task) => task.destroy());
   process.env.NODE_IS_CLOSING = "true";
 
   httpserver.close(() => {

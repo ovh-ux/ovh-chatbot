@@ -4,22 +4,24 @@ const web = require("../platforms/web/web");
 const bot = require("../bots/common")();
 const apiai = require("../utils/apiai");
 const Bluebird = require("bluebird");
-const { TextMessage } = require("../platforms/generics");
+const { TextMessage, createFeedback } = require("../platforms/generics");
 const translator = require("../utils/translator");
 
 module.exports = () => {
   const sendQuickResponses = (res, nichandle, responses) =>
-    Bluebird.mapSeries(responses, (response) => {
+    ({ responses: responses.map((response) => {
       switch (response.type) {
       case 0: {
         const textResponse = response.speech.replace(/<(.*)\|+(.*)>/, "$1");
-        return Bluebird.resolve(textResponse);
+        return new TextMessage(textResponse);
       }
       default: {
         const textResponse = response.speech.replace(/<(.*)\|+(.*)>/, "$1");
-        return Bluebird.resolve(textResponse);
+        return new TextMessage(textResponse);
       }
       }
+    }),
+      feedback: true
     });
 
   const postbackReceived = (res, nichandle, payload, locale) =>
@@ -107,6 +109,7 @@ module.exports = () => {
     const nichandle = req.user.nichandle;
     const locale = req.user.language;
     const type = req.body.type;
+    let result;
 
     // check the data sent first;
     if (!nichandle) {
@@ -141,18 +144,34 @@ module.exports = () => {
         }
         throw new Error(`unknown type, ${type}`);
       })
-      .then((result) => {
-        // if result.responses then the origin is the bot, ie there might be a feedback request
-        if (result.responses) {
-          return web.send(res, nichandle, result.responses, result, locale);
-        }
-        return web.send(res, nichandle, result, locale);
+      .then((resultLocal) => {
+        result = resultLocal;
+        return sendResponses(res, nichandle, result.responses, locale);
       })
-      .then((result) => res.status(200).json(result))
+      .then((array) => res.status(200).json(array))
+      .then(() => {
+        if (result.feedback) {
+          return sendResponses(res, nichandle, [createFeedback(result.intent, result.message, locale)]);
+        }
+        return null;
+      })
       .catch((err) => {
         res.logger.error(err);
         return res.status(503).json(err);
       });
+  }
+
+  function sendResponses (res, nichandle, responses, result, locale) {
+    let promises = responses.filter((response) => response instanceof Bluebird);
+    let generics = responses.filter((response) => !(response instanceof Bluebird));
+
+    if (promises.length) {
+      Bluebird.mapSeries(promises, (response) =>
+        Bluebird.resolve(response)
+          .then((resp) => sendResponses(res, nichandle, resp, result, locale)));
+    }
+
+    return Bluebird.all(generics.map((uGeneric) => web.send(res, nichandle, uGeneric)));
   }
 
   return {

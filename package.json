@@ -1,6 +1,6 @@
 {
   "name": "OvhChatbot",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "description": "Chatbot OVH to help support",
   "main": "app.js",
   "scripts": {
@@ -29,6 +29,7 @@
     "mongodb": "^2.2.11",
     "mongoose": "^4.8.1",
     "morgan": "^1.8.0",
+    "node-cron": "^1.2.1",
     "node-emoji": "^1.7.0",
     "ovh": "^2.0.1",
     "ovh-winston-ldp": "^0.3.0",

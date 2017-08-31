@@ -1,44 +1,38 @@
 "use strict";
 
 const Bluebird = require("bluebird");
-const { ButtonsListMessage, Button, TextMessage, ButtonsMessage, createFeedback } = require("../generics");
+const { ButtonsListMessage, Button, TextMessage, ButtonsMessage } = require("../generics");
 const WebMessage = require("../../models/web.model");
 const config = require("../../config/config-loader").load();
 const { textMessageAdapter, buttonAdapter, buttonListAdapter } = require("./web_adapters");
 
-function parseMsg (RawResponses) {
-  const responses = RawResponses.length == null || typeof RawResponses === "string" ? [RawResponses] : RawResponses;
+function parseMsg (uResponse) {
 
-  return responses.map((uResponse) => {
-    if (typeof uResponse === "string") {
-      return textMessageAdapter(uResponse);
-    }
+  if (typeof uResponse === "string") {
+    return textMessageAdapter(uResponse);
+  }
 
-    if (uResponse instanceof TextMessage) {
-      return textMessageAdapter(uResponse.text);
-    }
+  if (uResponse instanceof TextMessage) {
+    return textMessageAdapter(uResponse.text);
+  }
 
-    if (uResponse instanceof Button) {
-      return buttonAdapter(uResponse);
-    }
+  if (uResponse instanceof Button) {
+    return buttonAdapter(uResponse);
+  }
 
-    if (uResponse instanceof ButtonsListMessage || uResponse instanceof ButtonsMessage) {
-      return buttonListAdapter(uResponse);
-    }
+  if (uResponse instanceof ButtonsListMessage || uResponse instanceof ButtonsMessage) {
+    return buttonListAdapter(uResponse);
+  }
 
-    return uResponse;
-  });
+  return uResponse;
 }
 
-function sendFeedback (nichandle, intent, rawMessage, locale) {
-  return send(null, nichandle, createFeedback(intent, rawMessage, locale));
-}
-
-function send (res, id, rawResponsesPar, opt, locale) {
+function send (res, id, rawResponsesPar) {
   let flagUseRes = true;
   let nichandle = id;
   let rawResponses = rawResponsesPar;
-  let responses;
+  let response;
+  let histResponse;
 
   // input validation
   if (!rawResponses) {
@@ -63,27 +57,19 @@ function send (res, id, rawResponsesPar, opt, locale) {
   }
 
   // parse the rawResponses into a suitable format
-  responses = parseMsg(rawResponses);
+  response = parseMsg(rawResponses);
 
   // push the message to db for conversation history
-  if (responses.length > 0) {
-    return Bluebird.map(responses, (historyMessage) => {
-      historyMessage.origin = "bot";
-      return pushToHistory(nichandle, historyMessage);
-    }).then(() => {
+  histResponse = response;
+  histResponse.origin = "bot";
+  return pushToHistory(nichandle, histResponse)
+    .then(() => {
       // if we cant answer, we save to db for later
       if (flagUseRes) {
-        return Bluebird.resolve(responses).then((result) => {
-          if (opt && opt.feedback) {
-            sendFeedback(nichandle, opt.intent, opt.message, locale);
-          }
-          return result;
-        });
+        return Bluebird.resolve(response);
       }
       return Bluebird.resolve();
     });
-  }
-  return null;
 }
 
 function getHistory (res, nichandle) {

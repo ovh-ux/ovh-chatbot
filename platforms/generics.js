@@ -90,7 +90,7 @@ function createFeedback (intent, messageRaw, locale) {
     new Button(BUTTON_TYPE.POSTBACK, `FEEDBACK_BAD_${camelCase(intent)}_${message}`, translator("feedbackNo", locale)),
     new Button(BUTTON_TYPE.POSTBACK, `FEEDBACK_GOOD_${camelCase(intent)}_${message}`, translator("feedbackYes", locale))
   ];
-  return new ButtonsListMessage(translator("feedbackHelp", locale), buttons);
+  return new ButtonsMessage(translator("feedbackHelp", locale), buttons);
 }
 
 module.exports = {

@@ -9,5 +9,7 @@ const ndhQuestion = require("./ndh_question");
 const xdslBreak = require("./xdsl_break");
 const whoami = require("./whoami");
 const telephonyBreak = require("./telephony_break");
+const statusUpdate = require("./status_update");
+const serviceExpires = require("./service_expires");
 
-module.exports = Object.assign({}, dnsServerConfig, domainToHosting, thanks, websiteBreak, goodAnswer, ndhQuestion, xdslBreak, whoami, telephonyBreak);
+module.exports = Object.assign({}, dnsServerConfig, domainToHosting, thanks, websiteBreak, goodAnswer, ndhQuestion, xdslBreak, whoami, telephonyBreak, statusUpdate, serviceExpires);
