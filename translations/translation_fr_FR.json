@@ -20,10 +20,10 @@
   "connectedAs": "Tu es connecté en tant que %s :ok_hand:",
   "domainEditDns": "Tu dois modifier la zone DNS de ton domaine afin d'y ajouter le champ A avec l'IP de ton hébergement web, cette IP se trouve sur la page d'informations de ton hébergement dans l'espace client OVH.",
   "disconnected": "Tu n'es pas correctement connecté à ton compte OVH :( , il te suffit de me demander 'connecte-moi' pour te reconnecter.",
-  "expires-allOk": "Rien n'est sur le point d'expiré :tada:",
+  "expires-allOk": "Rien n'est sur le point d'expirer :tada:",
   "dnsEditDns": "Tu peux modifier tes serveurs DNS via l'espace client OVH",
-  "scanInProgress": ":hourglass: Analyse en cours... Patiente quelques instants, l'analyse peut prendre quelques minutes :hourglass:",
-  "diagInProgress": ":hourglass: Diagnostic en cours... Patiente quelques instants, le diagnostic peut prendre quelques minutes :hourglass:",
+  "scanInProgress": ":hourglass: Analyse en cours… Patiente quelques instants, l'analyse peut prendre quelques minutes :hourglass:",
+  "diagInProgress": ":hourglass: Diagnostic en cours… Patiente quelques instants, le diagnostic peut prendre quelques minutes :hourglass:",
   "feedbackBadUnderstanding": "Mauvaise compréhension",
   "feedbackHelp": "Est-ce que cette réponse t'a aidé ?",
   "feedbackNo": "Non",
@@ -105,8 +105,8 @@
   "hosting-unknown": "Problème non diagnostiquable. :thinking_face:",
   "settings-updates-true": ":sound: La notification lors d'incidents est activé.",
   "settings-updates-false": ":mute: La notification lors d'incidents est desactivé.",
-  "settings-expires-true": ":bell: La notification lors de l'arrivé à expiration de service est activé. Tu vas etre informé %s jours en avance",
-  "settings-expires-period": "Tu vas etre informé %s jours en avance",
+  "settings-expires-true": ":bell: La notification lors de l'arrivé à expiration de service est activé. Tu vas être informé %s jours en avance",
+  "settings-expires-period": "Tu vas être informé %s jours en avance",
   "settings-expires-false": ":no_bell: La notification lors de l'arrivé à expiration de service est desactivé",
   "settings-expires-edit": "Combien de jours dois-je te prévenir à l'avance avant que tes services expirent ? (actuellement: %s jours)",
   "settings-expires-days": "%s jours",
@@ -166,5 +166,5 @@
   "xdsl-resultLastDiag": "Voici le résultat du dernier diagnostic réalisé.",
   "xdsl-resultDiagRemaining": "Tu peux encore effectuer %s diagnostic(s) aujourd'hui.",
   "view-title": "Connecté",
-  "view-connected":"Tu es connecté en tant que: %s. Tu peux fermer cette fenetre et poser des questions au bot"
+  "view-connected":"Tu es connecté en tant que: %s. Tu peux fermer cette fenêtre et poser des questions au bot"
 }
