@@ -82,10 +82,10 @@ module.exports = () => {
     return ovh.getOvhClient(senderId)
       .then((client) => client.requestPromised("GET", "/me"))
       .then((meInfos) => meInfos.language)
-      .catch(() => messenger.getUserProfile(senderId).then((body) => JSON.parse(body).locale))
+      .catch(() => messenger.getUserProfile(senderId).then((body) => JSON.parse(body).locale.replace("_", "-")))
       .catch((err) => {
         logger.error(err);
-        return "en_US";
+        return "en-US";
       });
   }
 
