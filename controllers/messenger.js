@@ -11,6 +11,7 @@ const translator = require("../utils/translator");
 const logger = require("../providers/logging/logger");
 
 function getWebhook (req, res) {
+  logger.error("I get a webhook");
   if (req.query["hub.mode"] === "subscribe" && req.query["hub.verify_token"] === config.facebook.validationToken) {
     res.status(200).send(req.query["hub.challenge"]);
   } else {
@@ -21,6 +22,7 @@ function getWebhook (req, res) {
 
 module.exports = () => {
   function postWebhook (req, res) {
+    logger.error("I post a webhook");
     const data = req.body;
 
     // Make sure this is a page subscription
