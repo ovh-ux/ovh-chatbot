@@ -1,7 +1,7 @@
 # OVH Chatbot - Node.js
 
 ![OVH Chatbot Cover](FBcover.png)
-[![Maintenance](https://img.shields.io/maintenance/yes/2017.svg)]() [![Gitter](https://img.shields.io/gitter/room/nwjs/nw.js.svg)](https://gitter.im/ovh/ux) [![travis](https://travis-ci.org/ovh-ux/ovh-chatbot.svg?branch=master)](https://travis-ci.org/ovh-ux/ovh-chatbot) [![Commitizen friendly](https://img.shields.io/badge/commitizen-friendly-brightgreen.svg)](https://github.com/ovh-ux/cz-ovh-commit)
+[![Maintenance](https://img.shields.io/maintenance/yes/2018.svg)]() [![Gitter](https://img.shields.io/gitter/room/nwjs/nw.js.svg)](https://gitter.im/ovh/ux) [![travis](https://travis-ci.org/ovh-ux/ovh-chatbot.svg?branch=master)](https://travis-ci.org/ovh-ux/ovh-chatbot) [![Commitizen friendly](https://img.shields.io/badge/commitizen-friendly-brightgreen.svg)](https://github.com/ovh-ux/cz-ovh-commit)
 
 The main goal of this tool is to help [OVH](https://ovh.com) clients in order to have faster responses when you have some problems with OVH services. For example for web hosting you can ask why your website is broken and then this chatbot will find a solution to fix that.
 
