@@ -1,13 +1,18 @@
 version: "2"
+
 services:
   web:
     build: .
-    volumes:
-      - ./:/usr/src/app
+    image: ovhchatbot
     ports:
-      - "80:8080"
-    links:
+      - "80:80"
+    depends_on:
       - mongo
+    environment:
+      - MONGO=mongodb://mongo:27017/ovhchatbot
+    env_file:
+      - .env
+
   mongo:
     image: mongo
     ports:
