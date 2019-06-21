@@ -47,7 +47,7 @@
     "conventional-changelog-ovh": "^1.0.0",
     "cz-conventional-changelog": "^2.0.0",
     "cz-ovh-commit": "^1.0.0",
-    "eslint": "^3.19.0",
+    "eslint": "^4.18.2",
     "eslint-config-ovh": "^0.1.1",
     "grunt": "^1.0.1",
     "grunt-contrib-clean": "^1.1.0",
