@@ -27,7 +27,7 @@
     "lodash": "^4.17.4",
     "memory-cache": "^0.2.0",
     "mongodb": "^2.2.11",
-    "mongoose": "^4.8.1",
+    "mongoose": "^5.7.5",
     "morgan": "^1.8.0",
     "node-cron": "^1.2.1",
     "node-emoji": "^1.7.0",
